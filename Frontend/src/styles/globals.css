@@ -1,0 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+body {
+    font-family: 'Poppins', sans-serif;
+}
+
+img {
+    max-width: none !important;
+}
+
+
+.custom-transition {
+    transition: .2s all ease-in-out;
+}
+
+.hero-left {
+    padding-right: 10px !important;
+}
+
+
+.custom-shadow {
+    box-shadow: 0px 3px 10px 3px rgba(0, 0, 0, 0.2);
+
+}
+
+.fsize-revert {
+    font-size: revert;
+}
+
+.custom-box-shadow {
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+.checked\:bg-teal-500:checked {
+    background-color: #007E85 !important;
+    border-color: #007E85 !important;
+}
+
+.columns-con div ul>* {
+    margin-bottom: 4px;
+}
+
+
+.hamburger {
+    width: 24px;
+    height: 20px;
+    position: relative;
+}
+
+.hamburger .line {
+    position: absolute;
+    height: 3px;
+    width: 100%;
+    background: #007E85;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+.hamburger .line:nth-child(1) {
+    top: 0;
+}
+
+.hamburger .line:nth-child(2) {
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.hamburger .line:nth-child(3) {
+    bottom: 0;
+}
+
+.hamburger.active .line:nth-child(1) {
+    transform: translateY(10px) rotate(45deg);
+}
+
+.hamburger.active .line:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger.active .line:nth-child(3) {
+    transform: translateY(-10px) rotate(-45deg);
+}

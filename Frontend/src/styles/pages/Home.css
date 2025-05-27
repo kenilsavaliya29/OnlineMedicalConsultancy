@@ -1,0 +1,46 @@
+.service-cards{
+    padding:35px 5px; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 25px;;
+}
+
+.service-cards-item{
+    border-radius: 24px;
+    background-color: #ffff;
+    padding: 25px;
+}
+
+.service-cards-item .card-img{
+    width: 100%;
+}
+
+.service-cards-item-details{
+    padding-top: 25px;
+}
+
+.our-results-numbers {
+    color: #007E85;
+    font-weight: 700;
+    font-size: 44px;
+    
+}
+
+.our-results-body{
+    padding: 25px 65px;
+}
+
+
+
+
+@media  (max-width: 1024px) {
+        .hero{
+            flex-direction: column-reverse;
+        }
+
+        .hero-left{
+            padding-top: 75px;
+        }
+}
+
