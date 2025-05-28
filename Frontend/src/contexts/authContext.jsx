@@ -8,6 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [returnPath, setReturnPath] = useState(null);
+  const [isInitialLogin, setIsInitialLogin] = useState(false);
   
   // API URL from environment variables or default to localhost
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -35,6 +36,7 @@ export const AuthProvider = ({ children }) => {
         
         if (data.success && data.user) {
           setUser(data.user);
+          // Don't set isInitialLogin for existing sessions
         } else {
           setUser(null);
         }
@@ -95,6 +97,13 @@ export const AuthProvider = ({ children }) => {
       if (data.success) {
         console.log("Login successful for:", data.user?.email);
         setUser(data.user);
+        setIsInitialLogin(true); // Set flag for new login
+        
+        // Clear the flag after a short delay to allow navigation
+        setTimeout(() => {
+          setIsInitialLogin(false);
+        }, 1000);
+        
         return { success: true, message: 'Login successful!', user: data.user };
       } else {
         setError(data.message || 'Login failed');
@@ -123,11 +132,13 @@ export const AuthProvider = ({ children }) => {
       });
       
       setUser(null);
+      setIsInitialLogin(false); // Clear flag on logout
       return { success: true, message: 'Logged out successfully' };
     } catch (err) {
       console.error('Error during logout:', err);
       // Even if server call fails, clear user state
       setUser(null);
+      setIsInitialLogin(false); // Clear flag on logout
       return { success: true, message: 'Logged out locally' };
     } finally {
       setLoading(false);
@@ -156,6 +167,13 @@ export const AuthProvider = ({ children }) => {
 
       if (data.success) {
         setUser(data.user);
+        setIsInitialLogin(true); // Set flag for new registration
+        
+        // Clear the flag after a short delay to allow navigation
+        setTimeout(() => {
+          setIsInitialLogin(false);
+        }, 1000);
+        
         toast.success('Registration successful!');
         return { success: true, message: data.message, user: data.user };
       } else {
@@ -236,6 +254,7 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         user,
+        setUser,
         loading,
         error,
         login,
@@ -246,7 +265,7 @@ export const AuthProvider = ({ children }) => {
         setRedirectPath,
         getAndClearReturnPath,
         isAuthenticated: !!user,
-        setUser
+        isInitialLogin
       }}
     >
       {children}
@@ -261,4 +280,4 @@ export const useAuth = () => {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-}; 
+};

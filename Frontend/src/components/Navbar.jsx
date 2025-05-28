@@ -4,8 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import "../styles/components/Navbar.css"
 import "../styles/globals.css"
 import { AuthContext } from '../contexts/authContext.jsx';
-import { Button } from '@material-tailwind/react';
-
 
 
 const Navbar = ({ cookieCounter }) => {

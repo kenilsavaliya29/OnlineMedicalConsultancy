@@ -4,9 +4,8 @@ import { AuthContext } from '../../contexts/authContext.jsx';
 import { toast } from 'react-toastify';
 
 const ProtectedRoute = ({ allowedRoles, children }) => {
-  const { user, loading, getRedirectPath } = useContext(AuthContext);
+  const { user, loading, getRedirectPath, isInitialLogin } = useContext(AuthContext);
   const location = useLocation();
-
 
   // Show loading state while checking authentication
   if (loading) {
@@ -29,18 +28,24 @@ const ProtectedRoute = ({ allowedRoles, children }) => {
     const redirectPath = getRedirectPath(user);
     
     // Only show access denied toast when:
-    // 1. It's not an immediate post-login redirect
-    // 2. It's not a logout redirect
-    // 3. The user is actually trying to access a protected route
-    const isPostLoginRedirect = location.state?.postLogin;
-    const isLogoutRedirect = location.pathname === '/login' && !location.state?.from;
-    const isProtectedRouteAccess = !isPostLoginRedirect && !isLogoutRedirect;
+    // 1. It's not an initial login/signup (user just authenticated)
+    // 2. It's not a direct navigation (user typed URL or bookmark)
+    // 3. It's not coming from auth pages (login/signup)
+    const isDirectNavigation = !location.state?.from;
+    const isFromAuthPages = location.state?.from === '/login' || 
+                           location.state?.from === '/signup' ||
+                           location.state?.from?.includes('/login') ||
+                           location.state?.from?.includes('/signup');
     
-    if (isProtectedRouteAccess) {
+    const shouldShowToast = !isInitialLogin && 
+                           !isDirectNavigation && 
+                           !isFromAuthPages;
+    
+    if (shouldShowToast) {
       toast.error(`Access denied: You don't have permission to access this page.`);
     }
     
-    // Redirect without passing a message in state
+    // Redirect to appropriate dashboard
     return <Navigate to={redirectPath} replace />;
   }
 
@@ -48,4 +53,4 @@ const ProtectedRoute = ({ allowedRoles, children }) => {
   return children;
 };
 
-export default ProtectedRoute; 
+export default ProtectedRoute;

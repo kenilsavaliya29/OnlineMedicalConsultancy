@@ -34,7 +34,7 @@ const DoctorProfile = () => {
       }
 
       try {
-        console.log(`Fetching doctor with ID: ${id}`);
+        // console.log(`Fetching doctor with ID: ${id}`);
         const response = await fetch(`${API_URL}/${id}`, {
           method: 'GET',
           headers: {
@@ -51,15 +51,16 @@ const DoctorProfile = () => {
         const data = await response.json();
         console.log('Doctor data received:', data);
 
-        console.log(data.doctor.profile.availability)
         if (data.success) {
           setDoctor(data.doctor);
-          if (data.doctor.availability) {
-            const availableDays = data.doctor.availability.split(',').map(day => day.trim());
-            if (availableDays.length > 0) {
-              setSelectedDay(availableDays[0]);
-              fetchTimeSlots(id, availableDays[0]);
-            }
+          if (data.doctor.profile?.availability && Array.isArray(data.doctor.profile.availability) && data.doctor.profile.availability.length > 0) {
+            const availableDays = data.doctor.profile.availability;
+
+            setSelectedDay(availableDays[0]);
+            fetchTimeSlots(id, availableDays[0]);
+          } else {
+            setSelectedDay(null);
+            setAvailableTimeSlots([]);
           }
         } else {
           throw new Error(data.message || 'Error fetching doctor details');
@@ -250,7 +251,8 @@ const DoctorProfile = () => {
                   <div className="flex items-center text-gray-700">
                     <FaClock className="mr-2 text-[#007E85]" />
                     <span>
-                      {doctor.profile.experience > 0 ? doctor.profile.experience : '0'} {doctor.profile.experience > 1 ? 'Years' : 'Year'}</span>
+                      {doctor.profile.experience > 0 ? doctor.profile.experience : '0'} {doctor.profile.experience > 1 ? 'Years' : 'Year'}
+                    </span>
                   </div>
 
                   <div className="flex items-center text-gray-700">
