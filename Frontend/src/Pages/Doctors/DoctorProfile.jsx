@@ -9,22 +9,22 @@ const TIME_SLOTS_API_URL = 'http://localhost:3000/api/timeslots';
 const DoctorProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  
+
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
   const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
-  
+
   // Days of the week
   const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  
+
   // Fetch doctor details
   useEffect(() => {
     const fetchDoctorDetails = async () => {
       setLoading(true);
       setError(null);
-      
+
       // Check if ID is valid before making the API call
       if (!id) {
         console.error("Doctor ID is undefined or invalid");
@@ -32,7 +32,7 @@ const DoctorProfile = () => {
         setLoading(false);
         return;
       }
-      
+
       try {
         console.log(`Fetching doctor with ID: ${id}`);
         const response = await fetch(`${API_URL}/${id}`, {
@@ -43,18 +43,17 @@ const DoctorProfile = () => {
           },
           credentials: 'include'
         });
-        
+
         if (!response.ok) {
           throw new Error(`Failed to fetch doctor details. Status: ${response.status}`);
         }
-        
+
         const data = await response.json();
         console.log('Doctor data received:', data);
-        
+
+        console.log(data.doctor.profile.availability)
         if (data.success) {
           setDoctor(data.doctor);
-          
-          // Set default selected day if doctor is available
           if (data.doctor.availability) {
             const availableDays = data.doctor.availability.split(',').map(day => day.trim());
             if (availableDays.length > 0) {
@@ -72,23 +71,23 @@ const DoctorProfile = () => {
         setLoading(false);
       }
     };
-    
+
     fetchDoctorDetails();
   }, [id]);
-  
+
   // Fetch time slots when day changes
   useEffect(() => {
     if (id && selectedDay) {
       fetchTimeSlots(id, selectedDay);
     }
   }, [id, selectedDay]);
-  
+
   const fetchTimeSlots = async (doctorId, day) => {
     if (!doctorId || !day) {
       console.error("Missing doctorId or day for time slots");
       return;
     }
-    
+
     try {
       const response = await fetch(`${TIME_SLOTS_API_URL}/available/${doctorId}/${day}`, {
         method: 'GET',
@@ -96,14 +95,14 @@ const DoctorProfile = () => {
           'Content-Type': 'application/json'
         }
       });
-      
+
       if (!response.ok) {
         console.error(`Failed to fetch time slots. Status: ${response.status}`);
         return;
       }
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
         setAvailableTimeSlots(data.timeSlots);
       } else {
@@ -113,26 +112,26 @@ const DoctorProfile = () => {
       console.error('Error fetching time slots:', error);
     }
   };
-  
+
   // Helper function to render star ratings
   const renderStars = (rating) => {
     const stars = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
-    
+
     for (let i = 0; i < fullStars; i++) {
       stars.push(<FaStar key={`star-${i}`} className="text-yellow-400" />);
     }
-    
+
     if (hasHalfStar) {
       stars.push(<FaStarHalfAlt key="half-star" className="text-yellow-400" />);
     }
-    
+
     const remainingStars = 5 - stars.length;
     for (let i = 0; i < remainingStars; i++) {
       stars.push(<FaRegStar key={`empty-${i}`} className="text-gray-300" />);
     }
-    
+
     return (
       <div className="flex">
         {stars}
@@ -140,25 +139,25 @@ const DoctorProfile = () => {
       </div>
     );
   };
-  
+
   // Helper function to check if a day is available
   const isDayAvailable = (day) => {
-    if (!doctor || !doctor.availability) return false;
-    return doctor.availability.includes(day);
+    // Checks if doctor and profile and availability exist, and if the day is in the availability array
+    return doctor.profile.availability?.includes(day);
   };
-  
+
   // Function to handle booking appointment
   const handleBookAppointment = (timeSlot) => {
-    navigate(`/doctors/${id}/book`, { 
-      state: { 
+    navigate(`/doctors/${id}/book`, {
+      state: {
         doctor,
         selectedDay,
         selectedTime: `${timeSlot.startTime} - ${timeSlot.endTime}`,
         timeSlotId: timeSlot._id
-      } 
+      }
     });
   };
-  
+
   if (loading) {
     return (
       <div className="min-h-screen pt-24 pb-12 bg-gray-50 flex justify-center items-center">
@@ -166,14 +165,14 @@ const DoctorProfile = () => {
       </div>
     );
   }
-  
+
   if (error) {
     return (
       <div className="min-h-screen pt-24 pb-12 bg-gray-50 flex justify-center items-center">
         <div className="bg-red-100 text-red-700 p-4 rounded-lg max-w-md text-center">
           <p className="font-semibold">Error</p>
           <p>{error}</p>
-          <button 
+          <button
             onClick={() => navigate('/doctors')}
             className="mt-4 px-4 py-2 bg-[#007E85] text-white rounded-lg hover:bg-[#006b6f] transition-colors"
           >
@@ -183,13 +182,13 @@ const DoctorProfile = () => {
       </div>
     );
   }
-  
+
   if (!doctor) {
     return (
       <div className="min-h-screen pt-24 pb-12 bg-gray-50 flex justify-center items-center">
         <div className="bg-yellow-100 text-yellow-700 p-4 rounded-lg max-w-md text-center">
           <p>Doctor not found</p>
-          <button 
+          <button
             onClick={() => navigate('/doctors')}
             className="mt-4 px-4 py-2 bg-[#007E85] text-white rounded-lg hover:bg-[#006b6f] transition-colors"
           >
@@ -199,30 +198,30 @@ const DoctorProfile = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="min-h-screen bg-gray-50 pt-24 pb-12">
       <div className="container mx-auto px-4">
         {/* Back Button */}
-        <button 
+        <button
           onClick={() => navigate('/doctors')}
           className="mb-6 flex items-center text-[#007E85] hover:text-[#006b6f] transition-colors"
         >
           <FaArrowLeft className="mr-2" />
           <span>Back to Doctors</span>
         </button>
-        
+
         {/* Doctor Profile Header */}
         <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
           <div className="p-6 md:p-8">
             <div className="flex flex-col md:flex-row md:items-center">
               <div className="h-32 w-32 rounded-full overflow-hidden bg-[#007E85]/10 flex items-center justify-center text-[#007E85] text-6xl mx-auto md:mx-0 md:mr-8 mb-4 md:mb-0">
                 {doctor.profileImage ? (
-                  <img 
-                    src={doctor.profileImage.startsWith('http') 
-                      ? doctor.profileImage 
-                      : `http://localhost:3000${doctor.profileImage}`} 
-                    alt={`Dr. ${doctor.name}`} 
+                  <img
+                    src={doctor.profileImage.startsWith('http')
+                      ? doctor.profileImage
+                      : `http://localhost:3000${doctor.profileImage}`}
+                    alt={`Dr. ${doctor.firstName}`}
                     className="h-full w-full object-cover"
                     onError={(e) => {
                       e.target.onerror = null;
@@ -234,32 +233,33 @@ const DoctorProfile = () => {
                   <FaUserMd />
                 )}
               </div>
-              
+
               <div className="text-center md:text-left flex-grow">
                 <div className="flex items-center justify-center md:justify-start">
-                  <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Dr. {doctor.name}</h1>
+                  <h1 className="text-2xl md:text-3xl font-bold text-gray-800 capitalize">Dr. {doctor.firstName} {doctor.lastName}</h1>
                   <MdOutlineVerified className="ml-2 text-blue-500 text-xl" />
                 </div>
-                
-                <p className="text-gray-600 text-lg mt-1">{doctor.qualification} - {doctor.specialization}</p>
-                
+
+                <p className="text-gray-600 text-lg mt-1">{doctor.profile.qualification} - {doctor.profile.specialization}</p>
+
                 <div className="mt-2 flex items-center justify-center md:justify-start">
                   {renderStars(4.8)}
                 </div>
-                
+
                 <div className="mt-4 flex flex-wrap justify-center md:justify-start gap-4">
                   <div className="flex items-center text-gray-700">
                     <FaClock className="mr-2 text-[#007E85]" />
-                    <span>{doctor.experience}</span>
+                    <span>
+                      {doctor.profile.experience > 0 ? doctor.profile.experience : '0'} {doctor.profile.experience > 1 ? 'Years' : 'Year'}</span>
                   </div>
-                  
+
                   <div className="flex items-center text-gray-700">
                     <FaRegCalendarCheck className="mr-2 text-[#007E85]" />
                     <span>Available: {doctor.availability || 'Contact for details'}</span>
                   </div>
                 </div>
               </div>
-              
+
               <div className="mt-6 md:mt-0">
                 <button
                   onClick={() => document.getElementById('booking-section').scrollIntoView({ behavior: 'smooth' })}
@@ -271,7 +271,7 @@ const DoctorProfile = () => {
             </div>
           </div>
         </div>
-        
+
         {/* Main Content - Two Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Doctor Details */}
@@ -283,12 +283,12 @@ const DoctorProfile = () => {
                 <p className="text-gray-600">
                   Dr. {doctor.name} is a highly qualified {doctor.specialization} with {doctor.experience} of experience.
                   {/* In a real app, you'd have a more detailed bio from the database */}
-                  They specialize in providing comprehensive healthcare services and are committed to delivering 
+                  They specialize in providing comprehensive healthcare services and are committed to delivering
                   personalized treatment plans for each patient.
                 </p>
               </div>
             </div>
-            
+
             {/* Qualifications & Specializations */}
             <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
               <div className="p-6">
@@ -306,7 +306,7 @@ const DoctorProfile = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div>
                     <h3 className="font-semibold text-gray-700 mb-2">Specialization</h3>
                     <div className="bg-gray-50 p-3 rounded-lg">
@@ -318,13 +318,13 @@ const DoctorProfile = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Right Column - Booking Section */}
           <div id="booking-section">
             <div className="bg-white rounded-xl shadow-md overflow-hidden sticky top-24">
               <div className="p-6">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">Book an Appointment</h2>
-                
+
                 {/* Day Selector */}
                 <div className="mb-6">
                   <h3 className="font-semibold text-gray-700 mb-2">Select Day</h3>
@@ -333,13 +333,12 @@ const DoctorProfile = () => {
                       <button
                         key={day}
                         onClick={() => isDayAvailable(day) && setSelectedDay(day)}
-                        className={`p-2 rounded-lg text-center text-sm ${
-                          isDayAvailable(day)
-                            ? selectedDay === day
-                              ? 'bg-[#007E85] text-white'
-                              : 'bg-[#007E85]/10 text-[#007E85] hover:bg-[#007E85]/20'
-                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        }`}
+                        className={`p-2 rounded-lg text-center text-sm ${isDayAvailable(day)
+                          ? selectedDay === day
+                            ? 'bg-[#007E85] text-white'
+                            : 'bg-[#007E85]/10 text-[#007E85] hover:bg-[#007E85]/20'
+                          : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          }`}
                         disabled={!isDayAvailable(day)}
                       >
                         {day}
@@ -347,7 +346,7 @@ const DoctorProfile = () => {
                     ))}
                   </div>
                 </div>
-                
+
                 {/* Time Slots */}
                 <div>
                   <h3 className="font-semibold text-gray-700 mb-2">Select Time</h3>

@@ -133,12 +133,17 @@ function App() {
   ], {
     future: {
       v7_normalizeFormMethod: true,
+      v7_startTransition: true,
+      v7_fetcherPersist: true,
+      v7_partialHydration: true,
+      v7_skipActionErrorRevalidation: true,
+      v7_relativeSplatPath: true,
     }
   });
 
   return (
     <AuthProvider>
-      <RouterProvider router={router} >
+      <RouterProvider router={router}>
         <Navbar />
         <div className=''>
           <img src="assets/images/trial.svg" alt="" />

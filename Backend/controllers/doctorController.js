@@ -307,7 +307,7 @@ export const createDoctor = async (req, res) => {
     const doctor = {
       _id: newUser._id,
       name: `${newUser.firstName} ${newUser.lastName}`,
-      email: "Dr."+newUser.email,
+      email:newUser.email,
       phone: newUser.phoneNumber,
       profileImage: newUser.profileImage,
       role: newUser.role,

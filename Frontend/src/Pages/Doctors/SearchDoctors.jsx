@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { FaSearch, FaMapMarkerAlt, FaFilter, FaUserMd, FaTooth, FaEye, FaHeartbeat, FaBrain, FaBone, FaChild, FaAllergies, FaStar, FaStarHalfAlt, FaCalendarAlt, FaClock } from 'react-icons/fa';
+import { FaSearch, FaFilter, FaUserMd, FaTooth, FaEye, FaHeartbeat, FaBrain, FaBone, FaChild, FaAllergies, FaStar, FaStarHalfAlt, FaCalendarAlt, FaClock } from 'react-icons/fa';
 import { GiMedicines, GiStomach } from 'react-icons/gi';
 import { MdPregnantWoman, MdOutlineVerified } from 'react-icons/md';
 import { Link, useNavigate } from 'react-router-dom';
 
 const API_URL = 'http://localhost:3000/api/doctors';
+const BACKEND_URL = 'http://localhost:3000';
 
 const SearchDoctors = () => {
   const navigate = useNavigate();
@@ -12,13 +13,13 @@ const SearchDoctors = () => {
   const [filteredDoctors, setFilteredDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
-  
+
   const [filters, setFilters] = useState({
     specialization: '',
     experience: '',
@@ -90,31 +91,31 @@ const SearchDoctors = () => {
     }
 
     const query = searchQuery.toLowerCase();
-    
+
     // Collect all searchable terms
     const allTerms = new Set();
-    
+
     // Add specializations
     specializations.forEach(spec => allTerms.add(spec.name.toLowerCase()));
-    
+
     // Add qualifications
     qualificationOptions.forEach(qual => {
       if (qual.value) allTerms.add(qual.value.toLowerCase());
     });
-    
+
     // Add doctor names, specializations and qualifications from data
     doctors.forEach(doctor => {
       if (doctor.name) allTerms.add(doctor.name.toLowerCase());
       if (doctor.specialization) allTerms.add(doctor.specialization.toLowerCase());
       if (doctor.qualification) allTerms.add(doctor.qualification.toLowerCase());
     });
-    
+
     // Filter terms that match the query
     const matchedSuggestions = Array.from(allTerms)
       .filter(term => term.includes(query))
       .sort()
       .slice(0, 5); // Limit to 5 suggestions
-    
+
     setSuggestions(matchedSuggestions);
     setShowSuggestions(matchedSuggestions.length > 0);
   }, [searchQuery, doctors]);
@@ -122,7 +123,7 @@ const SearchDoctors = () => {
   const fetchDoctors = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await fetch(API_URL, {
         method: 'GET',
@@ -131,16 +132,17 @@ const SearchDoctors = () => {
         },
         credentials: 'include' // Include cookies if needed for authentication
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch doctors');
       }
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
         setDoctors(data.doctors);
         setFilteredDoctors(data.doctors);
+
       } else {
         throw new Error(data.message || 'Error fetching doctors');
       }
@@ -154,31 +156,31 @@ const SearchDoctors = () => {
 
   const applyFilters = () => {
     let result = [...doctors];
-    
+
     // Apply search query (case insensitive)
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      result = result.filter(doctor => 
+      result = result.filter(doctor =>
         doctor.name?.toLowerCase().includes(query) ||
         doctor.specialization?.toLowerCase().includes(query) ||
         doctor.qualification?.toLowerCase().includes(query)
       );
     }
-    
+
     // Apply active category filter (from specialty cards)
     if (activeCategory) {
-      result = result.filter(doctor => 
+      result = result.filter(doctor =>
         doctor.specialization === activeCategory
       );
     }
-    
+
     // Apply dropdown filters
     if (filters.specialization) {
-      result = result.filter(doctor => 
+      result = result.filter(doctor =>
         doctor.specialization === filters.specialization
       );
     }
-    
+
     if (filters.experience) {
       // Assuming experience is stored as "X years" in the database
       result = result.filter(doctor => {
@@ -190,19 +192,19 @@ const SearchDoctors = () => {
         return true;
       });
     }
-    
+
     if (filters.qualification) {
-      result = result.filter(doctor => 
+      result = result.filter(doctor =>
         doctor.qualification === filters.qualification
       );
     }
-    
+
     if (filters.availability) {
-      result = result.filter(doctor => 
+      result = result.filter(doctor =>
         doctor.availability && doctor.availability.includes(filters.availability)
       );
     }
-    
+
     setFilteredDoctors(result);
   };
 
@@ -254,20 +256,20 @@ const SearchDoctors = () => {
     const stars = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
-    
+
     for (let i = 0; i < fullStars; i++) {
       stars.push(<FaStar key={`star-${i}`} className="text-yellow-400" />);
     }
-    
+
     if (hasHalfStar) {
       stars.push(<FaStarHalfAlt key="half-star" className="text-yellow-400" />);
     }
-    
+
     const remainingStars = 5 - stars.length;
     for (let i = 0; i < remainingStars; i++) {
       stars.push(<FaStar key={`empty-${i}`} className="text-gray-300" />);
     }
-    
+
     return (
       <div className="flex">
         {stars}
@@ -281,6 +283,7 @@ const SearchDoctors = () => {
     navigate(`/doctors/${doctorId}`);
   };
 
+
   return (
     <div className="min-h-screen bg-gradient-to-tr from-gray-50 to-blue-50 pt-24 pb-12">
       <div className="container mx-auto px-4">
@@ -291,7 +294,7 @@ const SearchDoctors = () => {
             Search from our network of qualified healthcare professionals to get the care you need
           </p>
         </div>
-        
+
         {/* Search Section */}
         <div className="mb-8">
           <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md ">
@@ -314,7 +317,7 @@ const SearchDoctors = () => {
                     <div className="absolute left-0 right-0 z-50 h-40 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg overflow-visible">
                       <ul className=" overflow-y-auto">
                         {suggestions.map((suggestion, index) => (
-                          <li 
+                          <li
                             key={index}
                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer capitalize"
                             onClick={() => handleSuggestionClick(suggestion)}
@@ -326,7 +329,7 @@ const SearchDoctors = () => {
                     </div>
                   )}
                 </div>
-                
+
                 <button
                   onClick={() => setShowFilters(!showFilters)}
                   className="flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
@@ -334,7 +337,7 @@ const SearchDoctors = () => {
                   <FaFilter />
                   <span>Filters</span>
                 </button>
-                
+
                 <button
                   onClick={resetFilters}
                   className="flex items-center justify-center gap-2 px-4 py-3 bg-[#007E85] text-white rounded-lg hover:bg-[#006b6f] transition-colors"
@@ -342,7 +345,7 @@ const SearchDoctors = () => {
                   Search
                 </button>
               </div>
-              
+
               {/* Filter Section */}
               {showFilters && (
                 <div className="mt-6 pt-6 border-t border-gray-200">
@@ -361,7 +364,7 @@ const SearchDoctors = () => {
                         ))}
                       </select>
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Experience</label>
                       <select
@@ -375,7 +378,7 @@ const SearchDoctors = () => {
                         ))}
                       </select>
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Qualification</label>
                       <select
@@ -389,7 +392,7 @@ const SearchDoctors = () => {
                         ))}
                       </select>
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Availability</label>
                       <select
@@ -404,7 +407,7 @@ const SearchDoctors = () => {
                       </select>
                     </div>
                   </div>
-                  
+
                   <button
                     onClick={resetFilters}
                     className="mt-4 text-[#007E85] hover:text-[#006b6f] font-medium"
@@ -416,7 +419,7 @@ const SearchDoctors = () => {
             </div>
           </div>
         </div>
-        
+
         {/* Specialties Section */}
         <div className="mb-10">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Browse by Specialty</h2>
@@ -425,16 +428,14 @@ const SearchDoctors = () => {
               <div
                 key={specialty.name}
                 onClick={() => handleCategoryClick(specialty.name)}
-                className={`p-4 rounded-xl cursor-pointer transition-all ${
-                  activeCategory === specialty.name 
-                    ? 'bg-[#007E85] text-white shadow-lg transform scale-105' 
-                    : `${specialty.color} hover:shadow-md`
-                }`}
+                className={`p-4 rounded-xl cursor-pointer transition-all ${activeCategory === specialty.name
+                  ? 'bg-[#007E85] text-white shadow-lg transform scale-105'
+                  : `${specialty.color} hover:shadow-md`
+                  }`}
               >
                 <div className="flex flex-col items-center text-center">
-                  <div className={`text-3xl mb-2 ${
-                    activeCategory === specialty.name ? 'text-white' : ''
-                  }`}>
+                  <div className={`text-3xl mb-2 ${activeCategory === specialty.name ? 'text-white' : ''
+                    }`}>
                     {specialty.icon}
                   </div>
                   <div className="text-sm font-medium">{specialty.name}</div>
@@ -443,14 +444,14 @@ const SearchDoctors = () => {
             ))}
           </div>
         </div>
-        
+
         {/* Results Section */}
         <div>
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-800">
               {filteredDoctors.length} {filteredDoctors.length === 1 ? 'Doctor' : 'Doctors'} Found
             </h2>
-            
+
             {(activeCategory || searchQuery || Object.values(filters).some(v => v !== '')) && (
               <button
                 onClick={resetFilters}
@@ -460,7 +461,7 @@ const SearchDoctors = () => {
               </button>
             )}
           </div>
-          
+
           {loading ? (
             <div className="flex justify-center items-center h-64">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#007E85]"></div>
@@ -493,11 +494,9 @@ const SearchDoctors = () => {
                     <div className="flex items-start">
                       <div className="h-16 w-16 rounded-full overflow-hidden bg-[#007E85]/10 flex items-center justify-center text-[#007E85] text-3xl mr-4">
                         {doctor.profileImage ? (
-                          <img 
-                            src={doctor.profileImage.startsWith('http') 
-                              ? doctor.profileImage 
-                              : `http://localhost:3000${doctor.profileImage}`} 
-                            alt={`Dr. ${doctor.name}`} 
+                          <img
+                            src={`${BACKEND_URL}${doctor.profileImage}`}
+                            alt={`Dr. ${doctor.name}`}
                             className="h-full w-full object-cover"
                             onError={(e) => {
                               e.target.onerror = null;
@@ -510,39 +509,39 @@ const SearchDoctors = () => {
                         )}
                       </div>
                       <div>
-                        <h3 className="text-lg font-bold text-gray-800 flex items-center">
-                          Dr. {doctor.name}
+                        <h3 className="text-lg font-bold text-gray-800 flex items-center capitalize">
+                          Dr. {doctor.firstName} {doctor.lastName}
                           <MdOutlineVerified className="ml-1 text-blue-500" />
                         </h3>
-                        <p className="text-sm text-gray-600">{doctor.qualification} - {doctor.specialization}</p>
+                        <p className="text-sm text-gray-600">{doctor.profile?.qualification} - {doctor.profile?.specialization}</p>
                         <div className="mt-1">
                           {/* Either use the real rating from the API or a default */}
                           {renderStars(4.5)}
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="mt-4 pt-4 border-t border-gray-100">
                       <div className="flex items-center text-gray-700 text-sm mb-2">
                         <FaClock className="mr-2 text-[#007E85]" />
-                        <span>{doctor.experience}</span>
+                        <span>{doctor.profile?.experience} years experience</span>
                       </div>
-                      
+
                       <div className="flex items-center text-gray-700 text-sm">
                         <FaCalendarAlt className="mr-2 text-[#007E85]" />
-                        <span>Available: {doctor.availability || 'Contact for details'}</span>
+                        <span>Available: {doctor.profile?.availability?.join(', ') || 'Contact for details'}</span>
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex border-t border-gray-100">
-                    <button 
+                    <button
                       onClick={() => viewDoctorProfile(doctor._id)}
                       className="flex-1 py-3 bg-gray-50 text-[#007E85] font-medium hover:bg-gray-100 transition-colors"
                     >
                       View Profile
                     </button>
-                    <button 
+                    <button
                       onClick={() => navigate(`/doctors/${doctor._id}/book`)}
                       className="flex-1 py-3 bg-[#007E85] text-white font-medium hover:bg-[#006b6f] transition-colors"
                     >
