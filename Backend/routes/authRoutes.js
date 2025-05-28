@@ -1,18 +1,18 @@
 import express from 'express';
-import { 
-  signUp, 
-  login, 
-  logout, 
-  getUser, 
-  updateProfile, 
-  updateUserPassword, 
-  forgotPassword 
+import {
+  signUp,
+  login,
+  logout,
+  getUser,
+  updateProfile,
+  updateUserPassword,
+  forgotPassword
 } from '../controllers/authController.js';
-import { 
-  verifyUser, 
-  verifyAdmin, 
-  verifyDoctor, 
-  verifyPatient 
+import {
+  verifyUser,
+  verifyAdmin,
+  verifyDoctor,
+  verifyPatient
 } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -23,7 +23,7 @@ router.post('/login', login);
 router.post('/forgot-password', forgotPassword);
 
 // Authentication check
-router.post('/user', getUser);
+router.post('/user', verifyUser, getUser);
 router.post('/logout', verifyUser, logout);
 
 // Protected routes - User management

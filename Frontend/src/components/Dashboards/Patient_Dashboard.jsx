@@ -14,9 +14,9 @@ const Patient_Dashboard = () => {
   const [patientDetails, setPatientDetails] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const [selectedAppointment, setSelectedAppointment] = useState(null)
-  
+
   const [appointments, setAppointments] = useState([
-    
+
   ])
 
 
@@ -45,7 +45,7 @@ const Patient_Dashboard = () => {
           window.location.href = '/admin/dashboard'
         }
       }, 500) // Small delay to avoid toast during normal navigation
-      
+
       return () => clearTimeout(timer)
     } else {
       // Only show toast if we've been on this page for a moment (not during initial navigation)
@@ -53,7 +53,7 @@ const Patient_Dashboard = () => {
         toast.error("Please log in to access the patient dashboard")
         window.location.href = '/login'
       }, 500)
-      
+
       return () => clearTimeout(timer)
     }
   }, [user])
@@ -69,7 +69,7 @@ const Patient_Dashboard = () => {
     if (!patientDetails?._id) {
       return
     }
-    
+
     try {
       setIsLoading(true)
       const response = await fetch(`${API_URL}/api/appointments/user`, {
@@ -80,7 +80,7 @@ const Patient_Dashboard = () => {
         },
         credentials: 'include'
       })
-      
+
       if (response.status === 401) {
         toast.error('Your session has expired. Please log in again.')
         setTimeout(() => {
@@ -88,15 +88,15 @@ const Patient_Dashboard = () => {
         }, 3000)
         return
       }
-      
+
       if (!response.ok) {
         toast.error(`Server error: ${response.status} ${response.statusText}`)
         setIsLoading(false)
         return
       }
-      
+
       const data = await response.json()
-      
+
       if (data.success) {
         setAppointments(data.appointments || [])
       } else {
@@ -114,7 +114,7 @@ const Patient_Dashboard = () => {
     if (!patientDetails?._id) {
       return
     }
-    
+
     try {
       setIsLoading(true)
       const response = await fetch(`${API_URL}/api/medical-records/patient/${patientDetails._id}`, {
@@ -125,7 +125,7 @@ const Patient_Dashboard = () => {
         },
         credentials: 'include'
       })
-      
+
       if (response.status === 401) {
         toast.error('Your session has expired. Please log in again.')
         setTimeout(() => {
@@ -133,15 +133,15 @@ const Patient_Dashboard = () => {
         }, 3000)
         return
       }
-      
+
       if (!response.ok) {
         toast.error(`Server error: ${response.status} ${response.statusText}`)
         setIsLoading(false)
         return
       }
-      
+
       const data = await response.json()
-      
+
       if (data.success) {
         setMedicalRecords(data.medicalRecords || [])
       } else {
@@ -159,7 +159,7 @@ const Patient_Dashboard = () => {
     if (!patientDetails?._id) {
       return
     }
-    
+
     try {
       setIsLoading(true)
       const response = await fetch(`${API_URL}/api/prescriptions/patient/${patientDetails._id}`, {
@@ -170,7 +170,7 @@ const Patient_Dashboard = () => {
         },
         credentials: 'include'
       })
-      
+
       if (response.status === 401) {
         toast.error('Your session has expired. Please log in again.')
         setTimeout(() => {
@@ -178,15 +178,15 @@ const Patient_Dashboard = () => {
         }, 3000)
         return
       }
-      
+
       if (!response.ok) {
         toast.error(`Server error: ${response.status} ${response.statusText}`)
         setIsLoading(false)
         return
       }
-      
+
       const data = await response.json()
-      
+
       if (data.success) {
         setPrescriptions(data.prescriptions || [])
       } else {
@@ -283,7 +283,7 @@ const Patient_Dashboard = () => {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'overview':
-  return (
+        return (
           <div className="space-y-6">
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -321,48 +321,47 @@ const Patient_Dashboard = () => {
                 </div>
               </div>
               <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4">
                   <div className="bg-[#6EAB36]/10 p-4 rounded-lg">
                     <FaHeartbeat className="text-2xl text-[#6EAB36]" />
                   </div>
-            <div>
+                  <div>
                     <p className="text-sm text-gray-500">Health Score</p>
                     <h3 className="text-2xl font-bold text-gray-800">85</h3>
                   </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
             {/* Health and Appointments Overview */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">Health Metrics</h2>
-          <div className="grid grid-cols-2 gap-4">
-            {Object.entries(healthMetrics).map(([key, value]) => (
-              <div key={key} className="bg-gray-50 p-4 rounded-xl">
-                <p className="text-gray-600 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</p>
-                <p className="text-lg font-semibold text-[#007E85]">{value}</p>
-              </div>
-            ))}
-          </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {Object.entries(healthMetrics).map(([key, value]) => (
+                    <div key={key} className="bg-gray-50 p-4 rounded-xl">
+                      <p className="text-gray-600 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</p>
+                      <p className="text-lg font-semibold text-[#007E85]">{value}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">Upcoming Appointments</h2>
-          <div className="space-y-4">
+                <div className="space-y-4">
                   {appointments && appointments.length > 0 ? (
                     appointments.slice(0, 3).map(apt => (
                       <div key={apt.id || apt._id} className="border-l-4 border-[#007E85] bg-gray-50 p-4 rounded-r-xl">
-                <div className="flex justify-between items-start">
-                  <div>
+                        <div className="flex justify-between items-start">
+                          <div>
                             <p className="font-semibold">{apt.doctor || apt.doctorName}</p>
                             <p className="text-sm text-gray-600">{apt.date || apt.appointmentDate} at {apt.time || apt.appointmentTime}</p>
-                  </div>
-                  <span className={`px-3 py-1 rounded-full text-sm ${
-                            (apt.status === "Upcoming" || apt.status === "confirmed") ? "bg-blue-100 text-blue-600" : "bg-green-100 text-green-600"
-                  }`}>
+                          </div>
+                          <span className={`px-3 py-1 rounded-full text-sm ${(apt.status === "Upcoming" || apt.status === "confirmed") ? "bg-blue-100 text-blue-600" : "bg-green-100 text-green-600"
+                            }`}>
                             {apt.status === "confirmed" ? "Upcoming" : apt.status}
-                  </span>
+                          </span>
                         </div>
                       </div>
                     ))
@@ -386,9 +385,9 @@ const Patient_Dashboard = () => {
                 {patientDetails ? (
                   <div>
                     <div className="flex items-center gap-4 mb-6">
-                      <img 
-                        src={getProfileImage()} 
-                        alt="Patient Profile" 
+                      <img
+                        src={getProfileImage()}
+                        alt="Patient Profile"
                         className="w-20 h-20 rounded-full border-2 border-[#007E85] object-cover"
                       />
                       <div>
@@ -405,7 +404,7 @@ const Patient_Dashboard = () => {
                         )}
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
                       <div>
                         <h4 className="font-semibold text-gray-700 mb-1">Date of Birth</h4>
@@ -440,7 +439,7 @@ const Patient_Dashboard = () => {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">My Appointments</h2>
-              <button 
+              <button
                 onClick={fetchAppointments}
                 className="flex items-center gap-2 text-sm bg-[#007E85] text-white px-4 py-2 rounded-lg hover:bg-[#006b6f] transition-colors"
               >
@@ -477,14 +476,14 @@ const Patient_Dashboard = () => {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 h-10 w-10">
-                              <img 
-                                className="h-10 w-10 rounded-full object-cover" 
+                              <img
+                                className="h-10 w-10 rounded-full object-cover"
                                 src={
-                                  appointment.doctorId?.profileImage 
+                                  appointment.doctorId?.profileImage
                                     ? `${API_URL}${appointment.doctorId.profileImage}`
                                     : "https://randomuser.me/api/portraits/men/85.jpg"
-                                } 
-                                alt="Doctor" 
+                                }
+                                alt="Doctor"
                               />
                             </div>
                             <div className="ml-4">
@@ -503,34 +502,34 @@ const Patient_Dashboard = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                            ${appointment.appointmentType === 'chat' ? 'bg-blue-100 text-blue-800' : 
-                            appointment.appointmentType === 'video' ? 'bg-purple-100 text-purple-800' : 
-                            'bg-green-100 text-green-800'}`}>
-                            {appointment.appointmentType === 'inperson' ? 'In Person' : 
-                            (appointment.appointmentType || "In Person").charAt(0).toUpperCase() + 
-                            (appointment.appointmentType || "In Person").slice(1)}
+                            ${appointment.appointmentType === 'chat' ? 'bg-blue-100 text-blue-800' :
+                              appointment.appointmentType === 'video' ? 'bg-purple-100 text-purple-800' :
+                                'bg-green-100 text-green-800'}`}>
+                            {appointment.appointmentType === 'inperson' ? 'In Person' :
+                              (appointment.appointmentType || "In Person").charAt(0).toUpperCase() +
+                              (appointment.appointmentType || "In Person").slice(1)}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                            ${appointment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                            appointment.status === 'confirmed' || appointment.status === 'Upcoming' ? 'bg-blue-100 text-blue-800' : 
-                            appointment.status === 'completed' || appointment.status === 'Completed' ? 'bg-green-100 text-green-800' :
-                            'bg-red-100 text-red-800'}`}>
+                            ${appointment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                              appointment.status === 'confirmed' || appointment.status === 'Upcoming' ? 'bg-blue-100 text-blue-800' :
+                                appointment.status === 'completed' || appointment.status === 'Completed' ? 'bg-green-100 text-green-800' :
+                                  'bg-red-100 text-red-800'}`}>
                             {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                           <div className="flex space-x-2">
                             {(appointment.status === 'pending' || appointment.status === 'confirmed' || appointment.status === 'Upcoming') && (
-                              <button 
+                              <button
                                 onClick={() => cancelAppointment(appointment._id)}
                                 className="text-red-600 hover:text-red-800"
                               >
                                 Cancel
                               </button>
                             )}
-                            <button 
+                            <button
                               onClick={() => viewAppointmentDetails(appointment._id)}
                               className="text-[#007E85] hover:text-[#006b6f]"
                             >
@@ -552,7 +551,7 @@ const Patient_Dashboard = () => {
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold text-gray-800">Medical Records</h2>
-              <button 
+              <button
                 onClick={fetchMedicalRecords}
                 className="flex items-center gap-2 text-sm bg-[#007E85] text-white px-4 py-2 rounded-lg hover:bg-[#006b6f] transition-colors"
               >
@@ -571,18 +570,17 @@ const Patient_Dashboard = () => {
                 <p className="text-gray-400 text-sm">Your medical records will appear here once your doctor uploads them</p>
               </div>
             ) : (
-          <div className="space-y-4">
+              <div className="space-y-4">
                 {medicalRecords.map(record => (
                   <div key={record._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-              <div className="flex items-center gap-4">
-                      <div className={`p-3 rounded-lg ${
-                        record.recordType === 'lab_result' ? 'bg-blue-100 text-blue-600' : 
-                        record.recordType === 'imaging' ? 'bg-purple-100 text-purple-600' : 
-                        'bg-green-100 text-green-600'
-                      }`}>
+                    <div className="flex items-center gap-4">
+                      <div className={`p-3 rounded-lg ${record.recordType === 'lab_result' ? 'bg-blue-100 text-blue-600' :
+                        record.recordType === 'imaging' ? 'bg-purple-100 text-purple-600' :
+                          'bg-green-100 text-green-600'
+                        }`}>
                         <FaFileMedical className="w-6 h-6" />
                       </div>
-                <div>
+                      <div>
                         <p className="font-semibold">{record.title}</p>
                         <p className="text-sm text-gray-600">
                           {record.description || 'No description provided'}
@@ -592,13 +590,13 @@ const Patient_Dashboard = () => {
                             Date: {new Date(record.date).toLocaleDateString()}
                           </p>
                           <p className="text-xs flex items-center">
-                            <FaUserMd className="mr-1 text-gray-400" /> 
+                            <FaUserMd className="mr-1 text-gray-400" />
                             {record.doctorId?.name || 'Unknown Doctor'}
                           </p>
                         </div>
                       </div>
                     </div>
-                    <button 
+                    <button
                       onClick={() => handleDownload(record.recordType, record.title)}
                       className="w-10 h-10 flex items-center justify-center bg-[#007E85] text-white rounded-full hover:bg-[#006b6f] transition-colors"
                       disabled={!record.fileUrl}
@@ -606,7 +604,7 @@ const Patient_Dashboard = () => {
                     >
                       <FaDownload className="h-5 w-5" />
                     </button>
-                </div>
+                  </div>
                 ))}
               </div>
             )}
@@ -618,7 +616,7 @@ const Patient_Dashboard = () => {
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold text-gray-800">Prescriptions</h2>
-              <button 
+              <button
                 onClick={fetchPrescriptions}
                 className="flex items-center gap-2 text-sm bg-[#007E85] text-white px-4 py-2 rounded-lg hover:bg-[#006b6f] transition-colors"
               >
@@ -626,7 +624,7 @@ const Patient_Dashboard = () => {
                 Refresh
               </button>
             </div>
-            
+
             {isLoading ? (
               <div className="flex justify-center py-10">
                 <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#007E85]"></div>
@@ -642,25 +640,24 @@ const Patient_Dashboard = () => {
                 {prescriptions.map(prescription => (
                   <div key={prescription._id} className="p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                     <div className="flex justify-between items-start mb-3">
-                <div>
+                      <div>
                         <h3 className="font-semibold text-lg">{prescription.diagnosis}</h3>
                         <p className="text-sm text-gray-600">
                           Issued: {new Date(prescription.issueDate).toLocaleDateString()}
                         </p>
                         <p className="text-sm flex items-center mt-1">
-                          <FaUserMd className="mr-1 text-gray-400" /> 
+                          <FaUserMd className="mr-1 text-gray-400" />
                           {prescription.doctorId?.name || 'Unknown Doctor'}
                         </p>
                       </div>
-                      <span className={`px-3 py-1 rounded-full text-sm ${
-                        prescription.status === 'active' ? 'bg-green-100 text-green-800' : 
-                        prescription.status === 'completed' ? 'bg-blue-100 text-blue-800' : 
-                        'bg-red-100 text-red-800'
-                      }`}>
+                      <span className={`px-3 py-1 rounded-full text-sm ${prescription.status === 'active' ? 'bg-green-100 text-green-800' :
+                        prescription.status === 'completed' ? 'bg-blue-100 text-blue-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
                         {prescription.status.charAt(0).toUpperCase() + prescription.status.slice(1)}
                       </span>
                     </div>
-                    
+
                     <div className="bg-white rounded-lg p-3 border border-gray-200">
                       <p className="font-medium mb-2">Medications:</p>
                       <ul className="space-y-2">
@@ -678,15 +675,15 @@ const Patient_Dashboard = () => {
                         ))}
                       </ul>
                     </div>
-                    
+
                     {prescription.notes && (
                       <div className="mt-3 text-sm">
                         <p><span className="font-medium">Notes:</span> {prescription.notes}</p>
                       </div>
                     )}
-                    
+
                     <div className="mt-3 flex justify-end">
-                      <button 
+                      <button
                         onClick={() => handleDownload('pdf', `prescription_${prescription._id}.pdf`)}
                         className="flex items-center gap-1 text-sm bg-[#007E85] text-white px-3 py-1 rounded-md hover:bg-[#006b6f] transition-colors"
                         disabled={!prescription.fileUrl}
@@ -716,7 +713,7 @@ const Patient_Dashboard = () => {
                 ))}
               </div>
             </div>
-            
+
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
               <h2 className="text-xl font-bold text-gray-800 mb-4">Health History</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -743,7 +740,7 @@ const Patient_Dashboard = () => {
         return (
           <div className="space-y-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4">Chat with Doctors</h2>
-            
+
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[70vh]">
               {/* Appointment List Sidebar */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden lg:col-span-1">
@@ -751,7 +748,7 @@ const Patient_Dashboard = () => {
                   <h3 className="font-semibold">Your Appointments</h3>
                   <p className="text-sm text-gray-500">Select to chat</p>
                 </div>
-                
+
                 <div className="overflow-y-auto h-[calc(70vh-4rem)]">
                   {isLoading ? (
                     <div className="flex justify-center items-center h-32">
@@ -776,23 +773,21 @@ const Patient_Dashboard = () => {
                               e.preventDefault(); // Prevent default button behavior
                               setSelectedAppointment(appointment);
                             }}
-                            className={`w-full text-left p-4 transition-colors hover:bg-gray-50 cursor-pointer ${
-                              selectedAppointment?._id === appointment._id ? 'bg-[#007E85]/5 border-l-4 border-[#007E85]' : ''
-                            }`}
+                            className={`w-full text-left p-4 transition-colors hover:bg-gray-50 cursor-pointer ${selectedAppointment?._id === appointment._id ? 'bg-[#007E85]/5 border-l-4 border-[#007E85]' : ''
+                              }`}
                           >
                             <p className="font-medium truncate">
                               {appointment.doctorId?.name || appointment.doctor || appointment.doctorName || "Doctor"}
                             </p>
                             <div className="flex justify-between items-center mt-1">
                               <p className="text-sm text-gray-500 truncate">
-                                {appointment.appointmentDate || appointment.date}, 
+                                {appointment.appointmentDate || appointment.date},
                                 {appointment.appointmentTime || appointment.time}
                               </p>
-                              <span className={`px-2 py-1 text-xs rounded-full ${
-                                appointment.status === 'confirmed' 
-                                  ? 'bg-green-100 text-green-800' 
-                                  : 'bg-blue-100 text-blue-800'
-                              }`}>
+                              <span className={`px-2 py-1 text-xs rounded-full ${appointment.status === 'confirmed'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-blue-100 text-blue-800'
+                                }`}>
                                 {appointment.status === 'confirmed' ? 'Chat Available' : 'Pending'}
                               </span>
                             </div>
@@ -803,7 +798,7 @@ const Patient_Dashboard = () => {
                   )}
                 </div>
               </div>
-              
+
               {/* Chat Interface */}
               <div className="lg:col-span-3 h-full">
                 {/* Chat Interface content will be handled here */}
@@ -818,9 +813,9 @@ const Patient_Dashboard = () => {
             {/* Profile Header */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
               <div className="flex items-center gap-6">
-                <img 
-                  src={getProfileImage()} 
-                  alt="Patient Profile" 
+                <img
+                  src={getProfileImage()}
+                  alt="Patient Profile"
                   className="w-24 h-24 rounded-full border-4 border-[#007E85] object-cover"
                 />
                 <div>
@@ -874,12 +869,12 @@ const Patient_Dashboard = () => {
                   <div className="bg-red-100 p-4 rounded-lg">
                     <FaSignOutAlt className="text-2xl text-red-500" />
                   </div>
-                <div>
+                  <div>
                     <h3 className="font-bold text-lg">Logout</h3>
                     <p className="text-sm text-gray-500">Sign out of your account</p>
                   </div>
                 </div>
-                <button 
+                <button
                   onClick={handleLogout}
                   className="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors">
                   Logout
@@ -901,12 +896,12 @@ const Patient_Dashboard = () => {
       toast.error("Cannot cancel: Missing appointment ID")
       return
     }
-    
+
     // Confirmation before canceling
     if (!window.confirm("Are you sure you want to cancel this appointment?")) {
       return
     }
-    
+
     try {
       setIsLoading(true)
       const response = await fetch(`${API_URL}/api/appointments/${appointmentId}/status`, {
@@ -917,7 +912,7 @@ const Patient_Dashboard = () => {
         credentials: 'include',
         body: JSON.stringify({ status: 'cancelled' })
       })
-      
+
       if (response.status === 401) {
         console.error('Authentication error: Not authorized to access this resource')
         toast.error('Authentication error - please try logging in again')
@@ -926,26 +921,26 @@ const Patient_Dashboard = () => {
         }, 3000)
         return
       }
-      
+
       const data = await response.json()
-      
+
       if (data.success) {
         toast.success("Appointment canceled successfully. This will be reflected in your appointments list.")
-        
+
         // Find the canceled appointment to include in notification
         const appointment = appointments.find(apt => apt._id === appointmentId || apt.id === appointmentId)
         if (appointment) {
           const doctorName = appointment.doctorId?.name || appointment.doctor || appointment.doctorName || "your doctor"
           const date = appointment.appointmentDate || appointment.date
           const time = appointment.appointmentTime || appointment.time
-          
+
           // More comprehensive notification
           toast.info(
             `Your appointment with ${doctorName} on ${date} at ${time} has been canceled. You can book a new appointment anytime.`,
             { autoClose: 6000 }
           )
         }
-        
+
         fetchAppointments() // Refresh appointments
       } else {
         console.error("Failed to cancel appointment:", data.message)
@@ -963,12 +958,12 @@ const Patient_Dashboard = () => {
   const viewAppointmentDetails = (appointmentId) => {
     // Find the appointment in the list
     const appointment = appointments.find(apt => apt._id === appointmentId || apt.id === appointmentId)
-    
+
     if (!appointment) {
       toast.error("Appointment not found")
       return
     }
-    
+
     // Format appointment details for display - expanded with more patient information
     const details = [
       `Doctor: ${appointment.doctorId?.name || appointment.doctor || appointment.doctorName}`,
@@ -983,9 +978,9 @@ const Patient_Dashboard = () => {
       `Patient Email: ${appointment.patientEmail || patientDetails?.email}`,
       `Patient Phone: ${appointment.patientPhone || patientDetails?.phone || "Not specified"}`
     ].join("\n")
-    
+
     alert(`Appointment Details:\n\n${details}`)
-    
+
     // In a real application, you would show this in a modal or navigate to a details page
     // This is just a simple implementation for demonstration purposes
   }
@@ -996,10 +991,10 @@ const Patient_Dashboard = () => {
       <div className="w-64 bg-white shadow-lg">
         <div className="p-4">
           <div className="flex items-center gap-3 mb-6">
-            <img 
-              src={getProfileImage()} 
-              alt="Patient" 
-              className="w-12 h-12 rounded-full border-2 border-[#007E85] object-cover" 
+            <img
+              src={getProfileImage()}
+              alt="Patient"
+              className="w-12 h-12 rounded-full border-2 border-[#007E85] object-cover"
             />
             <div>
               <h3 className="font-bold text-gray-800">{getPatientFullName()}</h3>
@@ -1012,18 +1007,17 @@ const Patient_Dashboard = () => {
               <button
                 key={link.id}
                 onClick={() => handleNavigation(link.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                  activeTab === link.id 
-                  ? 'bg-[#007E85] text-white' 
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === link.id
+                  ? 'bg-[#007E85] text-white'
                   : 'text-gray-600 hover:bg-gray-100'
-                }`}
+                  }`}
               >
                 {link.icon}
                 <span>{link.name}</span>
               </button>
             ))}
             <button
-              onClick={handleLogout} 
+              onClick={handleLogout}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-red-500 hover:bg-red-50"
             >
               <FaSignOutAlt />
@@ -1039,19 +1033,19 @@ const Patient_Dashboard = () => {
         <div className="bg-white shadow-sm">
           <div className="flex justify-between items-center px-8 py-4">
             <h1 className="text-xl font-bold text-gray-800">
-              {activeTab === 'overview' ? 'Dashboard Overview' : 
-               activeTab === 'appointments' ? 'My Appointments' :
-               activeTab === 'doctors' ? 'My Doctors' :
-               activeTab === 'records' ? 'Medical Records' :
-               activeTab === 'prescriptions' ? 'Prescriptions' :
-               activeTab === 'health' ? 'Health Metrics' :
-               activeTab === 'wellness' ? 'Wellness Program' :
-               activeTab === 'payments' ? 'Bills & Payments' :
-               activeTab === 'messages' ? 'Messages' :
-               activeTab === 'settings' ? 'Account Settings' : 'Dashboard'}
+              {activeTab === 'overview' ? 'Dashboard Overview' :
+                activeTab === 'appointments' ? 'My Appointments' :
+                  activeTab === 'doctors' ? 'My Doctors' :
+                    activeTab === 'records' ? 'Medical Records' :
+                      activeTab === 'prescriptions' ? 'Prescriptions' :
+                        activeTab === 'health' ? 'Health Metrics' :
+                          activeTab === 'wellness' ? 'Wellness Program' :
+                            activeTab === 'payments' ? 'Bills & Payments' :
+                              activeTab === 'messages' ? 'Messages' :
+                                activeTab === 'settings' ? 'Account Settings' : 'Dashboard'}
             </h1>
             <div className="flex items-center gap-4">
-              <button 
+              <button
                 onClick={handleChatRedirect}
                 className="px-4 py-2 bg-[#007E85] text-white rounded-lg hover:bg-[#006b6f] transition-colors flex items-center gap-2"
               >
@@ -1061,7 +1055,7 @@ const Patient_Dashboard = () => {
               <button className="relative p-2 text-gray-500 hover:text-[#007E85] transition-colors">
                 <FaBell className="text-xl" />
                 <span className="absolute -top-1 -right-1 bg-[#6EAB36] text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">2</span>
-              </button> 
+              </button>
             </div>
           </div>
         </div>

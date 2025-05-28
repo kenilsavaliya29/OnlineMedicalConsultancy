@@ -13,13 +13,13 @@ const SuccessModal = ({ onClose }) => {
     const timer = setTimeout(() => {
       onClose();
     }, 3000);
-    
+
     return () => clearTimeout(timer);
   }, [onClose]);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <motion.div 
+      <motion.div
         initial={{ scale: 0.5, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         className="bg-white rounded-xl p-8 shadow-lg flex flex-col items-center max-w-md w-full"
@@ -134,7 +134,7 @@ const Settings = () => {
   const [errors, setErrors] = useState({});
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: '',
+    fullName: '',
     lastName: '',
     email: '',
     phone: '',
@@ -149,10 +149,10 @@ const Settings = () => {
     if (user) {
       setFormData(prevData => ({
         ...prevData,
-        firstName: user.firstname || '',
-        lastName: user.lastname || '',
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
         email: user.email || '',
-        phone: user.phone || user.phonenumber || ''
+        phone: user.phoneNumber || ''
       }));
     }
   }, [user]);
@@ -174,13 +174,13 @@ const Settings = () => {
 
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
-    
+
     let newErrors = {};
     if (!formData.firstName) newErrors.firstName = "First name is required";
     if (!formData.lastName) newErrors.lastName = "Last name is required";
     if (!formData.email) newErrors.email = "Email is required";
     if (!formData.phone) newErrors.phone = "Phone number is required";
-    
+
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
 
@@ -194,7 +194,7 @@ const Settings = () => {
           phone: formData.phone,
           // Include other doctor-specific fields that might be present
           specialization: user.specialization,
-          experience: user.experience, 
+          experience: user.experience,
           qualification: user.qualification,
           availability: user.availability
         };
@@ -207,9 +207,9 @@ const Settings = () => {
           credentials: 'include',
           body: JSON.stringify(doctorUpdateData)
         });
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
           // Update the user in context with new information
           setUser(prev => ({
@@ -223,7 +223,7 @@ const Settings = () => {
 
           // Show the success modal
           setShowSuccessModal(true);
-          
+
           // Force reload after 1.5 seconds to ensure all components update
           setTimeout(() => {
             window.location.reload();
@@ -250,9 +250,9 @@ const Settings = () => {
           credentials: 'include',
           body: JSON.stringify(updateData)
         });
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
           // Update the user in context with new information
           setUser(prev => ({
@@ -266,7 +266,7 @@ const Settings = () => {
 
           // Show the success modal
           setShowSuccessModal(true);
-          
+
           // Force reload after 1.5 seconds to ensure all components update
           setTimeout(() => {
             window.location.reload();
@@ -303,13 +303,13 @@ const Settings = () => {
         credentials: 'include',
         body: JSON.stringify(passwordData)
       });
-      
+
       const data = await response.json();
-        console.log(data)
+      console.log(data)
       if (data.success) {
         // Clear password fields
         setFormData(prev => ({ ...prev, currentPassword: '', newPassword: '' }));
-        
+
         // Show success modal
         setShowSuccessModal(true);
         console.log("Password updated successfully")
@@ -332,7 +332,7 @@ const Settings = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#e6f7f8] to-white pt-28 p-8">
       {showSuccessModal && <SuccessModal onClose={() => setShowSuccessModal(false)} />}
-      
+
       <div className="max-w-4xl mx-auto">
         <div className="mb-8 flex items-center gap-2 text-sm font-lato text-[#007E85]">
           <Link to="/" className="hover:text-[#00565c]">Home</Link>
@@ -486,10 +486,12 @@ const Settings = () => {
 
         <SettingSection title="Data Privacy" icon={<FaShieldAlt />}>
           <div className="space-y-4">
-            <button className="w-full flex items-center justify-between p-4 bg-[#007E85]/5 hover:bg-[#007E85]/10 rounded-xl transition-colors">
-              <span className="font-medium text-gray-800 font-lato">Download Personal Data</span>
-              <FaEnvelope className="text-[#007E85]" />
-            </button>
+            <a href="/api/download/personal-data" download={user.firstName}>
+              <button className="w-full flex items-center justify-between p-4 bg-[#007E85]/5 hover:bg-[#007E85]/10 rounded-xl transition-colors">
+                <span className="font-medium text-gray-800 font-lato">Download Personal Data</span>
+                <FaEnvelope className="text-[#007E85]" />
+              </button>
+            </a>
             <button className="w-full flex items-center justify-between p-4 bg-[#007E85]/5 hover:bg-[#007E85]/10 rounded-xl transition-colors">
               <span className="font-medium text-gray-800 font-lato">Privacy Settings</span>
               <FaShieldAlt className="text-[#007E85]" />

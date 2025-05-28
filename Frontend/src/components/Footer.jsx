@@ -7,16 +7,16 @@ const Footer = () => {
         <footer className="bg-[#007E85] text-white py-16">
             <div className="container mx-auto px-4">
                 <div className="grid grid-cols-1 md:grid-cols-5 sm:grid-cols-3 gap-8">
-                    
+
                     <div className="space-y-4">
                         <NavLink className="w-auto inline-block transform hover:scale-105 transition-transform duration-300" to="/">
-                            <div className="flex items-center bg-white rounded-lg px-4 py-2">
-                                <span className="text-[#007E85] text-2xl font-lexend font-bold">MediHome</span>
+                            <div className="flex items-center bg-white rounded-lg py-1">
+                                <img src="/assets/images/logo.png" alt="Carechat Logo" className="h-14" />
                             </div>
                         </NavLink>
                         <p className="text-sm text-gray-100 font-lato">Your Trusted Partner in Health & Wellness</p>
                         <div className='sm:block hidden'>
-                            <span className="text-sm text-gray-200 font-lexend">© 2023 MediHome. All Rights Reserved</span>
+                            <span className="text-sm text-gray-200 font-lexend">© 2023 CareChat. All Rights Reserved</span>
                         </div>
                     </div>
 
@@ -66,7 +66,7 @@ const Footer = () => {
                 </div>
 
                 <div className="mt-8 text-center sm:hidden block">
-                    <p className="text-sm text-gray-200 font-lexend">© 2023 MediHome. All Rights Reserved</p>
+                    <p className="text-sm text-gray-200 font-lexend">© 2023 CareChat. All Rights Reserved</p>
                 </div>
             </div>
         </footer>

@@ -14,9 +14,9 @@ const Navbar = ({ cookieCounter }) => {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   
-  // Get authentication state from the global AuthContext
+
   const { user, loading, logout } = useContext(AuthContext);
-  const userName = user ? user.firstname : "";
+  const userName = user ? user.firstName : "";
 
   // Function to get correct profile image URL
   const getProfileImageUrl = () => {
@@ -27,18 +27,12 @@ const Navbar = ({ cookieCounter }) => {
       return user.profileImage;
     }
     
-    // If it's a relative path, append it to the API URL
+  
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
     return `${API_URL}${user.profileImage}`;
   };
 
-  // Debug user state only when it changes (commented out in production)
-  useEffect(() => {
-    // Uncomment for debugging purposes only
-    // console.log("User state in Navbar changed:", user);
-  }, [user]);
 
-  // Disable body scroll when mobile menu is open
   useEffect(() => {
     if (mobileMenuOpen) {
       document.body.style.overflow = 'hidden';
@@ -101,7 +95,7 @@ const Navbar = ({ cookieCounter }) => {
             whileTap={{ scale: 0.95 }}
           >
             <NavLink to="/">
-              <img src="/assets/images/Logo.svg" alt="Medicare Logo" className="h-12" />
+              <img src="/assets/images/logo.png" alt="CareChat Logo" className="h-14" />
             </NavLink>
           </motion.div>
         </div>
@@ -126,7 +120,7 @@ const Navbar = ({ cookieCounter }) => {
                 <div className="flex flex-col h-full">
                   <div className="flex justify-between items-center mb-8">
                     <NavLink to="/">
-                      <img src="/assets/images/Logo.svg" alt="Medicare Logo" className='w-40' />
+                      <img src="/assets/images/logo.png" alt="CareChat Logo" className='w-40' />
                     </NavLink>
                   </div>
                   

@@ -108,13 +108,13 @@ const SignUp_Form = () => {
           <div className="w-full lg:w-7/12 p-8 md:p-12">
             <div className="mb-8">
               <Link to="/" className="block">
-                <img src="https://cdn-icons-png.flaticon.com/512/4807/4807695.png" alt="Medicare Logo" className="h-10 mx-auto mb-6 hover:opacity-80 transition-opacity" />
+                <img src="https://cdn-icons-png.flaticon.com/512/4807/4807695.png" alt="CareChat Logo" className="h-10 mx-auto mb-6 hover:opacity-80 transition-opacity" />
               </Link>
               <h1 className="text-2xl font-bold text-center text-gray-800 font-lexend mb-2">
                 Create your account
               </h1>
               <p className="text-center text-gray-600 font-montserrat text-sm">
-                Join Medicare for personalized healthcare services
+                Join CareChat for personalized healthcare services
               </p>
             </div>
 

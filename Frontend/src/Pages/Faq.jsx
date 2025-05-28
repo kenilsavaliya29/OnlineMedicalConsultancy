@@ -7,35 +7,35 @@ const Faq = () => {
 
   const faqs = [
     {
-      question: "What is Medicare's main goal?",
-      answer: "Medicare aims to provide accessible, high-quality healthcare services through digital solutions. Our platform connects patients with certified doctors 24/7, offers online consultations, and provides comprehensive wellness programs to improve overall health outcomes."
+      question: "What is CareChat's main goal?",
+      answer: "CareChat aims to provide accessible, high-quality healthcare services through digital solutions. Our platform connects patients with certified doctors 24/7, offers online consultations, and provides comprehensive wellness programs to improve overall health outcomes."
     },
     {
-      question: "How does Medicare make healthcare more accessible?", 
+      question: "How does CareChat make healthcare more accessible?", 
       answer: "We make healthcare accessible through instant doctor chats, online appointment scheduling, digital prescriptions, and virtual consultations. Our platform eliminates geographical barriers and provides round-the-clock medical assistance."
     },
     {
-      question: "What services does Medicare offer?",
-      answer: "Medicare offers a wide range of services including 24/7 doctor consultations, appointment scheduling, wellness programs, health checkups, digital prescriptions, and personalized healthcare solutions tailored to individual needs."
+      question: "What services does CareChat offer?",
+      answer: "CareChat offers a wide range of services including 24/7 doctor consultations, appointment scheduling, wellness programs, health checkups, digital prescriptions, and personalized healthcare solutions tailored to individual needs."
     },
     {
-      question: "How does Medicare ensure quality healthcare?",
+      question: "How does CareChat ensure quality healthcare?",
       answer: "We partner with certified and experienced healthcare professionals, maintain strict quality standards, and continuously monitor our services. Our platform also implements secure technology for protecting patient information and ensuring reliable healthcare delivery."
     },
     {
-      question: "What makes Medicare different from traditional healthcare?",
-      answer: "Medicare combines traditional healthcare expertise with modern technology to provide convenient, instant, and personalized healthcare solutions. Our digital platform makes healthcare services available anytime, anywhere, while maintaining high-quality standards."
+      question: "What makes CareChat different from traditional healthcare?",
+      answer: "CareChat combines traditional healthcare expertise with modern technology to provide convenient, instant, and personalized healthcare solutions. Our digital platform makes healthcare services available anytime, anywhere, while maintaining high-quality standards."
     },
     {
-      question: "Is my personal health information secure with Medicare?",
+      question: "Is my personal health information secure with CareChat?",
       answer: "Absolutely! We take data security very seriously. All your personal and health information is encrypted and stored securely following HIPAA compliance standards. We implement the latest security measures to ensure your data remains confidential."
     },
     {
-      question: "Can I get prescriptions through Medicare?",
+      question: "Can I get prescriptions through CareChat?",
       answer: "Yes! Our platform enables doctors to issue digital prescriptions after online consultations. These prescriptions are securely delivered to you and can be used at partner pharmacies. We ensure all prescriptions meet regulatory requirements."
     },
     {
-      question: "What types of doctors are available on Medicare?",
+      question: "What types of doctors are available on CareChat?",
       answer: "We have a diverse network of certified healthcare professionals including general physicians, specialists, pediatricians, dermatologists, psychiatrists, and more. All our doctors are verified and licensed to practice medicine."
     },
     {
@@ -54,7 +54,7 @@ const Faq = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-[#007E85] mb-4">Frequently Asked Questions</h1>
-            <p className="text-gray-600 max-w-2xl mx-auto">Find answers to common questions about Medicare's mission and services</p>
+            <p className="text-gray-600 max-w-2xl mx-auto">Find answers to common questions about CareChat's mission and services</p>
           </div>
 
           <div className="max-w-3xl mx-auto space-y-6">

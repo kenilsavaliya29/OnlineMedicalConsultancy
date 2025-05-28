@@ -245,7 +245,7 @@ export const addDoctorReview = async (req, res) => {
  */
 export const createDoctor = async (req, res) => {
   try {
-    // Extract user data
+
     const { 
       name, 
       email, 
@@ -254,10 +254,10 @@ export const createDoctor = async (req, res) => {
       specialization, 
       qualification, 
       experience, 
-      availability 
+      availability,
+      registrationNumber 
     } = req.body;
 
-    // Split name into first and last name
     const nameParts = name.split(' ');
     const firstName = nameParts[0];
     const lastName = nameParts.slice(1).join(' ');
@@ -297,7 +297,8 @@ export const createDoctor = async (req, res) => {
       bio: req.body.bio || '',
       languages: req.body.languages ? JSON.parse(req.body.languages) : ['English'],
       availability: Array.isArray(availability) ? availability : 
-                   (availability ? availability.split(',').map(day => day.trim()) : [])
+                   (availability ? availability.split(',').map(day => day.trim()) : []),
+      registrationNumber: registrationNumber // Add registrationNumber to profile
     });
 
     await doctorProfile.save();
@@ -306,14 +307,15 @@ export const createDoctor = async (req, res) => {
     const doctor = {
       _id: newUser._id,
       name: `${newUser.firstName} ${newUser.lastName}`,
-      email: newUser.email,
+      email: "Dr."+newUser.email,
       phone: newUser.phoneNumber,
       profileImage: newUser.profileImage,
       role: newUser.role,
       specialization: doctorProfile.specialization,
       qualification: doctorProfile.qualification,
       experience: doctorProfile.experience,
-      availability: doctorProfile.availability
+      availability: doctorProfile.availability,
+      registrationNumber: doctorProfile.registrationNumber // Include registrationNumber in response
     };
 
     res.status(201).json({
@@ -346,7 +348,8 @@ export const updateDoctor = async (req, res) => {
       specialization, 
       qualification, 
       experience, 
-      availability 
+      availability,
+      registrationNumber // Extract registrationNumber
     } = req.body;
 
     // 1. Update user account
@@ -409,6 +412,9 @@ export const updateDoctor = async (req, res) => {
         doctorProfile.languages = req.body.languages.split(',').map(lang => lang.trim());
       }
     }
+    if (registrationNumber) {
+      doctorProfile.registrationNumber = registrationNumber;
+    }
 
     await doctorProfile.save();
 
@@ -422,7 +428,8 @@ export const updateDoctor = async (req, res) => {
       specialization: doctorProfile.specialization,
       qualification: doctorProfile.qualification,
       experience: doctorProfile.experience,
-      availability: doctorProfile.availability
+      availability: doctorProfile.availability,
+      registrationNumber: doctorProfile.registrationNumber // Include registrationNumber in response
     };
 
     res.json({

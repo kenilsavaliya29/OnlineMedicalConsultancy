@@ -84,7 +84,8 @@ const WellnessProfile = () => {
           if (user) {
             setFormData(prev => ({
               ...prev,
-              name: `${user.firstname || ''} ${user.lastname || ''}`.trim()
+              name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+              gender: user.gender || ''
             }));
           }
           setLoading(false);
@@ -114,7 +115,11 @@ const WellnessProfile = () => {
             fitnessGoal: data.profile.fitnessGoal || '',
             activityLevel: data.profile.activityLevel || '',
             targetDuration: data.profile.targetDuration || 4,
-            targetWeight: data.profile.targetWeight || ''
+            targetWeight: data.profile.targetWeight || '',
+            firstName: data.profile.firstName || '',
+            lastName: data.profile.lastName || '',
+            email: data.profile.email || '',
+            phone: data.profile.phone || ''
           });
         } else {
           toast.error(`Failed to fetch profile data: ${data.message || 'Unknown error'}`);

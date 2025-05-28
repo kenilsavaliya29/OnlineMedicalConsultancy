@@ -50,8 +50,8 @@ const ContactUs = () => {
                 <FaEnvelope className="text-4xl text-[#007E85]" />
               </div>
               <h3 className="text-xl font-bold mb-2">Email</h3>
-              <p className="text-gray-600">support@medicare.com</p>
-              <p className="text-gray-600">info@medicare.com</p>
+              <p className="text-gray-600">support@CareChat.com</p>
+              <p className="text-gray-600">info@CareChat.com</p>
             </div>
 
             <div className="bg-white p-8 rounded-xl shadow-lg text-center">
@@ -213,7 +213,7 @@ const ContactUs = () => {
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl font-bold mb-6">Emergency Contact</h2>
             <p className="text-xl mb-8">For medical emergencies, please call our 24/7 helpline</p>
-            <div className="text-4xl font-bold">1-800-MEDICARE</div>
+            <div className="text-4xl font-bold">1-800-CareChat</div>
           </div>
         </div>
       </div>

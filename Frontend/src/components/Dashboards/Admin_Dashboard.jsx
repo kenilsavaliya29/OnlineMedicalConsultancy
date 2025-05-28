@@ -48,7 +48,8 @@ const Admin = () => {
     experience: '',
     qualification: '',
     role: 'doctor',
-    availability: { ...initialAvailabilityState }
+    availability: { ...initialAvailabilityState },
+    registrationNumber: ''
   });
 
   const specializations = [
@@ -65,14 +66,14 @@ const Admin = () => {
   ];
 
   // Add this to the state variables section:
-  const [viewType, setViewType] = useState('card'); // 'card' or 'table'
+  const [viewType, setViewType] = useState('card');
 
   // Fetch doctors on component mount
   useEffect(() => {
-    // Check if user is an admin
+
     if (user && user.role !== 'admin') {
       console.warn("Non-admin user trying to access admin dashboard:", user.role);
-      // Only show toast if we've been on this page for a moment (not during initial navigation)
+
       const timer = setTimeout(() => {
         toast.error("You don't have permission to access the admin dashboard");
         window.location.href = '/';
@@ -85,7 +86,7 @@ const Admin = () => {
       try {
         setIsLoading(true);
         setError(null);
-        
+
         const response = await fetch(`${API_URL}/api/doctors`, {
           credentials: 'include'
         });
@@ -188,7 +189,7 @@ const Admin = () => {
       if (!formData.specialization) errors.specialization = 'Specialization is required';
       if (!formData.experience) errors.experience = 'Experience is required';
       if (!formData.qualification) errors.qualification = 'Qualification is required';
-      
+
       // Email validation - required for new doctors
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!formData.email.trim()) {
@@ -196,23 +197,28 @@ const Admin = () => {
       } else if (!emailRegex.test(formData.email.trim())) {
         errors.email = 'Please enter a valid email address';
       }
-      
+
       // Password validation for new doctors
       if (formData.password.length < 6) {
         errors.password = 'Password must be at least 6 characters long';
       }
-      
+
       // Profile image validation for new doctors
       if (!profileImage && !profileImagePreview) {
         errors.profileImage = 'Profile image is required';
       }
-      
+
       // Availability validation for new doctors
       const hasAvailability = Object.values(formData.availability).some(v => v);
       if (!hasAvailability) errors.availability = 'Please select at least one day';
+
+      // Registration Number validation if provided
+      if (formData.registrationNumber.trim() && !/^[A-Za-z0-9]+$/.test(formData.registrationNumber.trim())) { // Example simple alphanumeric validation
+        errors.registrationNumber = 'Registration number must be alphanumeric';
+      }
     } else {
       // For editing doctors, only validate fields that are filled
-      
+
       // Email validation if provided
       if (formData.email.trim()) {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -220,10 +226,15 @@ const Admin = () => {
           errors.email = 'Please enter a valid email address';
         }
       }
-      
+
       // Password validation if provided (optional when editing)
       if (formData.password.trim() && formData.password.length < 6) {
         errors.password = 'Password must be at least 6 characters long';
+      }
+
+      // Registration Number validation if provided
+      if (formData.registrationNumber.trim() && !/^[A-Za-z0-9]+$/.test(formData.registrationNumber.trim())) { // Example simple alphanumeric validation
+        errors.registrationNumber = 'Registration number must be alphanumeric';
       }
     }
 
@@ -257,8 +268,9 @@ const Admin = () => {
         email: formData.email,
         phone: formData.phonenumber, // Map phonenumber to phone
         availability: availableDays, // Now it's an array
+        registrationNumber: formData.registrationNumber
       };
-      
+
       // Only include password if it's provided (not empty)
       if (formData.password.trim()) {
         doctorData.password = formData.password;
@@ -340,7 +352,8 @@ const Admin = () => {
           experience: '',
           qualification: '',
           role: 'doctor',
-          availability: { ...initialAvailabilityState }
+          availability: { ...initialAvailabilityState },
+          registrationNumber: ''
         });
         setProfileImage(null);
         setProfileImagePreview(null);
@@ -370,10 +383,10 @@ const Admin = () => {
     const availabilityState = { ...initialAvailabilityState };
     if (doctor.availability) {
       // Handle both array and string formats
-      const availableDays = Array.isArray(doctor.availability) ? 
-                            doctor.availability : 
-                            doctor.availability.split(',').map(day => day.trim());
-      
+      const availableDays = Array.isArray(doctor.availability) ?
+        doctor.availability :
+        doctor.availability.split(',').map(day => day.trim());
+
       availableDays.forEach(day => {
         if (availabilityState.hasOwnProperty(day)) {
           availabilityState[day] = true;
@@ -401,7 +414,8 @@ const Admin = () => {
       qualification: doctor.qualification,
       experience: doctor.experience,
       profileImage: doctor.profileImage,
-      availability: doctor.availability
+      availability: doctor.availability,
+      registrationNumber: doctor.registrationNumber || doctor.profile?.registrationNumber || ''
     });
 
     setFormData({
@@ -414,7 +428,8 @@ const Admin = () => {
       experience: doctor.experience || '',
       qualification: doctor.qualification || '',
       role: doctor.role || 'doctor',
-      availability: availabilityState
+      availability: availabilityState,
+      registrationNumber: doctor.registrationNumber || doctor.profile?.registrationNumber || ''
     });
 
     // Set profile image if available
@@ -433,7 +448,7 @@ const Admin = () => {
     setProfileImage(null); // Reset actual file
     setValidationErrors({});
     setShowAddForm(true);
-    
+
     // Scroll to the form
     setTimeout(() => {
       window.scrollTo({
@@ -476,29 +491,29 @@ const Admin = () => {
     const docFirstName = doctor.firstName || doctor.firstname || (doctor.name ? doctor.name.split(' ')[0] : '');
     const docLastName = doctor.lastName || doctor.lastname || (doctor.name ? doctor.name.split(' ').slice(1).join(' ') : '');
     const docFullName = `${docFirstName} ${docLastName}`.toLowerCase();
-    
+
     // Search term matching
-    const nameMatch = searchTerm === '' || 
-                      docFullName.includes(searchTerm.toLowerCase()) || 
-                      (doctor.name && doctor.name.toLowerCase().includes(searchTerm.toLowerCase()));
-    
+    const nameMatch = searchTerm === '' ||
+      docFullName.includes(searchTerm.toLowerCase()) ||
+      (doctor.name && doctor.name.toLowerCase().includes(searchTerm.toLowerCase()));
+
     // Other filters
     const specMatch = !filterSpecialization || doctor.specialization === filterSpecialization;
     const expMatch = !filterExperience || doctor.experience === filterExperience;
     const qualMatch = !filterQualification || doctor.qualification === filterQualification;
-    
+
     return nameMatch && specMatch && expMatch && qualMatch;
   });
 
   const formatAvailabilityForDisplay = (availability) => {
     if (!availability) return 'N/A';
-    
+
     // Handle both string and array formats
-    let days = Array.isArray(availability) ? availability : 
-              typeof availability === 'string' ? availability.split(',').map(day => day.trim()) : [];
-    
+    let days = Array.isArray(availability) ? availability :
+      typeof availability === 'string' ? availability.split(',').map(day => day.trim()) : [];
+
     if (days.length === 0) return 'N/A';
-    
+
     // Return the formatted days
     return days.map(day => (
       <span key={day} className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded mr-1 mb-1">
@@ -521,7 +536,8 @@ const Admin = () => {
       specialization: doctor.specialization || (doctor.profile?.specialization) || '',
       qualification: doctor.qualification || (doctor.profile?.qualification) || '',
       experience: doctor.experience || (doctor.profile?.experience) || '',
-      availability: doctor.availability || (doctor.profile?.availability) || []
+      availability: doctor.availability || (doctor.profile?.availability) || [],
+      registrationNumber: doctor.registrationNumber || (doctor.profile?.registrationNumber) || ''
     };
   };
 
@@ -547,7 +563,8 @@ const Admin = () => {
                 experience: '',
                 qualification: '',
                 role: 'doctor', // Always set role to doctor
-                availability: { ...initialAvailabilityState }
+                availability: { ...initialAvailabilityState },
+                registrationNumber: ''
               });
               setProfileImage(null);
               setProfileImagePreview(null);
@@ -728,6 +745,24 @@ const Admin = () => {
                       <p className="text-red-500 text-xs mt-1">{validationErrors.qualification}</p>
                     )}
                   </div>
+
+                  <div>
+                    <label className="block text-gray-700 mb-2">
+                      Registration Number {!editingDoctor && <span className="text-red-500">*</span>}
+                      {editingDoctor && <span className="text-gray-500 text-xs ml-2">(Optional when editing)</span>}
+                    </label>
+                    <input
+                      type="text"
+                      name="registrationNumber"
+                      value={formData.registrationNumber}
+                      onChange={handleInputChange}
+                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007E85] ${validationErrors.registrationNumber ? 'border-red-500' : ''}`}
+                      required={!editingDoctor}
+                    />
+                    {validationErrors.registrationNumber && (
+                      <p className="text-red-500 text-xs mt-1">{validationErrors.registrationNumber}</p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Third Column - Availability and Profile Image */}
@@ -774,8 +809,8 @@ const Admin = () => {
                       <label
                         htmlFor="profile-image-upload"
                         className={`cursor-pointer ${validationErrors.profileImage
-                            ? 'bg-red-500 hover:bg-red-700'
-                            : ' bg-[#007E85] hover:bg-[#006b6f]'
+                          ? 'bg-red-500 hover:bg-red-700'
+                          : ' bg-[#007E85] hover:bg-[#006b6f]'
                           } text-white font-bold py-2 px-4 rounded`}
                       >
                         {editingDoctor ? 'Change Image' : 'Choose Image'}
@@ -837,7 +872,7 @@ const Admin = () => {
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="mb-6">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Manage Doctors</h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
               <div className="lg:col-span-1">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Search Name</label>
@@ -908,21 +943,19 @@ const Admin = () => {
             <div className="flex space-x-2">
               <button
                 onClick={() => setViewType('card')}
-                className={`px-3 py-1 rounded ${
-                  viewType === 'card' 
-                    ? 'bg-[#007E85] text-white' 
+                className={`px-3 py-1 rounded ${viewType === 'card'
+                    ? 'bg-[#007E85] text-white'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
+                  }`}
               >
                 Card View
               </button>
               <button
                 onClick={() => setViewType('table')}
-                className={`px-3 py-1 rounded ${
-                  viewType === 'table' 
-                    ? 'bg-[#007E85] text-white' 
+                className={`px-3 py-1 rounded ${viewType === 'table'
+                    ? 'bg-[#007E85] text-white'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
+                  }`}
               >
                 Table View
               </button>
@@ -934,7 +967,7 @@ const Admin = () => {
             <div className="bg-gradient-to-r from-[#007E85] to-[#00565b] p-4 rounded-t-lg">
               <p className="text-gray-200 text-sm mt-1">Showing all registered healthcare professionals ({filteredDoctors.length})</p>
             </div>
-            
+
             {isLoading ? (
               <div className="flex justify-center items-center py-12 bg-white border border-t-0 border-gray-200 rounded-b-lg">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#007E85]"></div>
@@ -958,11 +991,11 @@ const Admin = () => {
                     <div className="col-span-1">Doctor Info</div>
                     <div className="col-span-1">Qualifications</div>
                     <div className="col-span-1">Contact</div>
-                    <div className="col-span-1">Availability</div>
+                    <div className="col-span-1">Registration / Availability</div>
                     <div className="col-span-1 text-right">Actions</div>
                   </div>
                 </div>
-                
+
                 {/* Doctor List - Card View */}
                 <div className="space-y-3 bg-white border border-t-0 border-gray-200 rounded-b-lg p-3">
                   {filteredDoctors.map(doctor => {
@@ -975,8 +1008,8 @@ const Admin = () => {
                             <div className="h-20 w-20 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center border-2 border-[#007E85]">
                               {doctorInfo.profileImage ? (
                                 <img
-                                  src={doctorInfo.profileImage.startsWith('http') 
-                                    ? doctorInfo.profileImage 
+                                  src={doctorInfo.profileImage.startsWith('http')
+                                    ? doctorInfo.profileImage
                                     : `${API_URL}${doctorInfo.profileImage}`}
                                   alt={`Dr. ${doctorInfo.firstName} ${doctorInfo.lastName}`}
                                   className="h-full w-full object-cover"
@@ -990,7 +1023,7 @@ const Admin = () => {
                               )}
                             </div>
                           </div>
-                          
+
                           {/* Doctor Info */}
                           <div className="flex-grow grid grid-cols-1 md:grid-cols-5 gap-4 mt-4 md:mt-0">
                             {/* Name and Specialization */}
@@ -1005,7 +1038,7 @@ const Admin = () => {
                                 ID: {doctorInfo.id ? doctorInfo.id.substring(0, 8) : 'N/A'}
                               </div>
                             </div>
-                            
+
                             {/* Qualification and Experience */}
                             <div className="md:col-span-1">
                               <div className="mb-2">
@@ -1017,7 +1050,7 @@ const Admin = () => {
                                 <span className="font-medium">{doctorInfo.experience || 'N/A'}</span>
                               </div>
                             </div>
-                            
+
                             {/* Contact Info */}
                             <div className="md:col-span-1">
                               <div className="mb-2">
@@ -1029,15 +1062,19 @@ const Admin = () => {
                                 <span className="font-medium">{doctorInfo.phone || 'N/A'}</span>
                               </div>
                             </div>
-                            
-                            {/* Availability */}
+
+                            {/* Registration and Availability */}
                             <div className="md:col-span-1">
+                              <div className="mb-2">
+                                <span className="block text-xs text-gray-500 uppercase">Registration No.</span>
+                                <span className="font-medium">{doctorInfo.registrationNumber || 'N/A'}</span>
+                              </div>
                               <span className="block text-xs text-gray-500 uppercase">Availability</span>
                               <div className="mt-1">
                                 {formatAvailabilityForDisplay(doctorInfo.availability)}
                               </div>
                             </div>
-                            
+
                             {/* Actions */}
                             <div className="md:col-span-1 flex justify-end items-center space-x-2">
                               <button
@@ -1081,6 +1118,9 @@ const Admin = () => {
                         Experience
                       </th>
                       <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Registration No.
+                      </th>
+                      <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Availability
                       </th>
                       <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -1091,7 +1131,7 @@ const Admin = () => {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {filteredDoctors.map((doctor) => {
                       const doctorInfo = extractDoctorInfo(doctor);
-                      
+
                       return (
                         <tr key={doctorInfo.id} className="hover:bg-gray-50">
                           <td className="px-4 py-4 border-b">
@@ -1099,8 +1139,8 @@ const Admin = () => {
                               <div className="h-10 w-10 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
                                 {doctorInfo.profileImage ? (
                                   <img
-                                    src={doctorInfo.profileImage.startsWith('http') 
-                                      ? doctorInfo.profileImage 
+                                    src={doctorInfo.profileImage.startsWith('http')
+                                      ? doctorInfo.profileImage
                                       : `${API_URL}${doctorInfo.profileImage}`}
                                     alt={`Dr. ${doctorInfo.fullName}`}
                                     className="h-full w-full object-cover"
@@ -1122,6 +1162,7 @@ const Admin = () => {
                           <td className="px-4 py-4 border-b">{doctorInfo.specialization || 'N/A'}</td>
                           <td className="px-4 py-4 border-b">{doctorInfo.qualification || 'N/A'}</td>
                           <td className="px-4 py-4 border-b">{doctorInfo.experience || 'N/A'}</td>
+                          <td className="px-4 py-4 border-b">{doctorInfo.registrationNumber || 'N/A'}</td>
                           <td className="px-4 py-4 border-b">
                             <div className="flex flex-wrap">
                               {formatAvailabilityForDisplay(doctorInfo.availability)}

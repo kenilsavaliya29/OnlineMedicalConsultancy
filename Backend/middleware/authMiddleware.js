@@ -43,7 +43,7 @@ export const verifyUser = async (req, res, next) => {
     // Get token from cookie or authorization header
     const token = req.cookies.authToken || 
                  (req.headers.authorization ? req.headers.authorization.split(' ')[1] : null);
-    
+
     if (!token) {
       return res.status(401).json({ 
         success: false, 

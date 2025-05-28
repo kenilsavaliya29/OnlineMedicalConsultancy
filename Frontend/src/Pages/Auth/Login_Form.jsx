@@ -204,10 +204,10 @@ const Login_Form = () => {
           <div className="w-full lg:w-7/12 p-8 md:p-12">
             <div className="mb-8">
               <NavLink to="/" className="block">
-                <img src="https://cdn-icons-png.flaticon.com/512/4807/4807695.png" alt="Medicare Logo" className="h-10 mx-auto mb-6 hover:opacity-80 transition-opacity" />
+                <img src="https://cdn-icons-png.flaticon.com/512/4807/4807695.png" alt="CareChat Logo" className="h-10 mx-auto mb-6 hover:opacity-80 transition-opacity" />
               </NavLink>
               <h1 className="text-2xl font-bold text-center text-gray-800 font-lexend mb-2">
-                Sign in to Medicare
+                Sign in to CareChat
               </h1>
               <p className="text-center text-gray-600 font-montserrat text-sm">
                 Access your personalized healthcare dashboard
