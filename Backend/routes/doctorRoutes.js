@@ -24,27 +24,10 @@ router.put('/:id/availability', verifyToken, authorizeRoles(['doctor']), updateA
 router.post('/:id/reviews', verifyToken, authorizeRoles(['patient']), addDoctorReview);
 
 // Admin routes
-router.post(
-  '/', 
-  verifyToken, 
-  authorizeRoles(['admin']), 
-  upload.single('profileImage'),
-  createDoctor
-);
+router.post('/', verifyToken, authorizeRoles(['admin']), upload.single('profileImage'),createDoctor);
 
-router.put(
-  '/:id', 
-  verifyToken, 
-  authorizeRoles(['admin']), 
-  upload.single('profileImage'),
-  updateDoctor
-);
+router.put('/:id', verifyToken, authorizeRoles(['admin']), upload.single('profileImage'),updateDoctor);
 
-router.delete(
-  '/:id', 
-  verifyToken, 
-  authorizeRoles(['admin']), 
-  deleteDoctor
-);
+router.delete('/:id', verifyToken, authorizeRoles(['admin']), deleteDoctor);
 
 export default router; 
