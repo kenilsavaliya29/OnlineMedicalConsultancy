@@ -35,16 +35,21 @@ const Layout = ({ children }) => {
     const [alert, setAlert] = useState(null);
 
     useEffect(() => {
-        // Check if location state contains access denied message
+        
         if (location.state?.accessDenied) {
             setAlert(location.state.message);
-            
             // Clear the location state to prevent the message from showing again after navigation
             window.history.replaceState({}, document.title);
         }
+
+        // Scroll to the top of the page on route change
+        window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: 'smooth'
+        });
     }, [location]);
 
-    // Close alert
     const handleCloseAlert = () => {
         setAlert(null);
     };

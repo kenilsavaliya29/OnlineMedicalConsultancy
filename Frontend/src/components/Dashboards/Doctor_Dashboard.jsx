@@ -22,6 +22,7 @@ const DoctorDashboard = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const { user, logout } = useContext(AuthContext);
 
+    console.log(user)
     const [timeSlots, setTimeSlots] = useState({});
     const [doctorDetails, setDoctorDetails] = useState(null);
     const [appointments, setAppointments] = useState([]);
@@ -34,11 +35,10 @@ const DoctorDashboard = () => {
 
     const navigate = useNavigate();
 
-    const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
     // Ref for the notifications container to detect outside clicks
     const notificationsRef = useRef(null);
-    // Ref for the sidebar to detect outside clicks
+
     const sidebarRef = useRef(null);
 
     // Memoize sidebar links to prevent recreation on every render
@@ -52,23 +52,6 @@ const DoctorDashboard = () => {
         { id: 'records', name: 'Medical Records', icon: <FaClipboardList /> },
         { id: 'settings', name: 'Settings', icon: <FaCog /> },
     ], []);
-
-    // Memoize profile image calculation
-    const profileImage = useMemo(() => {
-        if (doctorDetails && doctorDetails.profileImage) {
-            if (doctorDetails.profileImage.startsWith('http')) {
-                return doctorDetails.profileImage;
-            }
-            return `${API_URL}${doctorDetails.profileImage.startsWith('/') ? '' : '/'}${doctorDetails.profileImage}`;
-        }
-        return "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg";
-    }, [doctorDetails?.profileImage]);
-
-    // Memoize doctor name to prevent recalculation
-    const doctorName = useMemo(() => {
-        if (!doctorDetails) return 'Loading...';
-        return `${doctorDetails.fullName}`
-    }, [doctorDetails?.firstName, doctorDetails?.lastName]);
 
     // Memoize specialization
     const specialization = useMemo(() => {
@@ -461,7 +444,6 @@ const DoctorDashboard = () => {
         overview: {
             doctorDetails,
             appointments,
-            getProfileImage: () => profileImage,
             setActiveTab
         },
         appointments: {
@@ -493,13 +475,11 @@ const DoctorDashboard = () => {
         },
         settings: {
             doctorDetails,
-            getProfileImage: () => profileImage,
             handleLogout
         }
     }), [
         doctorDetails,
         appointments,
-        profileImage,
         isLoading,
         selectedDay,
         newSlot,
@@ -673,12 +653,12 @@ const DoctorDashboard = () => {
                         {/* Doctor Profile Summary in Sidebar */}
                         <div className="flex items-center gap-3 mb-6">
                             <img
-                                src={profileImage}
+                                src={doctorDetails?.profileImage ? `${API_URL}${doctorDetails.profileImage.startsWith('/') ? '' : '/'}${doctorDetails.profileImage}` : "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg"}
                                 alt="Doctor"
                                 className="w-12 h-12 rounded-full border-2 border-[#007E85] object-cover"
                             />
                             <div>
-                                <h3 className="font-bold text-gray-800">{doctorName}</h3>
+                                <h3 className="font-bold text-gray-800 capitalize">{doctorDetails?.fullName || "Doctor"}</h3>
                                 <p className="text-sm text-gray-500">{specialization}</p>
                             </div>
                         </div>

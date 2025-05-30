@@ -17,12 +17,16 @@ const DietPlan = () => {
   const [hasDietPlan, setHasDietPlan] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showProfilePrompt, setShowProfilePrompt] = useState(false);
+  const [showPlanPrompt, setShowPlanPrompt] = useState(false);
   
   // Fetch user's wellness profile and diet plan
   useEffect(() => {
     const fetchProfileAndPlan = async () => {
       try {
         setLoading(true);
+        setShowProfilePrompt(false); // Hide prompts initially
+        setShowPlanPrompt(false);
         
         // Fetch user profile
         const profileResponse = await fetch(`${API_URL}/api/wellness/profile`, {
@@ -34,15 +38,14 @@ const DietPlan = () => {
         });
         
         if (profileResponse.status === 404) {
-          // No profile found, redirect to create one
-          toast.info('Please create your wellness profile first');
-          navigate('/patient/wellness/profile');
+          // No profile found, show prompt
+          setShowProfilePrompt(true);
           return;
         }
         
         const profileData = await profileResponse.json();
         
-        if (!profileResponse.ok) {
+        if (!profileResponse.ok && profileResponse.status !== 404) { // Handle non-404 errors
           toast.error(profileData.message || 'Failed to fetch profile');
           if (profileResponse.status === 401) {
             navigate('/login');
@@ -53,7 +56,7 @@ const DietPlan = () => {
         setProfile(profileData.profile);
         
         // Check if we have a diet plan in the profile response
-        if (profileData.dietPlan) {
+        if (profileData?.dietPlan) { // Use optional chaining for safety
           setDietPlan(profileData.dietPlan);
           setSelectedWeek(profileData.dietPlan.weekNumber);
           
@@ -77,9 +80,9 @@ const DietPlan = () => {
             console.error('Error fetching diet plan history:', historyError);
           }
         } else {
-          // No diet plan found, redirect to create profile
+          // No diet plan found, show prompt
           toast.info('No diet plan found. Please update your wellness profile.');
-          navigate('/patient/wellness/profile');
+          setShowPlanPrompt(true);
         }
       } catch (error) {
         console.error('Error fetching profile and diet plan:', error);
@@ -178,8 +181,24 @@ const DietPlan = () => {
     );
   }
   
-  // Render message if no diet plan is available
-  if (!dietPlan) {
+  // Render message if no profile exists
+  if (showProfilePrompt) {
+    return (
+      <div className="max-w-4xl mx-auto p-8 bg-white rounded-lg shadow-md my-8 text-center">
+        <h1 className="text-2xl font-bold text-[#007E85] mb-4">Wellness Profile Required</h1>
+        <p className="mb-6 text-gray-600">You need a wellness profile to view your diet plan.</p>
+        <button
+          onClick={() => navigate('/patient/wellness/profile')}
+          className="bg-[#007E85] text-white px-6 py-2 rounded-lg hover:bg-[#006b6f]"
+        >
+          Create Wellness Profile
+        </button>
+      </div>
+    );
+  }
+  
+  // Render message if no diet plan is available but profile exists
+  if (showPlanPrompt || !dietPlan) { // Keep !dietPlan check as fallback
     return (
       <div className="max-w-4xl mx-auto p-8 bg-white rounded-lg shadow-md my-8 text-center">
         <h1 className="text-2xl font-bold text-[#007E85] mb-4">No Diet Plan Available</h1>

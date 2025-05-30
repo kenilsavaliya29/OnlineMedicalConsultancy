@@ -1,7 +1,10 @@
 import React from 'react'
 import { FaEnvelope, FaUserMd, FaKey, FaSignOutAlt } from 'react-icons/fa';
 
-const SettingsTab = ({ doctorDetails, getProfileImage, handleLogout }) => {
+// Assuming API_URL is accessible or passed as a prop if needed here
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+const SettingsTab = ({ doctorDetails, handleLogout }) => {
 
     console.log("Doctor Details:", doctorDetails);
     return (
@@ -10,12 +13,12 @@ const SettingsTab = ({ doctorDetails, getProfileImage, handleLogout }) => {
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <div className="flex items-center gap-6">
                     <img
-                        src={getProfileImage()}
+                        src={doctorDetails?.profileImage ? `${API_URL}${doctorDetails.profileImage.startsWith('/') ? '' : '/'}${doctorDetails.profileImage}` : "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg"}
                         alt="Doctor Profile"
                         className="w-24 h-24 rounded-full border-4 border-[#007E85] object-cover"
                     />
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-800">{ }</h2>
+                        <h2 className="text-2xl font-bold text-gray-800">{doctorDetails?.fullName || "Doctor"}</h2>
                         <p className="text-gray-500">{doctorDetails ? doctorDetails.profile.specialization || 'Doctor' : 'Doctor'}</p>
                         <p className="text-sm text-gray-500 mt-1">
                             <FaEnvelope className="inline mr-2" />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, NavLink, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { FaUserCircle, FaUtensils, FaHistory } from 'react-icons/fa';
 
 // Import wellness components
@@ -20,13 +20,6 @@ const WellnessProgram = () => {
       setActiveTab('diet-plan');
     }
   }, [location.pathname]);
-  
-  useEffect(() => {
-    // If user is at root wellness path, redirect to profile section
-    if (location.pathname === '/patient/wellness') {
-      navigate('/patient/wellness/profile');
-    }
-  }, [location.pathname, navigate]);
   
   return (
     <div className="min-h-screen bg-gray-50 pb-10 pt-24">
@@ -74,6 +67,8 @@ const WellnessProgram = () => {
         <Routes>
           <Route path="/profile" element={<WellnessProfile />} />
           <Route path="/diet-plan" element={<DietPlan />} />
+          {/* Default route for /patient/wellness */}
+          <Route path="/" element={<Navigate to="profile" replace />} />
         </Routes>
       </div>
     </div>

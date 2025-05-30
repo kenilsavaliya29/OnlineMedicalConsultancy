@@ -7,7 +7,7 @@ const ProtectedRoute = ({ allowedRoles, children }) => {
   const { user, loading, getRedirectPath, isInitialLogin } = useContext(AuthContext);
   const location = useLocation();
 
-  // Show loading state while checking authentication
+  
   if (loading) {
     return (
       <div className="min-h-screen flex justify-center items-center">

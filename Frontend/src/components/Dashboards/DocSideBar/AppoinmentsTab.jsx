@@ -1,5 +1,5 @@
 import React from 'react'
-import {FaCalendarCheck, FaSyncAlt } from 'react-icons/fa';
+import { FaCalendarCheck, FaSyncAlt } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
 

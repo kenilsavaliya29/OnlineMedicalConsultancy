@@ -3,14 +3,18 @@ import { useEffect } from 'react';
 import { FaCalendarCheck, FaUsers, FaWallet, FaPhone, FaEnvelope, FaStar, FaClock, FaCalendarAlt, FaComments } from 'react-icons/fa';
 import { AuthContext } from '../../../contexts/authContext';
 
-const OverviewTab = ({ appointments, getProfileImage, setActiveTab, isLoading }) => {
+// Assuming API_URL is accessible or passed as a prop if needed here
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-    const { user } = useContext(AuthContext);
-    console.log(user.profile.rating)
-    const [doctorDetails, setDoctorDetails] = useState(null);
-    useEffect(() => {
-        setDoctorDetails(user);
-    }, []);
+const OverviewTab = ({ appointments, setActiveTab, isLoading, doctorDetails }) => {
+
+    // Removed local doctorDetails state as it's passed as a prop
+    // const { user } = useContext(AuthContext);
+    // console.log(user.profile.rating)
+    // const [doctorDetails, setDoctorDetails] = useState(null);
+    // useEffect(() => {
+    //     setDoctorDetails(user);
+    // }, []); // Removed this effect
 
 
     return (
@@ -108,12 +112,12 @@ const OverviewTab = ({ appointments, getProfileImage, setActiveTab, isLoading })
                             <div>
                                 <div className="flex items-center gap-4 mb-6">
                                     <img
-                                        src={getProfileImage()}
+                                        src={doctorDetails?.profileImage ? `${API_URL}${doctorDetails.profileImage.startsWith('/') ? '' : '/'}${doctorDetails.profileImage}` : "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg"}
                                         alt="Doctor Profile"
                                         className="w-20 h-20 rounded-full border-2 border-[#007E85] object-cover"
                                     />
                                     <div>
-                                        <h3 className="text-lg font-semibold capitalize">Dr. {doctorDetails.fullName}</h3>
+                                        <h3 className="text-lg font-semibold capitalize">Dr. {doctorDetails?.fullName || "Doctor"}</h3>
                                         <div className="flex items-center text-sm text-gray-500 mt-1">
                                             <FaEnvelope className="mr-1" />
                                             <span>{doctorDetails.email}</span>

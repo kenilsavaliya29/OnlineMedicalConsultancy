@@ -248,4 +248,72 @@ export const getUpcomingAppointments = async (req, res) => {
       error: error.message
     });
   }
+};
+
+/**
+ * Get appointments for a specific doctor
+ */
+export const getAppointmentsForDoctor = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+    
+    // Verify the requesting doctor is accessing their own appointments
+    if (req.user._id.toString() !== doctorId) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only view your own appointments'
+      });
+    }
+    
+    const appointments = await Appointment.find({ doctorId })
+      .sort({ appointmentDate: 1, appointmentTime: 1 });
+      
+    res.json({
+      success: true,
+      appointments
+    });
+  } catch (error) {
+    console.error('Error fetching appointments for doctor:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch appointments for doctor',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * Update appointment status by a doctor
+ */
+export const updateAppointmentStatusByDoctor = async (req, res) => {
+  try {
+    const { appointmentId } = req.params;
+    const { status } = req.body;
+    
+    const appointment = await Appointment.findByIdAndUpdate(
+      appointmentId,
+      { status },
+      { new: true }
+    );
+    
+    if (!appointment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Appointment not found'
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: 'Appointment status updated successfully',
+      appointment
+    });
+  } catch (error) {
+    console.error('Error updating appointment status by doctor:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update appointment status by doctor',
+      error: error.message
+    });
+  }
 }; 
