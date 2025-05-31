@@ -8,15 +8,6 @@ const OverViewTab = React.memo(() => {
 
     const { user } = useContext(AuthContext);
 
-    //dummy
-    const [healthMetrics, setHealthMetrics] = useState({
-        weight: "68 kg",
-        bloodPressure: "120/80",
-        heartRate: "72 bpm",
-        temperature: "98.6°F"
-    })
-
-    // Temporary appointment data (replace with fetch logic later)
     const [appointments, setAppointments] = useState([]);
 
     return (
@@ -74,12 +65,26 @@ const OverViewTab = React.memo(() => {
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <h2 className="text-xl font-bold text-gray-800 mb-4">Health Metrics</h2>
                     <div className="grid grid-cols-2 gap-4">
-                        {Object.entries(healthMetrics).map(([key, value]) => (
-                            <div key={key} className="bg-gray-50 p-4 rounded-xl">
-                                <p className="text-gray-600 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</p>
-                                <p className="text-lg font-semibold text-[#007E85]">{value}</p>
-                            </div>
-                        ))}
+                        {user.profile && (
+                            <>
+                                <div className="bg-gray-50 p-4 rounded-xl">
+                                    <p className="text-gray-600 capitalize">Height</p>
+                                    <p className="text-lg font-semibold text-[#007E85]">{user.profile.height} cm</p>
+                                </div>
+                                <div className="bg-gray-50 p-4 rounded-xl">
+                                    <p className="text-gray-600 capitalize">Weight</p>
+                                    <p className="text-lg font-semibold text-[#007E85]">{user.profile.weight} kg</p>
+                                </div>
+                                <div className="bg-gray-50 p-4 rounded-xl">
+                                    <p className="text-gray-600 capitalize">Blood Group</p>
+                                    <p className="text-lg font-semibold text-[#007E85]">{user.profile.bloodGroup}</p>
+                                </div>
+                                <div className="bg-gray-50 p-4 rounded-xl">
+                                    <p className="text-gray-600 capitalize">Date of Birth</p>
+                                    <p className="text-lg font-semibold text-[#007E85]">{new Date(user.profile.dateOfBirth).toLocaleDateString('en-GB')}</p>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
 
@@ -172,19 +177,3 @@ const OverViewTab = React.memo(() => {
 })
 
 export default OverViewTab
-
-
-
-// import React from 'react'
-// import { useContext } from 'react'
-// import { AuthContext } from '../../../contexts/authContext'
-
-// const OverViewTab = () => {
-//     const { user }  = useContext(AuthContext)
-//     console.log(user)
-//     return (
-//         <div>{user.profile._id}</div>
-//     )
-// }
-
-// export default OverViewTab

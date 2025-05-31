@@ -1,21 +1,21 @@
 import React, { useState, useEffect, useCallback, useContext } from 'react'
 import { FaCalendarCheck, FaSyncAlt } from 'react-icons/fa'
 import { toast } from 'react-toastify'
+import { AuthContext } from '../../../contexts/authContext'
 
 
 const API_URL = import.meta.env.BACKEND_URL || 'http://localhost:3000'
 
-const AppoinmentsTab = React.memo(({ patientDetails }) => {
+const AppoinmentsTab = React.memo(() => {
 
-
+    const { user } = useContext(AuthContext)
     const [appointments, setAppointments] = useState([])
     const [isLoading, setIsLoading] = useState(false)
-
 
     // Fetch patient appointments (Moved from Patient_Dashboard)
     const fetchAppointments = useCallback(async () => {
 
-        if (!patientDetails?._id) {
+        if (!user._id) {
 
             console.log("Patient details not available for appointment fetch");
             setIsLoading(false);
@@ -58,7 +58,7 @@ const AppoinmentsTab = React.memo(({ patientDetails }) => {
         } finally {
             setIsLoading(false)
         }
-    }, [patientDetails._id]);
+    }, [user._id]);
 
 
     useEffect(() => {
@@ -149,16 +149,16 @@ const AppoinmentsTab = React.memo(({ patientDetails }) => {
             `Status: ${appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}`,
             `Reason for Visit: ${appointment.reason || "Not specified"}`,
             `Additional Notes: ${appointment.notes || "None provided"}`,
-            `Patient Name: ${appointment.patientName || patientDetails?.firstname + " " + patientDetails?.lastname}`,
-            `Patient Email: ${appointment.patientEmail || patientDetails?.email}`,
-            `Patient Phone: ${appointment.patientPhone || patientDetails?.phone || "Not specified"}`
+            `Patient Name: ${appointment.patientName || userfirstname + " " + userlastname}`,
+            `Patient Email: ${appointment.patientEmail || useremail}`,
+            `Patient Phone: ${appointment.patientPhone || userphone || "Not specified"}`
         ].join("\n")
 
         alert(`Appointment Details:\n\n${details}`)
 
         // In a real application, you would show this in a modal or navigate to a details page
 
-    }, [appointments, patientDetails]);
+    }, [appointments, user]);
 
 
     return (

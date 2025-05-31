@@ -8,21 +8,14 @@ const patientProfileSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
-  
-  // Medical information
+
   dateOfBirth: Date,
-  bloodGroup: {
-    type: String,
-    enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Unknown']
-  },
-  height: Number, // in cm
-  weight: Number, // in kg
   allergies: [String],
-  chronicConditions: [String],
+  medicalConditions: [String],
   medications: [{
     name: String,
     dosage: String,
-    frequency: String,
+    frequent: Number,
     startDate: Date,
     endDate: Date,
     isActive: {
@@ -30,27 +23,46 @@ const patientProfileSchema = new mongoose.Schema({
       default: true
     }
   }],
-  
-  // Emergency contact
+
+  // Wellness Program Information
+  wellnessProgram: {
+    dietaryPreference: {
+      type: String,
+      enum: ['Vegetarian', 'Non-Vegetarian', 'Vegan', 'Eggetaria  n'],
+      default: 'Vegetarian'
+    },
+    fitnessGoal: String,
+    activityLevel: {
+      type: String,
+    },
+    targetDuration: {
+      type: Number,
+      min: 1,
+      max: 52
+    },
+    targetWeight: Number,
+    dietPlanContent: String,
+  },
+
+
   emergencyContact: {
     name: String,
     relationship: String,
     phoneNumber: String,
     email: String
   },
-  
-  // Insurance information
+
   insurance: {
     provider: String,
     policyNumber: String,
     validUntil: Date
   },
-  
-  // Health metrics
+
+
   healthMetrics: [{
     type: {
       type: String,
-      enum: ['blood_pressure', 'heart_rate', 'blood_sugar', 'cholesterol', 'temperature', 'other']
+      enum: ['blood_pressure', 'heart_rate', 'blood_sugar', 'cholesterol', 'temperature', 'height', 'weight', 'blood_group', 'other']
     },
     value: String,
     unit: String,
@@ -60,8 +72,8 @@ const patientProfileSchema = new mongoose.Schema({
     },
     notes: String
   }],
-  
-  // Preferences
+
+
   communicationPreferences: {
     appointmentReminders: {
       type: Boolean,
@@ -76,8 +88,8 @@ const patientProfileSchema = new mongoose.Schema({
       default: false
     }
   },
-  
-  // Timestamps
+
+
   createdAt: {
     type: Date,
     default: Date.now
@@ -88,30 +100,30 @@ const patientProfileSchema = new mongoose.Schema({
   }
 });
 
-// Update timestamp before saving
-patientProfileSchema.pre('save', function(next) {
+// Updat  e   timestamp before savin
+patientProfileSchema.pre('save', function (next) {
   this.updatedAt = new Date();
   next();
 });
 
 // Calculate age as a virtual property
-patientProfileSchema.virtual('age').get(function() {
+patientProfileSchema.virtual('age').get(function () {
   if (!this.dateOfBirth) return null;
-  
+
   const today = new Date();
   const birthDate = new Date(this.dateOfBirth);
   let age = today.getFullYear() - birthDate.getFullYear();
   const monthDiff = today.getMonth() - birthDate.getMonth();
-  
+
   if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
     age--;
   }
-  
+
   return age;
 });
 
-// Add indexes for frequent queries
-// patientProfileSchema.index({ userId: 1 }); // Removed to avoid duplicate index (already unique in schema)
+// Add in  dexes for frequent queries
+// patientProfileSchema.index({ userId: 1 }); // Removed to avoid duplicat  e index (already unique in schema)
 patientProfileSchema.index({ 'healthMetrics.date': -1 });
 
 // Add virtual to get full user info

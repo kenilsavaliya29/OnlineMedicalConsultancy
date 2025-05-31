@@ -11,26 +11,28 @@ const WellnessProfile = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
+  const [heightUnit, setHeightUnit] = useState('cm'); // 'cm' or 'ftIn'
+  const [tempFeet, setTempFeet] = useState('');
+  const [tempInches, setTempInches] = useState('');
   
   const [formData, setFormData] = useState({
     name: '',
     age: '',
     gender: '',
-    height: '', // in cm
-    weight: '', // in kg
+    height: '',
+    weight: '',
     medicalConditions: [],
     allergies: [],
     dietaryPreference: 'Vegetarian',
     fitnessGoal: '',
     activityLevel: '',
-    targetDuration: 4, // default 4 weeks
-    targetWeight: '' // optional
+    targetDuration: 4,
+    targetWeight: ''
   });
   
   const [tempMedicalCondition, setTempMedicalCondition] = useState('');
   const [tempAllergy, setTempAllergy] = useState('');
   
-  // Common medical conditions for quick selection
   const commonMedicalConditions = [
     'Diabetes', 
     'Hypertension', 
@@ -40,7 +42,6 @@ const WellnessProfile = () => {
     'Kidney Disease'
   ];
   
-  // Common allergies for quick selection
   const commonAllergies = [
     'Nuts', 
     'Dairy', 
@@ -50,16 +51,27 @@ const WellnessProfile = () => {
     'Soy'
   ];
   
-  // Fetch user's existing profile if available
+  // Utility to convert centimeters to feet and inches
+  const cmToFtIn = (cm) => {
+    if (isNaN(cm) || cm === '') return { feet: '', inches: '' };
+    const totalInches = cm / 2.54;
+    const feet = Math.floor(totalInches / 12);
+    const inches = Math.round(totalInches % 12);
+    return { feet, inches };
+  };
+
+  // Utility to convert feet and inches to centimeters
+  const ftInToCm = (feet, inches) => {
+    if (feet === '' && inches === '') return '';
+    const totalInches = (parseFloat(feet) || 0) * 12 + (parseFloat(inches) || 0);
+    return (totalInches * 2.54).toFixed(2); // Keep 2 decimal places for cm
+  };
+
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
         setLoading(true);
         
-        // We don't need to check for token in localStorage anymore,
-        // it's now handled by cookies automatically
-        
-        // Proceed even if user object is not in context yet
         if (!user) {
           console.log('User context not loaded yet, profile may fail to load');
         }
@@ -72,15 +84,13 @@ const WellnessProfile = () => {
           headers: {
             'Content-Type': 'application/json'
           },
-          credentials: 'include' // Include cookies for auth
+          credentials: 'include'
         });
         
         console.log('Response status:', response.status);
         
         if (response.status === 404) {
-          // No profile exists yet
           setHasProfile(false);
-          // Pre-fill name from user data if available
           if (user) {
             setFormData(prev => ({
               ...prev,
@@ -91,8 +101,8 @@ const WellnessProfile = () => {
           setLoading(false);
           return;
         } else if (response.status === 401) {
-          // Unauthorized - session might have expired
           toast.error('Your session has expired. Please login again.');
+          setRedirectPath('/patient/wellness/profile');
           navigate('/login');
           return;
         }
@@ -102,12 +112,12 @@ const WellnessProfile = () => {
         
         if (response.ok && data.success) {
           setHasProfile(true);
-          // Populate form with existing data
+          const profileHeightCm = data.profile.height || '';
           setFormData({
             name: data.profile.name || '',
             age: data.profile.age || '',
             gender: data.profile.gender || '',
-            height: data.profile.height || '',
+            height: profileHeightCm,
             weight: data.profile.weight || '',
             medicalConditions: data.profile.medicalConditions || [],
             allergies: data.profile.allergies || [],
@@ -121,6 +131,20 @@ const WellnessProfile = () => {
             email: data.profile.email || '',
             phone: data.profile.phone || ''
           });
+
+          // Try to infer previous unit or default to cm display
+          if (profileHeightCm) {
+            const { feet, inches } = cmToFtIn(profileHeightCm);
+            // If feet and inches are reasonably whole numbers, suggest ft/in display
+            if (feet > 0 && inches >= 0 && (profileHeightCm % 2.54 !== 0)) { // Check if it's not a perfect CM conversion
+              setHeightUnit('ftIn');
+              setTempFeet(feet);
+              setTempInches(inches);
+            } else {
+              setHeightUnit('cm');
+            }
+          }
+
         } else {
           toast.error(`Failed to fetch profile data: ${data.message || 'Unknown error'}`);
           console.error('Failed to fetch profile:', data.message, 'Status:', response.status);
@@ -136,7 +160,6 @@ const WellnessProfile = () => {
     fetchUserProfile();
   }, [user, API_URL, navigate]);
   
-  // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -145,11 +168,42 @@ const WellnessProfile = () => {
     }));
   };
   
-  // Handle numeric input changes with validation
+  const handleHeightChange = (e) => {
+    const { value, name } = e.target;
+    
+    if (heightUnit === 'cm') {
+      if (value === '' || /^[0-9]*\.?[0-9]*$/.test(value)) {
+        setFormData(prev => ({ ...prev, height: value }));
+      }
+    } else { // ftIn
+      if (name === 'feet') {
+        if (value === '' || /^[0-9]*$/.test(value)) {
+          setTempFeet(value);
+        }
+      } else if (name === 'inches') {
+        if (value === '' || (/^[0-9]*$/.test(value) && parseInt(value) >= 0 && parseInt(value) <= 11)) {
+          setTempInches(value);
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (heightUnit === 'ftIn') {
+      setFormData(prev => ({ ...prev, height: ftInToCm(tempFeet, tempInches) }));
+    } else if (heightUnit === 'cm') {
+      // If switching to cm, convert current ft/in to cm and set formData.height
+      if (tempFeet !== '' || tempInches !== '') {
+        setFormData(prev => ({ ...prev, height: ftInToCm(tempFeet, tempInches) }));
+      }
+      setTempFeet('');
+      setTempInches('');
+    }
+  }, [heightUnit, tempFeet, tempInches]);
+
   const handleNumericInput = (e) => {
     const { name, value } = e.target;
     
-    // Only allow numbers and decimal point
     if (value === '' || /^[0-9]*\.?[0-9]*$/.test(value)) {
       setFormData(prev => ({
         ...prev,
@@ -158,7 +212,6 @@ const WellnessProfile = () => {
     }
   };
   
-  // Add medical condition
   const addMedicalCondition = (condition) => {
     if (!condition.trim()) return;
     
@@ -172,7 +225,6 @@ const WellnessProfile = () => {
     setTempMedicalCondition('');
   };
   
-  // Remove medical condition
   const removeMedicalCondition = (condition) => {
     setFormData(prev => ({
       ...prev,
@@ -180,7 +232,6 @@ const WellnessProfile = () => {
     }));
   };
   
-  // Add allergy
   const addAllergy = (allergy) => {
     if (!allergy.trim()) return;
     
@@ -194,7 +245,6 @@ const WellnessProfile = () => {
     setTempAllergy('');
   };
   
-  // Remove allergy
   const removeAllergy = (allergy) => {
     setFormData(prev => ({
       ...prev,
@@ -202,21 +252,26 @@ const WellnessProfile = () => {
     }));
   };
   
-  // Form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validate form
-    if (!formData.name || !formData.age || !formData.gender || !formData.height || 
+
+    let finalHeightCm = formData.height;
+    if (heightUnit === 'ftIn') {
+      finalHeightCm = ftInToCm(tempFeet, tempInches);
+    }
+
+    if (!formData.name || !formData.age || !formData.gender || !finalHeightCm || 
         !formData.weight || !formData.fitnessGoal || !formData.activityLevel) {
       toast.error('Please fill in all required fields');
       return;
     }
+
+    // Update formData with the final calculated height before submission
+    setFormData(prev => ({ ...prev, height: finalHeightCm }));
     
     try {
       setSubmitting(true);
       
-      // Create or update profile - always use POST, the server will handle updating if profile exists
       console.log('Submitting profile form');
       console.log('Form data:', JSON.stringify(formData, null, 2));
       
@@ -225,15 +280,14 @@ const WellnessProfile = () => {
         headers: {
           'Content-Type': 'application/json'
         },
-        credentials: 'include', // Include cookies for auth
-        body: JSON.stringify(formData)
+        credentials: 'include',
+        body: JSON.stringify({ ...formData, height: finalHeightCm }) // Send final height
       });
       
       console.log('Response status:', response.status);
       
       if (response.status === 401) {
         toast.error('Your session has expired. Please login again.');
-        // Store the current path in context instead of localStorage
         setRedirectPath('/patient/wellness/profile');
         navigate('/login');
         return;
@@ -246,7 +300,6 @@ const WellnessProfile = () => {
         toast.success(hasProfile ? 'Profile updated successfully!' : 'Profile created successfully!');
         setHasProfile(true);
         
-        // Navigate to the diet plan page
         navigate('/patient/wellness/diet-plan');
       } else {
         toast.error(data.message || 'Failed to save profile');
@@ -280,7 +333,6 @@ const WellnessProfile = () => {
       
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Basic Information */}
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-gray-800 border-b pb-2">Basic Information</h2>
             
@@ -326,18 +378,59 @@ const WellnessProfile = () => {
               </select>
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-gray-700 mb-2 font-medium">Height (cm)*</label>
-                <input
-                  type="text"
-                  name="height"
-                  value={formData.height}
-                  onChange={handleNumericInput}
-                  placeholder="In centimeters"
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007E85]"
-                  required
-                />
+                <label className="block text-gray-700 mb-2 font-medium">Height*</label>
+                <div className="flex flex-wrap items-center gap-2">
+                  <select
+                    name="heightUnit"
+                    value={heightUnit}
+                    onChange={(e) => {
+                      setHeightUnit(e.target.value);
+                      if (e.target.value === 'cm') {
+                        setTempFeet('');
+                        setTempInches('');
+                      }
+                    }}
+                    className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007E85] w-24"
+                  >
+                    <option value="cm">cm</option>
+                    <option value="ftIn">ft/in</option>
+                  </select>
+
+                  {heightUnit === 'cm' ? (
+                    <input
+                      type="text"
+                      name="height"
+                      value={formData.height}
+                      onChange={handleHeightChange}
+                      placeholder="e.g., 175"
+                      className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007E85]"
+                      required
+                    />
+                  ) : (
+                    <>
+                      <input
+                        type="text"
+                        name="feet"
+                        value={tempFeet}
+                        onChange={handleHeightChange}
+                        placeholder="Feet"
+                        className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007E85]"
+                        required={heightUnit === 'ftIn'}
+                      />
+                      <input
+                        type="text"
+                        name="inches"
+                        value={tempInches}
+                        onChange={handleHeightChange}
+                        placeholder="Inches"
+                        className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007E85]"
+                        required={heightUnit === 'ftIn'}
+                      />
+                    </>
+                  )}
+                </div>
               </div>
               
               <div>
@@ -355,7 +448,6 @@ const WellnessProfile = () => {
             </div>
           </div>
           
-          {/* Health & Preferences */}
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-gray-800 border-b pb-2">Health & Preferences</h2>
             
@@ -441,7 +533,6 @@ const WellnessProfile = () => {
           </div>
         </div>
         
-        {/* Medical Conditions and Allergies */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
           <div>
             <h2 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">Medical Conditions</h2>
@@ -566,4 +657,4 @@ const WellnessProfile = () => {
   );
 };
 
-export default WellnessProfile; 
+export default WellnessProfile;

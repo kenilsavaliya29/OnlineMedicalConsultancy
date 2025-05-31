@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FaUserMd, FaCalendarCheck, FaFileMedical, FaWallet, FaComments, FaCog, FaChartLine, FaSignOutAlt, FaBell, FaUser, FaHeartbeat, FaNotesMedical, FaUserCircle, FaPhone, FaEnvelope, FaMapMarkerAlt, FaKey, FaStar, FaDownload, FaSyncAlt, FaAppleAlt } from 'react-icons/fa'
+import { FaUserMd, FaCalendarCheck, FaFileMedical, FaWallet, FaComments, FaCog, FaChartLine, FaSignOutAlt, FaBell, FaUser, FaHeartbeat, FaNotesMedical, FaUserCircle, FaPhone, FaEnvelope, FaMapMarkerAlt, FaKey, FaStar, FaDownload, FaSyncAlt, FaAppleAlt, FaHospitalUser } from 'react-icons/fa'
 import { toast } from 'react-toastify'
 import { AuthContext } from '../../contexts/authContext.jsx'
 
@@ -12,6 +12,7 @@ import HealthTab from './PatientSideBar/HealthTab.jsx'
 import MessagesTab from './PatientSideBar/MessagesTab.jsx'
 import SettingsTab from './PatientSideBar/SettingsTab.jsx'
 import MyDoctorTab from './PatientSideBar/MyDoctorTab.jsx'
+import MedicalProfileTab from './PatientSideBar/MedicalProfileTab.jsx'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
@@ -21,6 +22,7 @@ const Patient_Dashboard = () => {
   const { user, logout } = useContext(AuthContext)
   const [activeTab, setActiveTab] = useState('overview')
   const [patientDetails, setPatientDetails] = useState(null)
+  const [isBasicProfileComplete, setIsBasicProfileComplete] = useState(true); // Prop to pass to MedicalProfileTab
 
   // Check if user is logged in and is a patient
   useEffect(() => {
@@ -48,7 +50,7 @@ const Patient_Dashboard = () => {
 
       return () => clearTimeout(timer)
     }
-  }, [user])
+  }, [user, navigate]) // Removed API_URL from dependency array
 
 
   const handleChatRedirect = useCallback(() => {
@@ -73,6 +75,7 @@ const Patient_Dashboard = () => {
     { id: 'overview', name: 'Overview', icon: <FaChartLine /> },
     { id: 'appointments', name: 'My Appointments', icon: <FaCalendarCheck /> },
     { id: 'doctors', name: 'My Doctors', icon: <FaUserMd /> },
+    { id: 'medical-profile', name: 'My Medical Profile', icon: <FaHospitalUser /> },
     { id: 'records', name: 'Medical Records', icon: <FaFileMedical /> },
     { id: 'prescriptions', name: 'Prescriptions', icon: <FaNotesMedical /> },
     { id: 'health', name: 'Health Metrics', icon: <FaHeartbeat /> },
@@ -95,16 +98,16 @@ const Patient_Dashboard = () => {
   const renderTabContent = useCallback(() => {
     switch (activeTab) {
       case 'overview':
-        return <OverViewTab patientDetails={patientDetails} />
+        return <OverViewTab />
 
       case 'appointments':
-        return <AppoinmentsTab patientDetails={patientDetails} />
+        return <AppoinmentsTab />
 
       case 'records':
-        return <RecordsTab patientDetails={patientDetails} />
+        return <RecordsTab />
 
       case 'prescriptions':
-        return <PrescriptionsTab patientDetails={patientDetails} />
+        return <PrescriptionsTab  />
 
       case 'health':
         return <HealthTab />
@@ -117,6 +120,9 @@ const Patient_Dashboard = () => {
 
       case 'doctors':
         return <MyDoctorTab />
+
+      case 'medical-profile':
+        return <MedicalProfileTab />
 
       default:
         return <div>Select a tab from the sidebar</div>;
@@ -180,7 +186,8 @@ const Patient_Dashboard = () => {
                           activeTab === 'wellness' ? 'Wellness Program' :
                             activeTab === 'payments' ? 'Bills & Payments' :
                               activeTab === 'messages' ? 'Messages' :
-                                activeTab === 'settings' ? 'Account Settings' : 'Dashboard'}
+                                activeTab === 'settings' ? 'Account Settings' :
+                                  activeTab === 'medical-profile' ? 'My Medical Profile' : 'Dashboard'}
             </h1>
             <div className="flex items-center gap-4">
               <button

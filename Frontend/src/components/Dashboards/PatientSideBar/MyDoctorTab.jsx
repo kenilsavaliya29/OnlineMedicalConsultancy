@@ -21,8 +21,7 @@ const MyDoctorTab = React.memo(() => {
 
         try {
             setIsLoading(true);
-            // Assuming an API endpoint exists to get doctors associated with a patient
-            // This could be doctors they've had appointments with, or explicitly linked doctors
+            
             const response = await fetch(`${API_URL}/api/doctors/patient/${user._id}`, {
                 method: 'GET',
                 headers: {

@@ -1,73 +1,74 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
-import { FaUserMd, FaCalendarCheck, FaFileMedical, FaWallet, FaComments, FaCog, FaChartLine, FaSignOutAlt, FaBell, FaUser, FaHeartbeat, FaNotesMedical, FaUserCircle, FaPhone, FaEnvelope, FaMapMarkerAlt, FaKey, FaStar, FaDownload, FaSyncAlt, FaAppleAlt } from 'react-icons/fa'
+import { FaUserMd, FaNotesMedical, FaDownload, FaSyncAlt } from 'react-icons/fa'
 import { toast } from 'react-toastify'
 import { useContext } from 'react'
 import { AuthContext } from '../../../contexts/authContext.jsx'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
-const PrescriptionsTab = React.memo(({ patientDetails }) => {
+const PrescriptionsTab = React.memo(() => {
 
-  const { logout } = useContext(AuthContext);
+    const { user, logout } = useContext(AuthContext);
 
-  const [prescriptions, setPrescriptions] = useState([])
-  const [isLoading, setIsLoading] = useState(false)
+    const [prescriptions, setPrescriptions] = useState([])
+    const [isLoading, setIsLoading] = useState(false)
 
-  const handleDownload = useCallback((fileType, fileName) => {
-    console.log(`Placeholder download for ${fileType}: ${fileName}`);
-    toast.info(`Download requested for ${fileName}`);
-    // Actual download logic would go here
-  }, []);
+    const handleDownload = useCallback((fileType, fileName) => {
+        console.log(`Placeholder download for ${fileType}: ${fileName}`);
+        toast.info(`Download requested for ${fileName}`);
 
-  const fetchPrescriptions = useCallback(async () => {
-      if (!patientDetails?._id) {
-        // console.log("Patient details not available for prescriptions fetch");
-        // setIsLoading(false); // Ensure loading is false if fetch skipped
-        return;
-      }
+    }, []);
 
-    try {
-      setIsLoading(true);
-      const response = await fetch(`${API_URL}/api/prescriptions/patient/${patientDetails._id}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        credentials: 'include'
-      });
+    const fetchPrescriptions = useCallback(async () => {
+        if (!user?._id) {
+            console.log("Patient details not available for prescriptions fetch");
+            setIsLoading(false); // Ensure loading is false if fetch skipped
+            return;
+        }
 
-      if (response.status === 401) {
-        toast.error('Your session has expired. Please log in again.');
-        setTimeout(() => {
-          logout();
-        }, 3000);
-        return;
-      }
+        try {
+            setIsLoading(true);
+            const response = await fetch(`${API_URL}/api/prescriptions/patient/${user._id}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                credentials: 'include'
+            });
 
-      if (!response.ok) {
-        toast.error(`Server error: ${response.status} ${response.statusText}`);
-        setIsLoading(false);
-        return;
-      }
 
-      const data = await response.json();
+            if (response.status === 401) {
+                toast.error('Your session has expired. Please log in again.');
+                setTimeout(() => {
+                    logout();
+                }, 3000);
+                return;
+            }
 
-      if (data.success) {
-        setPrescriptions(data.prescriptions || []);
-      } else {
-        toast.error(`Failed to fetch prescriptions: ${data.message}`);
-      }
-    } catch (error) {
-      toast.error(`Error fetching prescriptions: ${error.message}`);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [patientDetails?._id, logout]);
+            if (!response.ok) {
+                toast.error(`Server error: ${response.status} ${response.statusText}`);
+                setIsLoading(false);
+                return;
+            }
 
-  useEffect(() => {
-      fetchPrescriptions();
-  }, [fetchPrescriptions]);
+            const data = await response.json();
+
+            if (data.success) {
+                setPrescriptions(data.prescriptions || []);
+            } else {
+                toast.error(`Failed to fetch prescriptions: ${data.message}`);
+            }
+        } catch (error) {
+            toast.error(`Error fetching prescriptions: ${error.message}`);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [user?._id, logout]);
+
+    useEffect(() => {
+        fetchPrescriptions();
+    }, [fetchPrescriptions]);
 
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">

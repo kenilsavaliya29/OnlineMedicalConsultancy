@@ -23,6 +23,7 @@ import DoctorProfile from './Pages/Doctors/DoctorProfile';
 import AppointmentBooking from './Pages/Doctors/AppointmentBooking';
 import WellnessProgram from './pages/Patient/WellnessProgram';
 import { AuthProvider } from './contexts/authContext';
+import NotFoundPage from './404Page';
 
 function App() {
   const router = createBrowserRouter([
@@ -129,6 +130,10 @@ function App() {
     {
       path: "/doctors/:id/book",
       element: <ProtectedRoute allowedRoles={['patient']}><Layout><AppointmentBooking /></Layout></ProtectedRoute>
+    },
+    {
+      path: "*",
+      element: <NotFoundPage />,
     }
   ], {
     future: {

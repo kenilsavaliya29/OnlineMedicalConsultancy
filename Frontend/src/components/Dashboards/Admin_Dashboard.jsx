@@ -944,8 +944,8 @@ const Admin = () => {
               <button
                 onClick={() => setViewType('card')}
                 className={`px-3 py-1 rounded ${viewType === 'card'
-                    ? 'bg-[#007E85] text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  ? 'bg-[#007E85] text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                   }`}
               >
                 Card View
@@ -953,8 +953,8 @@ const Admin = () => {
               <button
                 onClick={() => setViewType('table')}
                 className={`px-3 py-1 rounded ${viewType === 'table'
-                    ? 'bg-[#007E85] text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  ? 'bg-[#007E85] text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                   }`}
               >
                 Table View

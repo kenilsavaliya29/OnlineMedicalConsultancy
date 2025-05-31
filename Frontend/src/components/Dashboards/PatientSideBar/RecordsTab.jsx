@@ -1,29 +1,29 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react'
-import { FaUserMd, FaCalendarCheck, FaFileMedical, FaWallet, FaComments, FaCog, FaChartLine, FaSignOutAlt, FaBell, FaUser, FaHeartbeat, FaNotesMedical, FaUserCircle, FaPhone, FaEnvelope, FaMapMarkerAlt, FaKey, FaStar, FaDownload, FaSyncAlt, FaAppleAlt } from 'react-icons/fa'
+import { FaUserMd, FaFileMedical, FaDownload, FaSyncAlt, } from 'react-icons/fa'
 import { toast } from 'react-toastify'
-import { useContext } from 'react' // Assuming AuthContext might be needed for logout
-import { AuthContext } from '../../../contexts/authContext.jsx' // Assuming AuthContext might be needed for logout
+import { useContext } from 'react'
+import { AuthContext } from '../../../contexts/authContext.jsx'
 
-// Assuming API_URL is accessible or defined here
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
-const RecordsTab = React.memo(({ patientDetails }) => { // Now receives patientDetails
+const RecordsTab = React.memo(() => {
 
-    // Moved state and fetch function from Patient_Dashboard
+    const { user } = useContext(AuthContext)
     const [medicalRecords, setMedicalRecords] = useState([])
     const [isLoading, setIsLoading] = useState(false)
+    console.log(user)
 
-    // Placeholder handleDownload function (replace with actual implementation)
     const handleDownload = useCallback((fileType, fileName) => {
         console.log(`Placeholder download for ${fileType}: ${fileName}`);
         toast.info(`Download requested for ${fileName}`);
-        // Actual download logic would go here
+
     }, []);
 
     // Fetch patient's medical records (Moved from Patient_Dashboard)
     const fetchMedicalRecords = useCallback(async () => {
-        // Use patientDetails prop to get _id for the fetch
-        if (!patientDetails?._id) {
+        // Use user prop to get _id for the fetch
+        if (!user?._id) {
             // console.log("Patient details not available for medical records fetch");
             // setIsLoading(false); // Ensure loading is false if fetch skipped
             return;
@@ -31,21 +31,21 @@ const RecordsTab = React.memo(({ patientDetails }) => { // Now receives patientD
 
         try {
             setIsLoading(true)
-            const response = await fetch(`${API_URL}/api/medical-records/patient/${patientDetails._id}`, {
+            const response = await fetch(`${API_URL}/api/medical-records/patient/${user._id}`, {
                 // ... existing code ...
             });
             // ... existing code ...
         } catch (error) {
             // ... existing code ...
         }
-    }, [patientDetails._id]);
+    }, [user._id]);
 
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold text-gray-800">Medical Records</h2>
                 <button
-                    onClick={fetchMedicalRecords} // Now calls the local fetch function
+                    onClick={fetchMedicalRecords} 
                     className="flex items-center gap-2 text-sm bg-[#007E85] text-white px-4 py-2 rounded-lg hover:bg-[#006b6f] transition-colors"
                 >
                     <FaSyncAlt className={isLoading ? 'animate-spin' : ''} />

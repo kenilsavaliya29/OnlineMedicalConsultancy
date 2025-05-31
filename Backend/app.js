@@ -5,6 +5,9 @@ import medicalRecordRoutes from "./routes/medicalRecordRoutes.js";
 import prescriptionRoutes from "./routes/prescriptionRoutes.js";
 import cors from 'cors';
 import timeslotRoutes from './routes/timeslotRoutes.js';
+import patientProfileRoutes from './routes/patientProfileRoutes.js';
+import wellnessRoutes from './routes/wellnessRoute.js';
+import cookieParser from 'cookie-parser';
 
 const app = express();
 
@@ -19,6 +22,7 @@ if (!fs.existsSync(uploadsDir)) {
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Serve uploaded files
 app.use('/uploads', express.static('uploads'));
@@ -35,5 +39,7 @@ app.use("/api/appointments", appointmentRoutes);
 app.use("/api/medical-records", medicalRecordRoutes);
 app.use("/api/prescriptions", prescriptionRoutes);
 app.use('/api/timeslots', timeslotRoutes);
+app.use('/api/patient', patientProfileRoutes);
+app.use('/api/wellness', wellnessRoutes);
 
 export default app; 

@@ -41,13 +41,13 @@ const getUserWithProfile = async (userId) => {
 export const verifyUser = async (req, res, next) => {
   try {
     // Get token from cookie or authorization header
-    const token = req.cookies.authToken || 
-                 (req.headers.authorization ? req.headers.authorization.split(' ')[1] : null);
+    const token = req.cookies.authToken ||
+      (req.headers.authorization ? req.headers.authorization.split(' ')[1] : null);
 
     if (!token) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Authentication required' 
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
       });
     }
 
@@ -56,18 +56,18 @@ export const verifyUser = async (req, res, next) => {
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET);
     } catch (error) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Invalid or expired token' 
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid or expired token'
       });
     }
 
     // Get user data with profile
     const user = await getUserWithProfile(decoded.id);
     if (!user) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'User not found' 
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
       });
     }
 
@@ -76,9 +76,9 @@ export const verifyUser = async (req, res, next) => {
     next();
   } catch (error) {
     console.error('Authentication error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Authentication failed' 
+    res.status(500).json({
+      success: false,
+      message: 'Authentication failed'
     });
   }
 };
@@ -131,22 +131,52 @@ export const verifyAdmin = (req, res, next) => {
  * Middleware to verify if the user is a patient
  * Must be used after verifyUser
  */
-export const verifyPatient = (req, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({
+
+export const verifyPatient = async (req, res, next) => {
+
+  try {
+    const token = req.cookies.authToken ||
+      (req.headers.authorization ? req.headers.authorization.split(' ')[1] : null);
+    console.log(token)
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
+
+    // Verify token
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (error) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid or expired token'
+      });
+    }
+
+    // Get user data with profile
+    const user = await getUserWithProfile(decoded.id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Add user to request object
+    req.user = user;
+    next();
+  } catch (error) {
+    console.error('Error in verifyPatient:', error);
+    return res.status(500).json({
       success: false,
-      message: 'Authentication required'
+      message: 'Internal server error'
     });
   }
 
-  if (req.user.role !== 'patient') {
-    return res.status(403).json({
-      success: false,
-      message: 'Access denied. Patient role required'
-    });
-  }
-
-  next();
 };
 
 /**
@@ -230,13 +260,13 @@ export const checkRole = (roles) => {
 export const verifyToken = async (req, res, next) => {
   try {
     // Get token from cookie or authorization header
-    const token = req.cookies.authToken || 
-                 (req.headers.authorization ? req.headers.authorization.split(' ')[1] : null);
-    
+    const token = req.cookies.authToken ||
+      (req.headers.authorization ? req.headers.authorization.split(' ')[1] : null);
+
     if (!token) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Authentication required' 
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
       });
     }
 
@@ -245,18 +275,18 @@ export const verifyToken = async (req, res, next) => {
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET);
     } catch (error) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Invalid or expired token' 
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid or expired token'
       });
     }
 
     // Get user data with profile
     const user = await getUserWithProfile(decoded.id);
     if (!user) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'User not found' 
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
       });
     }
 
@@ -265,9 +295,9 @@ export const verifyToken = async (req, res, next) => {
     next();
   } catch (error) {
     console.error('Authentication error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Authentication failed' 
+    res.status(500).json({
+      success: false,
+      message: 'Authentication failed'
     });
   }
 };
