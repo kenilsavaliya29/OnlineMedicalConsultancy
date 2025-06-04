@@ -146,22 +146,30 @@ const OverViewTab = React.memo(() => {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
                                 <div>
                                     <h4 className="font-semibold text-gray-700 mb-1">Date of Birth</h4>
-                                    <p>{user.dob || 'Not specified'}</p>
+                                    <p className='text-gray-500'>{new Date(user.profile.dateOfBirth).toLocaleDateString('en-GB')}</p>
                                 </div>
                                 <div>
                                     <h4 className="font-semibold text-gray-700 mb-1">Gender</h4>
-                                    <p>{user.gender || 'Not specified'}</p>
+                                    <p className='capitalize text-gray-500'>{user.gender || 'Not specified'}</p>
                                 </div>
                                 <div>
                                     <h4 className="font-semibold text-gray-700 mb-1">Blood Type</h4>
-                                    <p>{user.bloodType || 'Not specified'}</p>
+                                    <p className='text-gray-500'>{user.profile.bloodGroup || 'Not specified'}</p>
                                 </div>
                                 <div>
                                     <h4 className="font-semibold text-gray-700 mb-1">Allergies</h4>
-                                    <p>{user.profile.allergies || 'None reported'}</p>
+                                    {user.profile.allergies && user.profile.allergies.length > 0 ? (
+                                        <ul className="list-disc list-inside text-gray-700">
+                                            {user.profile.allergies.map((allergy, index) => (
+                                                <li key={index}>{allergy}</li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <p className="text-gray-500">No allergies reported</p>
+                                    )}
                                 </div>
                             </div>
                         </div>

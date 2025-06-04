@@ -84,6 +84,9 @@ export const getMedicalProfile = async (req, res) => {
 // used to update the medical profile of the patient
 // can be used by patient to update or doctor to add details or changes after consultation
 export const updatePatientMedicalProfile = async (req, res) => {
+
+  console.log(req.body);
+
   try {
     const userId = req.user._id;
     const {
@@ -95,7 +98,8 @@ export const updatePatientMedicalProfile = async (req, res) => {
       medicalConditions, 
       medications,
       emergencyContact,
-      insurance
+      insurance,
+      healthMetrics
     } = req.body;
 
     let patientProfile = await PatientProfile.findOne({ userId });
@@ -117,6 +121,7 @@ export const updatePatientMedicalProfile = async (req, res) => {
     patientProfile.medications = medications || patientProfile.medications;
     patientProfile.emergencyContact = emergencyContact || patientProfile.emergencyContact;
     patientProfile.insurance = insurance || patientProfile.insurance;
+    patientProfile.healthMetrics = healthMetrics || patientProfile.healthMetrics;
 
     await patientProfile.save();
 

@@ -32,6 +32,7 @@ const DoctorDashboard = () => {
     const [selectedAppointment, setSelectedAppointment] = useState(null);
     const [error, setError] = useState(null);
     const [isNotificationsModalOpen, setIsNotificationsModalOpen] = useState(false);
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
     const navigate = useNavigate();
 
@@ -40,6 +41,7 @@ const DoctorDashboard = () => {
     const notificationsRef = useRef(null);
 
     const sidebarRef = useRef(null);
+    const logoutModalRef = useRef(null);
 
     // Memoize sidebar links to prevent recreation on every render
     const sidebarLinks = useMemo(() => [
@@ -314,6 +316,15 @@ const DoctorDashboard = () => {
             toast.error("An error occurred during logout");
         }
     }, [logout]);
+
+    // Functions to open and close logout confirmation modal
+    const openLogoutModal = useCallback(() => {
+        setIsLogoutModalOpen(true);
+    }, []);
+
+    const closeLogoutModal = useCallback(() => {
+        setIsLogoutModalOpen(false);
+    }, []);
 
     const updateAppointmentStatus = useCallback(async (appointmentId, status) => {
         if (!appointmentId) {
@@ -611,6 +622,10 @@ const DoctorDashboard = () => {
             if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
                 closeNotificationsModal();
             }
+            // Close logout modal if click is outside its container
+            if (isLogoutModalOpen && logoutModalRef.current && !logoutModalRef.current.contains(event.target)) {
+                closeLogoutModal();
+            }
             // Close sidebar if click is outside the sidebar and sidebar toggle button
             // Need to check against both the sidebar element and the button that opens it
             // The button has class lg:hidden, so we only care about it on small screens
@@ -618,7 +633,8 @@ const DoctorDashboard = () => {
 
             if (sidebarOpen && sidebarRef.current && !sidebarRef.current.contains(event.target) &&
                 (!sidebarToggleButton || !sidebarToggleButton.contains(event.target)) &&
-                (!notificationsRef.current || !notificationsRef.current.contains(event.target)) // Also ensure click isn't inside notification box
+                (!notificationsRef.current || !notificationsRef.current.contains(event.target)) && // Also ensure click isn't inside notification box
+                (!logoutModalRef.current || !logoutModalRef.current.contains(event.target)) // Also ensure click isn't inside logout modal
             ) {
                 closeSidebar();
             }
@@ -628,7 +644,7 @@ const DoctorDashboard = () => {
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [closeNotificationsModal, closeSidebar, sidebarOpen]); // Add dependencies
+    }, [closeNotificationsModal, closeSidebar, sidebarOpen, isLogoutModalOpen, closeLogoutModal]); // Add dependencies
 
     return (
         <>
@@ -682,7 +698,7 @@ const DoctorDashboard = () => {
                             ))}
                             <button
                                 onClick={() => {
-                                    handleLogout();
+                                    openLogoutModal();
                                     closeSidebar();
                                 }}
                                 className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-red-500 hover:bg-red-50"
@@ -749,7 +765,7 @@ const DoctorDashboard = () => {
                     </div>
 
                     {/* Dashboard Content */}
-                    <div className="p-4 lg:p-8 mt-16 lg:mt-0">
+                    <div className="p-4 lg:p-8 max:mt-16 lg:mt-0">
                         {renderTabContent()}
                     </div>
                 </div>
@@ -757,6 +773,30 @@ const DoctorDashboard = () => {
 
             {/* Patient Reviews Section */}
             <ReviewsSection isLoading={isLoading} doctorDetails={doctorDetails} />
+
+            {/* Logout Confirmation Modal */}
+            {isLogoutModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-xl p-6 w-11/12 max-w-sm mx-auto" ref={logoutModalRef}>
+                        <h3 className="text-lg font-semibold text-gray-800 mb-4">Confirm Logout</h3>
+                        <p className="text-gray-600 mb-6">Are you sure you want to log out?</p>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={closeLogoutModal}
+                                className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors"
+                            >
+                                No, Cancel
+                            </button>
+                            <button
+                                onClick={handleLogout}
+                                className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors"
+                            >
+                                Yes, Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 };

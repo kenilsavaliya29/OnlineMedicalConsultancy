@@ -131,7 +131,7 @@ const OverviewTab = ({ appointments, setActiveTab, isLoading, doctorDetails }) =
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                                <div className="grid grid-cols-2 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
                                     <div>
                                         <h4 className="font-semibold text-gray-700 mb-1">Specialization</h4>
                                         <div className="bg-[#007E85]/10 px-3 py-1 rounded-full inline-block">

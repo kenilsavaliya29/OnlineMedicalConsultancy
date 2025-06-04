@@ -6,11 +6,12 @@ import useDebounce from '../../../hooks/useDebounce.js';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const MedicalProfileTab = () => {
+
   const { user } = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [isProfileComplete, setIsProfileComplete] = useState(true);
-  const [formData, setFormData] = useState({
+  const initialFormData = {
     dateOfBirth: '',
     bloodGroup: '',
     height: '',
@@ -21,7 +22,26 @@ const MedicalProfileTab = () => {
     emergencyContact: { name: '', relationship: '', phoneNumber: '', email: '' },
     insurance: { provider: '', policyNumber: '', validUntil: '' },
     healthMetrics: []
-  });
+  };
+  const [formData, setFormData] = useState(initialFormData);
+
+  // State for local input changes, which will be debounced
+  const [localFormData, setLocalFormData] = useState(initialFormData);
+
+  // Debounce the local form data
+  const debouncedLocalFormData = useDebounce(localFormData, 500);
+
+  // Effect to update formData when debouncedLocalFormData changes
+  useEffect(() => {
+    // Only update formData if debouncedLocalFormData is different
+    // Use a deep comparison but don't include formData in the dependency array
+    const isDifferent = JSON.stringify(debouncedLocalFormData) !== JSON.stringify(formData);
+    
+    if (isDifferent) {
+      setFormData(debouncedLocalFormData);
+    }
+    // Remove formData from dependency array to break circular updates
+  }, [debouncedLocalFormData]);
 
   const [tempMedicalCondition, setTempMedicalCondition] = useState('');
   const [tempAllergy, setTempAllergy] = useState('');
@@ -54,11 +74,23 @@ const MedicalProfileTab = () => {
         });
 
         const data = await response.json();
-        console.log(data)
 
         if (response.ok && data.success) {
           const profile = data.profile;
           setFormData({
+            dateOfBirth: profile.dateOfBirth ? new Date(profile.dateOfBirth).toISOString().split('T')[0] : '',
+            bloodGroup: profile.bloodGroup || '',
+            height: profile.height || '',
+            weight: profile.weight || '',
+            allergies: profile.allergies || [],
+            medicalConditions: profile.medicalConditions || [],
+            medications: profile.medications || [],
+            emergencyContact: profile.emergencyContact || { name: '', relationship: '', phoneNumber: '', email: '' },
+            insurance: profile.insurance || { provider: '', policyNumber: '', validUntil: '' },
+            healthMetrics: profile.healthMetrics || []
+          });
+          // Also update localFormData so that debounced state is initialized correctly
+          setLocalFormData({
             dateOfBirth: profile.dateOfBirth ? new Date(profile.dateOfBirth).toISOString().split('T')[0] : '',
             bloodGroup: profile.bloodGroup || '',
             height: profile.height || '',
@@ -111,24 +143,24 @@ const MedicalProfileTab = () => {
     setIsProfileComplete(complete);
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = React.useCallback((e) => {
     const { name, value } = e.target;
     if (name.includes('emergencyContact.')) {
       const field = name.split('.')[1];
-      setFormData(prev => ({
+      setLocalFormData(prev => ({
         ...prev,
         emergencyContact: { ...prev.emergencyContact, [field]: value }
       }));
     } else if (name.includes('insurance.')) {
       const field = name.split('.')[1];
-      setFormData(prev => ({
+      setLocalFormData(prev => ({
         ...prev,
         insurance: { ...prev.insurance, [field]: value }
       }));
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      setLocalFormData(prev => ({ ...prev, [name]: value }));
     }
-  };
+  }, []);
 
   const addMedicalCondition = (condition) => {
     if (condition && !formData.medicalConditions.includes(condition)) {
@@ -216,13 +248,14 @@ const MedicalProfileTab = () => {
     setSubmitting(true);
 
     try {
+      // Use the debounced formData for submission
       const response = await fetch(`${API_URL}/api/patient/update-medical-profile`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify(formData),
+        body: JSON.stringify(formData), // Use formData here
       });
       const data = await response.json();
 
@@ -240,7 +273,6 @@ const MedicalProfileTab = () => {
     }
   };
 
-  console.log(formData)
   if (loading) {
     return (
       <div className="flex justify-center items-center h-full">
@@ -266,7 +298,7 @@ const MedicalProfileTab = () => {
               type="date"
               id="dateOfBirth"
               name="dateOfBirth"
-              value={formData.dateOfBirth}
+              value={localFormData.dateOfBirth}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007E85]"
               required
@@ -277,7 +309,7 @@ const MedicalProfileTab = () => {
             <select
               id="bloodGroup"
               name="bloodGroup"
-              value={formData.bloodGroup}
+              value={localFormData.bloodGroup}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007E85]"
               required
@@ -301,7 +333,7 @@ const MedicalProfileTab = () => {
                 type="number"
                 id="height"
                 name="height"
-                value={formData.height}
+                value={localFormData.height}
                 onChange={handleInputChange}
                 placeholder="e.g., 175"
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007E85]"
@@ -314,7 +346,7 @@ const MedicalProfileTab = () => {
                 type="number"
                 id="weight"
                 name="weight"
-                value={formData.weight}
+                value={localFormData.weight}
                 onChange={handleInputChange}
                 placeholder="e.g., 70"
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007E85]"
@@ -488,7 +520,7 @@ const MedicalProfileTab = () => {
               type="text"
               id="emergencyContactName"
               name="emergencyContact.name"
-              value={formData.emergencyContact.name}
+              value={localFormData.emergencyContact.name}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007E85]"
               required
@@ -499,7 +531,7 @@ const MedicalProfileTab = () => {
             <select
               id="emergencyContactRelationship"
               name="emergencyContact.relationship"
-              value={formData.emergencyContact.relationship}
+              value={localFormData.emergencyContact.relationship}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007E85]"
             >
@@ -518,7 +550,7 @@ const MedicalProfileTab = () => {
               type="tel"
               id="emergencyContactPhone"
               name="emergencyContact.phoneNumber"
-              value={formData.emergencyContact.phoneNumber}
+              value={localFormData.emergencyContact.phoneNumber}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007E85]"
               required
@@ -530,7 +562,7 @@ const MedicalProfileTab = () => {
               type="email"
               id="emergencyContactEmail"
               name="emergencyContact.email"
-              value={formData.emergencyContact.email}
+              value={localFormData.emergencyContact.email}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007E85]"
             />
@@ -546,7 +578,7 @@ const MedicalProfileTab = () => {
               type="text"
               id="insuranceProvider"
               name="insurance.provider"
-              value={formData.insurance.provider}
+              value={localFormData.insurance.provider}
               onChange={handleInputChange}
               placeholder="e.g., Blue Cross Blue Shield"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007E85]"
@@ -558,7 +590,7 @@ const MedicalProfileTab = () => {
               type="text"
               id="policyNumber"
               name="insurance.policyNumber"
-              value={formData.insurance.policyNumber}
+              value={localFormData.insurance.policyNumber}
               onChange={handleInputChange}
               placeholder="e.g., XYZ123456789"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007E85]"
@@ -570,7 +602,7 @@ const MedicalProfileTab = () => {
               type="date"
               id="validUntil"
               name="insurance.validUntil"
-              value={formData.insurance.validUntil ? new Date(formData.insurance.validUntil).toISOString().split('T')[0] : ''}
+              value={localFormData.insurance.validUntil ? new Date(localFormData.insurance.validUntil).toISOString().split('T')[0] : ''}
               onChange={handleInputChange}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007E85]"
             />
@@ -681,4 +713,4 @@ const MedicalProfileTab = () => {
   );
 };
 
-export default MedicalProfileTab; 
+export default MedicalProfileTab;
