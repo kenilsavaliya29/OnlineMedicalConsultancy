@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useContext } from 'react'
 import { FaCalendarCheck, FaSyncAlt } from 'react-icons/fa'
-import { toast } from 'react-toastify'
+import MessageBox from '../../common/MessageBox.jsx'
 import { AuthContext } from '../../../contexts/authContext'
 
 
@@ -8,7 +8,7 @@ const API_URL = import.meta.env.BACKEND_URL || 'http://localhost:3000'
 
 const AppoinmentsTab = React.memo(() => {
 
-    const { user } = useContext(AuthContext)
+    const { user, logout } = useContext(AuthContext)
     const [appointments, setAppointments] = useState([])
     const [isLoading, setIsLoading] = useState(false)
 
@@ -34,14 +34,14 @@ const AppoinmentsTab = React.memo(() => {
             })
 
             if (response.status === 401) {
-                toast.error('Your session has expired. Please log in again.')
+                MessageBox.error('Your session has expired. Please log in again.')
                 setTimeout(() => {
                 }, 3000)
                 return
             }
 
             if (!response.ok) {
-                toast.error(`Server error: ${response.status} ${response.statusText}`)
+                MessageBox.error(`Server error: ${response.status} ${response.statusText}`)
                 setIsLoading(false)
                 return
             }
@@ -51,10 +51,10 @@ const AppoinmentsTab = React.memo(() => {
             if (data.success) {
                 setAppointments(data.appointments || [])
             } else {
-                toast.error(`Failed to fetch appointments: ${data.message}`)
+                MessageBox.error(`Failed to fetch appointments: ${data.message}`)
             }
         } catch (error) {
-            toast.error(`Error fetching appointments: ${error.message}`)
+            MessageBox.error(`Error fetching appointments: ${error.message}`)
         } finally {
             setIsLoading(false)
         }
@@ -69,7 +69,7 @@ const AppoinmentsTab = React.memo(() => {
     const cancelAppointment = useCallback(async (appointmentId) => {
         if (!appointmentId) {
             console.error("No appointment ID provided")
-            toast.error("Cannot cancel: Missing appointment ID")
+            MessageBox.error("Cannot cancel: Missing appointment ID")
             return
         }
 
@@ -91,7 +91,7 @@ const AppoinmentsTab = React.memo(() => {
 
             if (response.status === 401) {
                 console.error('Authentication error: Not authorized to access this resource')
-                toast.error('Authentication error - please try logging in again')
+                MessageBox.error('Authentication error - please try logging in again')
                 setTimeout(() => {
                     logout()
                 }, 3000)
@@ -101,7 +101,7 @@ const AppoinmentsTab = React.memo(() => {
             const data = await response.json()
 
             if (data.success) {
-                toast.success("Appointment canceled successfully. This will be reflected in your appointments list.")
+                MessageBox.success("Appointment canceled successfully. This will be reflected in your appointments list.")
 
                 // Find the canceled appointment to include in notification
                 const appointment = appointments.find(apt => apt._id === appointmentId || apt.id === appointmentId)
@@ -111,7 +111,7 @@ const AppoinmentsTab = React.memo(() => {
                     const time = appointment.appointmentTime || appointment.time
 
                     // More comprehensive notification
-                    toast.info(
+                    MessageBox.info(
                         `Your appointment with ${doctorName} on ${date} at ${time} has been canceled. You can book a new appointment anytime.`,
                         { autoClose: 6000 }
                     )
@@ -120,15 +120,15 @@ const AppoinmentsTab = React.memo(() => {
                 fetchAppointments() // Refresh appointments
             } else {
                 console.error("Failed to cancel appointment:", data.message)
-                toast.error(data.message || "Failed to cancel appointment")
+                MessageBox.error(data.message || "Failed to cancel appointment")
             }
         } catch (error) {
             console.error("Error canceling appointment:", error)
-            toast.error(`Error: ${error.message || "Could not cancel appointment"}`)
+            MessageBox.error(`Error: ${error.message || "Could not cancel appointment"}`)
         } finally {
             setIsLoading(false)
         }
-    }, [appointments, fetchAppointments]);
+    }, [appointments, fetchAppointments, logout]);
 
 
     const viewAppointmentDetails = useCallback((appointmentId) => {
@@ -136,7 +136,7 @@ const AppoinmentsTab = React.memo(() => {
         const appointment = appointments.find(apt => apt._id === appointmentId || apt.id === appointmentId)
 
         if (!appointment) {
-            toast.error("Appointment not found")
+            MessageBox.error("Appointment not found")
             return
         }
 
@@ -149,9 +149,9 @@ const AppoinmentsTab = React.memo(() => {
             `Status: ${appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}`,
             `Reason for Visit: ${appointment.reason || "Not specified"}`,
             `Additional Notes: ${appointment.notes || "None provided"}`,
-            `Patient Name: ${appointment.patientName || userfirstname + " " + userlastname}`,
-            `Patient Email: ${appointment.patientEmail || useremail}`,
-            `Patient Phone: ${appointment.patientPhone || userphone || "Not specified"}`
+            `Patient Name: ${appointment.patientName || user.firstname + " " + user.lastname}`,
+            `Patient Email: ${appointment.patientEmail || user.email}`,
+            `Patient Phone: ${appointment.patientPhone || user.phone || "Not specified"}`
         ].join("\n")
 
         alert(`Appointment Details:\n\n${details}`)

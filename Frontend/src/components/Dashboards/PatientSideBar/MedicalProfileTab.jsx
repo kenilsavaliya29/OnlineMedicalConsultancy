@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { toast } from 'react-toastify';
+import MessageBox from '../../common/MessageBox.jsx';
 import { AuthContext } from '../../../contexts/authContext.jsx';
 import useDebounce from '../../../hooks/useDebounce.js';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const MedicalProfileTab = () => {
-
+ 
   const { user } = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -107,12 +107,12 @@ const MedicalProfileTab = () => {
 
           setIsProfileComplete(false);
         } else {
-          toast.error(data.message || 'Failed to fetch medical profile.');
+          MessageBox.error(data.message || 'Failed to fetch medical profile.');
           setIsProfileComplete(false);
         }
       } catch (error) {
         console.error('Error fetching medical profile:', error);
-        toast.error('Error connecting to server.');
+        MessageBox.error('Error connecting to server.');
         setIsProfileComplete(false);
       } finally {
         setLoading(false);
@@ -203,7 +203,7 @@ const MedicalProfileTab = () => {
       setTempStartDate('');
       setTempEndDate('');
     } else {
-      toast.error('Medication name, dosage, and frequency are required.');
+      MessageBox.error('Medication name, dosage, and frequency are required.');
     }
   };
 
@@ -232,7 +232,7 @@ const MedicalProfileTab = () => {
       setTempMetricDate(new Date().toISOString().split('T')[0]);
       setTempMetricNotes('');
     } else {
-      toast.error('Health metric type, value, and unit are required.');
+      MessageBox.error('Health metric type, value, and unit are required.');
     }
   };
 
@@ -260,14 +260,14 @@ const MedicalProfileTab = () => {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        toast.success(data.message);
+        MessageBox.success(data.message);
         checkProfileCompletion(data.profile); // Re-check completion after update
       } else {
-        toast.error(data.message || 'Failed to save medical profile.');
+        MessageBox.error(data.message || 'Failed to save medical profile.');
       }
     } catch (error) {
       console.error('Error submitting medical profile:', error);
-      toast.error('Error connecting to server.');
+      MessageBox.error('Error connecting to server.');
     } finally {
       setSubmitting(false);
     }
@@ -501,7 +501,7 @@ const MedicalProfileTab = () => {
                 {formData.medications.map((med, index) => (
                   <li key={index} className="bg-gray-100 p-2 rounded-lg flex justify-between items-center">
                     <span>{med.name} - {med.dosage} ({med.frequency})</span>
-                    <button type="button" onClick={() => removeMedication(index)} className="ml-2 text-red-500 hover:text-red-700 text-sm">Remove</button>
+                    <button type="button" onClick={() => removeMedication(index)} className="ml-2 text-red-500 hover:text-red-700 text-sm">×</button>
                   </li>
                 ))}
               </ul>
@@ -689,7 +689,7 @@ const MedicalProfileTab = () => {
                 {formData.healthMetrics.map((metric, index) => (
                   <li key={index} className="bg-gray-100 p-2 rounded-lg flex justify-between items-center">
                     <span>{metric.type}: {metric.value} {metric.unit} (on {new Date(metric.date).toLocaleDateString()})</span>
-                    <button type="button" onClick={() => removeHealthMetric(index)} className="ml-2 text-red-500 hover:text-red-700 text-sm">Remove</button>
+                    <button type="button" onClick={() => removeHealthMetric(index)} className="ml-2 text-red-500 hover:text-red-700 text-sm">×</button>
                   </li>
                 ))}
               </ul>

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { FaUserMd, FaCalendarDay, FaClock, FaArrowLeft, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
 import { AuthContext } from '../../contexts/authContext.jsx';
-import { toast } from 'react-toastify';
+import MessageBox from '../../components/common/MessageBox.jsx';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -136,7 +136,7 @@ const AppointmentBooking = () => {
     
     // Check if user is logged in
     if (!user) {
-      toast.error("Please log in to book an appointment");
+      MessageBox.error("Please log in to book an appointment");
       // Store return URL path in context
       setRedirectPath(`/doctors/${id}/book`);
       // Attach appointment data as query params

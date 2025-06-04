@@ -7,13 +7,22 @@ import { useInView } from 'react-intersection-observer';
 import { FaHeartbeat, FaComments, FaCalendarCheck, FaStethoscope, FaPrescription, FaShieldAlt, FaClock, FaUserCheck } from 'react-icons/fa';
 import { useContext } from 'react';
 import { AuthContext } from '../contexts/authContext.jsx';
-import { toast } from 'react-toastify';
+import MessageBox from './common/MessageBox.jsx';
 
 
 const Home = () => {
   const { ref, inView } = useInView({ threshold: 0.1 });
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [messageBox, setMessageBox] = useState({ show: false, type: '', message: '' });
+
+  const showMessage = (type, message) => {
+    setMessageBox({ show: true, type, message });
+  };
+
+  const closeMessageBox = () => {
+    setMessageBox({ show: false, type: '', message: '' });
+  };
 
   const handleWellnessClick = (e) => {
     e.preventDefault();
@@ -21,12 +30,19 @@ const Home = () => {
       navigate('/patient/wellness');
     } else {
       navigate('/login');
-      toast.info('Please login as a patient to access the Wellness Program');
+      showMessage('info', 'Please login as a patient to access the Wellness Program');
     }
   };
 
   return (
     <main className='mt-20'>
+      {messageBox.show && (
+        <MessageBox
+          type={messageBox.type}
+          message={messageBox.message}
+          onClose={closeMessageBox}
+        />
+      )}
       <div className="hero container flex flex-col lg:flex-row items-center justify-center m-auto p-4 sm:p-6 md:p-8 lg:p-14 lg:py-20 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 sm:w-48 lg:w-64 h-32 sm:h-48 lg:h-64 bg-[#007E85] opacity-10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
         <div className="absolute bottom-0 left-0 w-48 sm:w-64 lg:w-96 h-48 sm:h-64 lg:h-96 bg-[#6EAB36] opacity-10 rounded-full translate-y-1/2 -translate-x-1/2"></div>

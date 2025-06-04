@@ -1,7 +1,6 @@
 import React from 'react'
 import { FaCalendarCheck, FaSyncAlt } from 'react-icons/fa';
-import { toast } from 'react-toastify';
-
+import MessageBox from '../../common/MessageBox.jsx';
 
 const AppointmentsTab = ({ appointments, isLoading, fetchAppointments, updateAppointmentStatus, viewAppointmentDetails }) => {
     return (
@@ -85,7 +84,7 @@ const AppointmentsTab = ({ appointments, isLoading, fetchAppointments, updateApp
                                                             try {
                                                                 updateAppointmentStatus(appointment._id, 'cancelled');
                                                             } catch (error) {
-                                                                toast.error("An error occurred while canceling");
+                                                                MessageBox.error("An error occurred while canceling");
                                                             }
                                                         }
                                                         return false;
@@ -103,7 +102,7 @@ const AppointmentsTab = ({ appointments, isLoading, fetchAppointments, updateApp
                                                     try {
                                                         viewAppointmentDetails(appointment);
                                                     } catch (error) {
-                                                        toast.error("An error occurred while viewing details");
+                                                        MessageBox.error("An error occurred while viewing details");
                                                     }
                                                     return false;
                                                 }}

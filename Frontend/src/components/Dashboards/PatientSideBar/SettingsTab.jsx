@@ -1,22 +1,29 @@
 import React, { useContext } from 'react'
 import { AuthContext } from '../../../contexts/authContext';
+import { FaUser, FaLock, FaBell, FaEnvelope, FaShieldAlt, FaEye, FaEyeSlash, FaEdit, FaCheck, FaTimes, FaKey, FaSignOutAlt } from 'react-icons/fa';
 
 const SettingsTab = React.memo(() => {
 
   const { user, logout } = useContext(AuthContext);
 
+  const handleLogout = async () => {
+    await logout();
+    window.location.href = "/";
+  };
+
+  console.log(user)
   return (
     <div className="space-y-6">
       {/* Profile Header */}
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
         <div className="flex items-center gap-6">
           <img
-            src={getProfileImage()}
+            src={user && user.profileImage ? user.profileImage : "https://img.freepik.com/free-vector/businessman-character-avatar-isolated_24877-60111.jpg?w=740&t=st=1693113479~exp=1693114079~hmac=740079bac9bac9709276b095b4d1410b49850d0d9b1c27e95efcad33ad86ce483e26"}
             alt="Patient Profile"
             className="w-24 h-24 rounded-full border-4 border-[#007E85] object-cover"
           />
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">{getPatientFullName()}</h2>
+            <h2 className="text-2xl font-bold text-gray-800 capitalize">{user.fullName}</h2>
             <p className="text-gray-500">Patient</p>
             <p className="text-sm text-gray-500 mt-1">
               <FaEnvelope className="inline mr-2" />
@@ -60,23 +67,6 @@ const SettingsTab = React.memo(() => {
           </button>
         </div>
 
-        {/* Logout */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="bg-red-100 p-4 rounded-lg">
-              <FaSignOutAlt className="text-2xl text-red-500" />
-            </div>
-            <div>
-              <h3 className="font-bold text-lg">Logout</h3>
-              <p className="text-sm text-gray-500">Sign out of your account</p>
-            </div>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors">
-            Logout
-          </button>
-        </div>
       </div>
     </div>
   );

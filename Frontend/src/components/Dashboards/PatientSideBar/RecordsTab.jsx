@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react'
 import { FaUserMd, FaFileMedical, FaDownload, FaSyncAlt, } from 'react-icons/fa'
-import { toast } from 'react-toastify'
+import MessageBox from '../../../components/common/MessageBox.jsx'
 import { useContext } from 'react'
 import { AuthContext } from '../../../contexts/authContext.jsx'
 
@@ -16,7 +16,7 @@ const RecordsTab = React.memo(() => {
 
     const handleDownload = useCallback((fileType, fileName) => {
         console.log(`Placeholder download for ${fileType}: ${fileName}`);
-        toast.info(`Download requested for ${fileName}`);
+        MessageBox.info(`Download requested for ${fileName}`);
 
     }, []);
 
@@ -32,13 +32,40 @@ const RecordsTab = React.memo(() => {
         try {
             setIsLoading(true)
             const response = await fetch(`${API_URL}/api/medical-records/patient/${user._id}`, {
-                // ... existing code ...
-            });
-            // ... existing code ...
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                credentials: 'include'
+            })
+
+            if (response.status === 401) {
+                MessageBox.error('Your session has expired. Please log in again.');
+                // In a real app, you might trigger a logout here
+                // setTimeout(() => { logout(); }, 3000);
+                return;
+            }
+
+            if (!response.ok) {
+                MessageBox.error(`Server error: ${response.status} ${response.statusText}`);
+                setIsLoading(false);
+                return;
+            }
+
+            const data = await response.json()
+
+            if (data.success) {
+                setMedicalRecords(data.medicalRecords || [])
+            } else {
+                MessageBox.error(`Failed to fetch medical records: ${data.message}`);
+            }
         } catch (error) {
-            // ... existing code ...
+            MessageBox.error(`Error fetching medical records: ${error.message}`);
+        } finally {
+            setIsLoading(false)
         }
-    }, [user._id]);
+    }, [user?._id]);
 
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">

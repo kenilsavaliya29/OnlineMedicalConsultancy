@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { toast } from 'react-toastify';
+import MessageBox from '../components/common/MessageBox';
 
 export const AuthContext = createContext();
 
@@ -10,10 +10,10 @@ export const AuthProvider = ({ children }) => {
   const [returnPath, setReturnPath] = useState(null);
   const [isInitialLogin, setIsInitialLogin] = useState(false);
   
-  // API URL from environment variables or default to localhost
+
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-  // Check if user is authenticated on initial load
+
   useEffect(() => {
     const verifyUser = async () => {
       try {
@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
         
         const response = await fetch(`${API_URL}/auth/user`, {
           method: 'POST',
-          credentials: 'include', // Important to include cookies
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json'
           }
@@ -36,7 +36,6 @@ export const AuthProvider = ({ children }) => {
         
         if (data.success && data.user) {
           setUser(data.user);
-          // Don't set isInitialLogin for existing sessions
         } else {
           setUser(null);
         }
@@ -97,9 +96,9 @@ export const AuthProvider = ({ children }) => {
       if (data.success) {
         console.log("Login successful for:", data.user?.email);
         setUser(data.user);
-        setIsInitialLogin(true); // Set flag for new login
+        setIsInitialLogin(true); 
         
-        // Clear the flag after a short delay to allow navigation
+        
         setTimeout(() => {
           setIsInitialLogin(false);
         }, 1000);
@@ -132,13 +131,13 @@ export const AuthProvider = ({ children }) => {
       });
       
       setUser(null);
-      setIsInitialLogin(false); // Clear flag on logout
+      setIsInitialLogin(false);
       return { success: true, message: 'Logged out successfully' };
     } catch (err) {
       console.error('Error during logout:', err);
-      // Even if server call fails, clear user state
+
       setUser(null);
-      setIsInitialLogin(false); // Clear flag on logout
+      setIsInitialLogin(false); 
       return { success: true, message: 'Logged out locally' };
     } finally {
       setLoading(false);
@@ -167,14 +166,14 @@ export const AuthProvider = ({ children }) => {
 
       if (data.success) {
         setUser(data.user);
-        setIsInitialLogin(true); // Set flag for new registration
+        setIsInitialLogin(true); 
         
-        // Clear the flag after a short delay to allow navigation
+        
         setTimeout(() => {
           setIsInitialLogin(false);
         }, 1000);
         
-        toast.success('Registration successful!');
+        MessageBox.success('Registration successful!');
         return { success: true, message: data.message, user: data.user };
       } else {
         return { success: false, message: data.message };
@@ -209,7 +208,7 @@ export const AuthProvider = ({ children }) => {
 
       if (data.success) {
         setUser(data.user);
-        toast.success('Profile updated successfully!');
+        MessageBox.success('Profile updated successfully!');
         return { success: true, message: data.message, user: data.user };
       } else {
         return { success: false, message: data.message };
@@ -271,13 +270,4 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
-};
-
-// Custom hook to use the auth context
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 };

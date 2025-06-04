@@ -85,7 +85,6 @@ export const getMedicalProfile = async (req, res) => {
 // can be used by patient to update or doctor to add details or changes after consultation
 export const updatePatientMedicalProfile = async (req, res) => {
 
-  console.log(req.body);
 
   try {
     const userId = req.user._id;

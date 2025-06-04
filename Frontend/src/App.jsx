@@ -7,8 +7,8 @@ import Services from './Pages/Services'
 import ContactUs from './Pages/ContactUs'
 import Blogs from './Pages/Blogs'
 import About from './Pages/About';
-import Forgot_Password from './Pages/Auth/Forgot_Password';
-import Reset_Password from './Pages/Auth/Reset_Password';
+import ForgotPassword from './Pages/Auth/ForgotPassword';
+import ResetPassword from './Pages/Auth/ResetPassword';
 import Patient_Dashboard from './components/Dashboards/Patient_Dashboard';
 import Layout from './Pages/Layout';
 import Terms_and_Conditions from './Pages/Terms_Conditions';
@@ -41,11 +41,11 @@ function App() {
     },
     {
       path: "/login/forgotpassword",
-      element: <Forgot_Password />,
+      element: <ForgotPassword />,
     },
     {
       path: "/login/resetpassword/:token",
-      element: <Reset_Password />,
+      element: <ResetPassword />,
     },
     // Public route that redirects to proper wellness route
     {

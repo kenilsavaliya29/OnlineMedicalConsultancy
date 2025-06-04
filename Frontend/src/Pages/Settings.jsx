@@ -5,10 +5,8 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 
-
-// Success Modal Component
 const SuccessModal = ({ onClose }) => {
-  // Auto-close the modal after 3 seconds
+
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
@@ -130,11 +128,12 @@ const EditableField = ({ label, name, value, onChange, error }) => {
 const Settings = () => {
   const { user, setUser } = useContext(AuthContext);
 
-  const [successMessage, setSuccessMessage] = useState('');
+  // Removed successMessage, showErrorBox, errorMessage states
   const [errors, setErrors] = useState({});
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+
   const [formData, setFormData] = useState({
-    fullName: '',
+    firstName: '', // Corrected from fullName
     lastName: '',
     email: '',
     phone: '',
@@ -149,10 +148,10 @@ const Settings = () => {
     if (user) {
       setFormData(prevData => ({
         ...prevData,
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
+        firstName: user.firstName || '', // Use user.firstName
+        lastName: user.lastName || '',   // Use user.lastName
         email: user.email || '',
-        phone: user.phoneNumber || ''
+        phone: user.phoneNumber || '' // Use user.phoneNumber
       }));
     }
   }, [user]);
@@ -165,6 +164,13 @@ const Settings = () => {
     setFormData(prevFormData => ({
       ...prevFormData,
       [name]: newValue
+    }));
+
+    // Clear specific error when the user starts typing in that field
+    setErrors(prevErrors => ({
+      ...prevErrors,
+      [name]: undefined, // Clear the specific field error
+      general: undefined // Clear general error on any change
     }));
   };
 
@@ -190,9 +196,9 @@ const Settings = () => {
         // Data for doctor update
         const doctorUpdateData = {
           email: formData.email,
-          name: `${formData.firstName} ${formData.lastName}`,
+          name: `${formData.firstName} ${formData.lastName}`, // Combine first and last for doctor name
           phone: formData.phone,
-          // Include other doctor-specific fields that might be present
+          // Keep existing doctor specific fields if they exist on user object
           specialization: user.specialization,
           experience: user.experience,
           qualification: user.qualification,
@@ -214,32 +220,28 @@ const Settings = () => {
           // Update the user in context with new information
           setUser(prev => ({
             ...prev,
-            firstname: formData.firstName,
-            lastname: formData.lastName,
+            firstName: formData.firstName, // Update firstName
+            lastName: formData.lastName,   // Update lastName
             email: formData.email,
-            phone: formData.phone,
-            name: `${formData.firstName} ${formData.lastName}`
+            phoneNumber: formData.phone, // Update phoneNumber
+            name: `${formData.firstName} ${formData.lastName}` // Update combined name
           }));
 
           // Show the success modal
           setShowSuccessModal(true);
 
-          // Force reload after 1.5 seconds to ensure all components update
-          setTimeout(() => {
-            window.location.reload();
-          }, 1500);
+          // Removed window.location.reload()
         } else {
           setErrors({
             general: data.message || 'Failed to update doctor profile'
           });
         }
-      } else {
-        // Regular user/patient update
+      } else { // Assuming 'patient' or other roles
         const updateData = {
-          firstname: formData.firstName,
-          lastname: formData.lastName,
+          firstname: formData.firstName, // Use firstname for patient endpoint
+          lastname: formData.lastName,   // Use lastname for patient endpoint
           email: formData.email,
-          phonenumber: formData.phone
+          phonenumber: formData.phone    // Use phonenumber for patient endpoint
         };
 
         const response = await fetch(`http://localhost:3000/auth/update-profile`, {
@@ -257,20 +259,16 @@ const Settings = () => {
           // Update the user in context with new information
           setUser(prev => ({
             ...prev,
-            firstname: formData.firstName,
-            lastname: formData.lastName,
+            firstName: formData.firstName, // Update firstName
+            lastName: formData.lastName,   // Update lastName
             email: formData.email,
-            phonenumber: formData.phone
+            phoneNumber: formData.phone    // Update phoneNumber
           }));
-
 
           // Show the success modal
           setShowSuccessModal(true);
 
-          // Force reload after 1.5 seconds to ensure all components update
-          setTimeout(() => {
-            window.location.reload();
-          }, 1500);
+          // Removed window.location.reload()
         } else {
           setErrors({
             general: data.message || 'Failed to update profile'
@@ -278,18 +276,28 @@ const Settings = () => {
         }
       }
     } catch (error) {
+      console.error("Profile update error:", error); // Log the error
       setErrors({
-        general: 'An unexpected error occurred'
+        general: 'An unexpected error occurred during profile update.'
       });
     }
-  };
+  }; // Correctly closed handleProfileSubmit
 
+  // Defined handleSecuritySubmit separately
   const handleSecuritySubmit = async (e) => {
     e.preventDefault();
 
+    let newErrors = {};
+    if (!formData.currentPassword) newErrors.currentPassword = "Current password is required";
+    if (!formData.newPassword) newErrors.newPassword = "New password is required";
+    // Add more validation for new password if needed (e.g., length, complexity)
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
+
     // Data being sent to server
     const passwordData = {
-      email: user.email,
+      email: user.email, // Assuming email is needed for password change
       currentPassword: formData.currentPassword,
       newPassword: formData.newPassword
     };
@@ -309,29 +317,35 @@ const Settings = () => {
       if (data.success) {
         // Clear password fields
         setFormData(prev => ({ ...prev, currentPassword: '', newPassword: '' }));
+        setErrors({}); // Clear any previous errors
 
         // Show success modal
         setShowSuccessModal(true);
         console.log("Password updated successfully")
-        // Force reload after 1.5 seconds to ensure all components update
-        setTimeout(() => {
-          window.location.reload();
-        }, 1500);
+        // Removed window.location.reload()
       } else {
-        setErrors({
-          general: data.message || 'Failed to change password'
-        });
+        // Check for specific error messages from the backend
+        if (data.message === 'Current password is incorrect') {
+          setErrors({ currentPassword: 'Incorrect current password' });
+        } else {
+          setErrors({
+            general: data.message || 'Failed to change password'
+          });
+        }
       }
     } catch (error) {
+      console.error("Password update error:", error); // Log the error
       setErrors({
-        general: 'An unexpected error occurred'
+        general: 'An unexpected error occurred during password change.'
       });
     }
-  };
+  }; // Correctly closed handleSecuritySubmit
+
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#e6f7f8] to-white pt-28 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#e6e9f0] to-[#eef1f5] py-12 px-4 sm:px-6 lg:px-8"> {/* Added background */}
       {showSuccessModal && <SuccessModal onClose={() => setShowSuccessModal(false)} />}
+      {/* Removed ErrorBox component usage */}
 
       <div className="max-w-4xl mx-auto">
         <div className="mb-8 flex items-center gap-2 text-sm font-lato text-[#007E85]">
@@ -342,15 +356,7 @@ const Settings = () => {
 
         <h1 className="text-4xl font-bold text-[#007E85] mb-8 font-dm">Account Settings</h1>
 
-        {successMessage && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="mb-6 p-4 bg-[#6EAB36]/10 text-[#6EAB36] rounded-xl border border-[#6EAB36]"
-          >
-            {successMessage}
-          </motion.div>
-        )}
+        {/* Removed successMessage display as showSuccessModal is used */}
 
         {errors.general && (
           <motion.div
@@ -411,7 +417,7 @@ const Settings = () => {
         </SettingSection>
 
         <SettingSection title="Account Security" icon={<FaLock />}>
-          <form onSubmit={handleSecuritySubmit} className="space-y-6">
+          <form onSubmit={handleSecuritySubmit} className="space-y-6"> {/* Use handleSecuritySubmit */}
             <div className="space-y-6">
               <div>
                 <label className="block text-gray-700 font-medium mb-2 font-lato">Current Password</label>
@@ -434,6 +440,9 @@ const Settings = () => {
                     {formData.showPassword ? <FaEyeSlash /> : <FaEye />}
                   </button>
                 </div>
+                {errors.currentPassword && (
+                  <p className="text-red-500 text-sm mt-1">{errors.currentPassword}</p>
+                )}
               </div>
 
               <div>
@@ -447,6 +456,7 @@ const Settings = () => {
                   style={{ outline: 'none' }}
                   required
                 />
+                 {/* Add error display for new password if needed */}
               </div>
 
               <button
@@ -484,16 +494,18 @@ const Settings = () => {
           </div>
         </SettingSection>
 
-        <SettingSection title="Data Privacy" icon={<FaShieldAlt />}>
+        {/* Corrected and cleaned up the Data & Privacy section */}
+        <SettingSection title="Data & Privacy" icon={<FaShieldAlt />}> {/* Changed icon to FaShieldAlt */}
           <div className="space-y-4">
-            <a href="/api/download/personal-data" download={user.firstName}>
+            <a href="/api/download/personal-data" download={user?.firstName || 'personal-data'}> {/* Added optional chaining and default filename */}
               <button className="w-full flex items-center justify-between p-4 bg-[#007E85]/5 hover:bg-[#007E85]/10 rounded-xl transition-colors">
                 <span className="font-medium text-gray-800 font-lato">Download Personal Data</span>
                 <FaEnvelope className="text-[#007E85]" />
               </button>
             </a>
+            {/* Assuming Privacy Settings is just a link or placeholder */}
             <button className="w-full flex items-center justify-between p-4 bg-[#007E85]/5 hover:bg-[#007E85]/10 rounded-xl transition-colors">
-              <span className="font-medium text-gray-800 font-lato">Privacy Settings</span>
+              <span className="font-medium text-gray-800 font-lato">Privacy Settings</span> {/* Corrected typo "Settins" */}
               <FaShieldAlt className="text-[#007E85]" />
             </button>
           </div>

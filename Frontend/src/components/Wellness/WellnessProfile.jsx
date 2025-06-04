@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { toast } from 'react-toastify';
+import MessageBox from '../common/MessageBox';
 import { AuthContext } from '../../contexts/authContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -101,7 +101,7 @@ const WellnessProfile = () => {
           setLoading(false);
           return;
         } else if (response.status === 401) {
-          toast.error('Your session has expired. Please login again.');
+          MessageBox.error('Your session has expired. Please login again.');
           setRedirectPath('/patient/wellness/profile');
           navigate('/login');
           return;
@@ -146,12 +146,12 @@ const WellnessProfile = () => {
           }
 
         } else {
-          toast.error(`Failed to fetch profile data: ${data.message || 'Unknown error'}`);
+          MessageBox.error(`Failed to fetch profile data: ${data.message || 'Unknown error'}`);
           console.error('Failed to fetch profile:', data.message, 'Status:', response.status);
         }
       } catch (error) {
         console.error('Error fetching profile:', error);
-        toast.error(`Failed to connect to server: ${error.message}`);
+        MessageBox.error(`Failed to connect to server: ${error.message}`);
       } finally {
         setLoading(false);
       }
@@ -262,7 +262,7 @@ const WellnessProfile = () => {
 
     if (!formData.name || !formData.age || !formData.gender || !finalHeightCm || 
         !formData.weight || !formData.fitnessGoal || !formData.activityLevel) {
-      toast.error('Please fill in all required fields');
+      MessageBox.error('Please fill in all required fields');
       return;
     }
 
@@ -287,7 +287,7 @@ const WellnessProfile = () => {
       console.log('Response status:', response.status);
       
       if (response.status === 401) {
-        toast.error('Your session has expired. Please login again.');
+        MessageBox.error('Your session has expired. Please login again.');
         setRedirectPath('/patient/wellness/profile');
         navigate('/login');
         return;
@@ -297,17 +297,17 @@ const WellnessProfile = () => {
       console.log('Response data:', data);
       
       if (data.success) {
-        toast.success(hasProfile ? 'Profile updated successfully!' : 'Profile created successfully!');
+        MessageBox.success(hasProfile ? 'Profile updated successfully!' : 'Profile created successfully!');
         setHasProfile(true);
         
         navigate('/patient/wellness/diet-plan');
       } else {
-        toast.error(data.message || 'Failed to save profile');
+        MessageBox.error(data.message || 'Failed to save profile');
         console.error('Failed to save profile:', data);
       }
     } catch (error) {
       console.error('Error saving profile:', error);
-      toast.error(`Failed to connect to server: ${error.message}`);
+      MessageBox.error(`Failed to connect to server: ${error.message}`);
     } finally {
       setSubmitting(false);
     }

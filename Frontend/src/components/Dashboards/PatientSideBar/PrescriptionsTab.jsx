@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { FaUserMd, FaNotesMedical, FaDownload, FaSyncAlt } from 'react-icons/fa'
-import { toast } from 'react-toastify'
+import MessageBox from '../../common/MessageBox.jsx'
 import { useContext } from 'react'
 import { AuthContext } from '../../../contexts/authContext.jsx'
 
@@ -15,7 +15,7 @@ const PrescriptionsTab = React.memo(() => {
 
     const handleDownload = useCallback((fileType, fileName) => {
         console.log(`Placeholder download for ${fileType}: ${fileName}`);
-        toast.info(`Download requested for ${fileName}`);
+        MessageBox.info(`Download requested for ${fileName}`);
 
     }, []);
 
@@ -39,7 +39,7 @@ const PrescriptionsTab = React.memo(() => {
 
 
             if (response.status === 401) {
-                toast.error('Your session has expired. Please log in again.');
+                MessageBox.error('Your session has expired. Please log in again.');
                 setTimeout(() => {
                     logout();
                 }, 3000);
@@ -47,7 +47,7 @@ const PrescriptionsTab = React.memo(() => {
             }
 
             if (!response.ok) {
-                toast.error(`Server error: ${response.status} ${response.statusText}`);
+                MessageBox.error(`Server error: ${response.status} ${response.statusText}`);
                 setIsLoading(false);
                 return;
             }
@@ -57,10 +57,10 @@ const PrescriptionsTab = React.memo(() => {
             if (data.success) {
                 setPrescriptions(data.prescriptions || []);
             } else {
-                toast.error(`Failed to fetch prescriptions: ${data.message}`);
+                MessageBox.error(`Failed to fetch prescriptions: ${data.message}`);
             }
         } catch (error) {
-            toast.error(`Error fetching prescriptions: ${error.message}`);
+            MessageBox.error(`Error fetching prescriptions: ${error.message}`);
         } finally {
             setIsLoading(false);
         }

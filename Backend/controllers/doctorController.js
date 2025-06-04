@@ -1,5 +1,7 @@
 import User from '../models/userModel.js';
 import DoctorProfile from '../models/doctorProfileModel.js';
+import { sendEmail } from '../utils/email.js';
+import crypto from 'crypto';
 
 /**
  * Get all doctors
@@ -239,17 +241,54 @@ export const addDoctorReview = async (req, res) => {
   }
 };
 
+//random password generator fn
+const generateRandomPassword = (length = 10) => {
+  const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+  let password = '';
+  
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * charset.length);
+    password += charset[randomIndex];
+  }
+  
+  return password;
+};
+
+//mail sender
+const sendWelcomeEmail = async (doctorName, email, password) => {
+  console.log("hello")
+  const subject = 'Welcome to Medical Consultancy - Your Account Details';
+  
+  const body = `
+Dear Dr. ${doctorName},
+
+Welcome to our Medical Consultancy platform! Your account has been created by the administrator.
+
+Here are your login credentials:
+Email: ${email}
+Password: ${password}
+
+Please log in using these credentials and change your password as soon as possible for security reasons.
+
+If you have any questions, please contact our support team.
+
+Best regards,
+Medical Consultancy Team
+  `;
+  
+  return await sendEmail(email, subject, body);
+};
+
 /**
  * Create new doctor (admin only)
  * Creates both a user account with doctor role and a doctor profile
  */
 export const createDoctor = async (req, res) => {
   try {
-
+    console.log(req.body)
     const { 
-      name, 
+      fullName, 
       email, 
-      password, 
       phone, 
       specialization, 
       qualification, 
@@ -258,7 +297,7 @@ export const createDoctor = async (req, res) => {
       registrationNumber 
     } = req.body;
 
-    const nameParts = name.split(' ');
+    const nameParts = fullName.split(' ');
     const firstName = nameParts[0];
     const lastName = nameParts.slice(1).join(' ');
 
@@ -271,12 +310,15 @@ export const createDoctor = async (req, res) => {
       });
     }
 
+    // Generate a random password
+    const generatedPassword = generateRandomPassword();
+
     // 1. Create user account with doctor role
     const newUser = new User({
       firstName,
       lastName,
       email,
-      password, // Will be hashed by pre-save hook
+      password: generatedPassword, 
       phoneNumber: phone,
       role: 'doctor'
     });
@@ -297,17 +339,24 @@ export const createDoctor = async (req, res) => {
       bio: req.body.bio || '',
       languages: req.body.languages ? JSON.parse(req.body.languages) : ['English'],
       availability: Array.isArray(availability) ? availability : 
-                   (availability ? availability.split(',').map(day => day.trim()) : []),
+                  (availability ? availability.split(',').map(day => day.trim()) : []),
       registrationNumber: registrationNumber // Add registrationNumber to profile
     });
 
     await doctorProfile.save();
 
+    // 3. Send welcome email with login credentials
+    const emailResult = await sendWelcomeEmail(fullName, email, generatedPassword);
+    
+    if (!emailResult.success) {
+      console.warn('Failed to send welcome email:', emailResult.error);
+    }
+
     // Return combined data
     const doctor = {
       _id: newUser._id,
       name: `${newUser.firstName} ${newUser.lastName}`,
-      email:newUser.email,
+      email: newUser.email,
       phone: newUser.phoneNumber,
       profileImage: newUser.profileImage,
       role: newUser.role,
@@ -315,7 +364,7 @@ export const createDoctor = async (req, res) => {
       qualification: doctorProfile.qualification,
       experience: doctorProfile.experience,
       availability: doctorProfile.availability,
-      registrationNumber: doctorProfile.registrationNumber // Include registrationNumber in response
+      registrationNumber: doctorProfile.registrationNumber
     };
 
     res.status(201).json({
@@ -341,7 +390,7 @@ export const updateDoctor = async (req, res) => {
   try {
     const { id } = req.params;
     const { 
-      name, 
+      fullName, 
       email, 
       password, 
       phone, 
@@ -370,8 +419,8 @@ export const updateDoctor = async (req, res) => {
     }
 
     // Update user account fields
-    if (name) {
-      const nameParts = name.split(' ');
+    if (fullName) {
+      const nameParts = fullName.split(' ');
       user.firstName = nameParts[0];
       user.lastName = nameParts.slice(1).join(' ');
     }
@@ -421,7 +470,7 @@ export const updateDoctor = async (req, res) => {
     // Return updated doctor data
     const updatedDoctor = {
       _id: user._id,
-      name: `${user.firstName} ${user.lastName}`,
+      fullName: `${user.firstName} ${user.lastName}`,
       email: user.email,
       phone: user.phoneNumber,
       profileImage: user.profileImage,
@@ -489,4 +538,4 @@ export const deleteDoctor = async (req, res) => {
       error: error.message
     });
   }
-}; 
+};

@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useContext, useCallback, useMemo, useRef } from 'react';
-import { FaUserMd, FaCalendarCheck, FaUsers, FaWallet, FaComments, FaCog, FaChartBar, FaSignOutAlt, FaBell, FaSearch, FaClipboardList, FaUserCircle, FaPhone, FaEnvelope, FaMapMarkerAlt, FaEllipsisV, FaVideo, FaPaperclip, FaPaperPlane, FaKey, FaStar, FaClock, FaCalendarAlt, FaPlus, FaTrash, FaTimes, FaInfo, FaSyncAlt, FaRegClock, FaLock, FaBars } from 'react-icons/fa';
+import { FaCalendarCheck, FaUsers, FaWallet, FaComments, FaCog, FaChartBar, FaSignOutAlt, FaBell, FaClipboardList, FaClock, FaTimes, FaInfo } from 'react-icons/fa';
 import { AuthContext } from '../../contexts/authContext.jsx';
-import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import MessageBox from '../common/MessageBox.jsx';
 
-// Import refactored tab components
+
 import OverviewTab from './DocSideBar/OverviewTab.jsx';
 import AppointmentsTab from './DocSideBar/AppoinmentsTab.jsx';
 import AvailabilityTab from './DocSideBar/AvailabilityTab.jsx';
@@ -33,6 +33,15 @@ const DoctorDashboard = () => {
     const [error, setError] = useState(null);
     const [isNotificationsModalOpen, setIsNotificationsModalOpen] = useState(false);
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+    const [messageBox, setMessageBox] = useState({ show: false, type: '', message: '' });
+
+    const showMessage = (type, message) => {
+        setMessageBox({ show: true, type, message });
+    };
+
+    const closeMessageBox = () => {
+        setMessageBox({ show: false, type: '', message: '' });
+    };
 
     const navigate = useNavigate();
 
@@ -102,7 +111,7 @@ const DoctorDashboard = () => {
             setDoctorDetails(user);
         } else if (user && user.role !== 'doctor') {
             const timer = setTimeout(() => {
-                toast.error("You don't have permission to access the doctor dashboard. Redirecting...");
+                showMessage('error', "You don't have permission to access the doctor dashboard. Redirecting...");
                 if (user.role === 'admin') {
                     window.location.href = '/admin/dashboard';
                 } else {
@@ -113,7 +122,7 @@ const DoctorDashboard = () => {
             return () => clearTimeout(timer);
         } else {
             const timer = setTimeout(() => {
-                toast.error("Please log in to access the doctor dashboard");
+                showMessage('error', "Please log in to access the doctor dashboard");
                 window.location.href = '/login';
             }, 500);
 
@@ -139,7 +148,7 @@ const DoctorDashboard = () => {
             });
 
             if (response.status === 401) {
-                toast.error('Your session has expired. Please log in again.');
+                showMessage('error', 'Your session has expired. Please log in again.');
                 setTimeout(() => {
                     logout();
                 }, 3000);
@@ -147,7 +156,7 @@ const DoctorDashboard = () => {
             }
 
             if (!response.ok) {
-                toast.error(`Server error: ${response.status} ${response.statusText}`);
+                showMessage('error', `Server error: ${response.status} ${response.statusText}`);
                 setIsLoading(false);
                 return;
             }
@@ -157,10 +166,10 @@ const DoctorDashboard = () => {
             if (data.success) {
                 setAppointments(data.appointments || []);
             } else {
-                toast.error(`Failed to fetch appointments: ${data.message}`);
+                showMessage('error', `Failed to fetch appointments: ${data.message}`);
             }
         } catch (error) {
-            toast.error(`Error fetching appointments: ${error.message}`);
+            showMessage('error', `Error fetching appointments: ${error.message}`);
         } finally {
             setIsLoading(false);
         }
@@ -180,13 +189,13 @@ const DoctorDashboard = () => {
             });
 
             if (response.status === 401) {
-                toast.error('Authentication error - please try logging in again');
+                showMessage('error', 'Authentication error - please try logging in again');
                 logout();
                 return;
             }
 
             if (!response.ok) {
-                toast.error(`Server error: ${response.status} ${response.statusText}`);
+                showMessage('error', `Server error: ${response.status} ${response.statusText}`);
                 setIsLoading(false);
                 return;
             }
@@ -196,10 +205,10 @@ const DoctorDashboard = () => {
             if (data.success) {
                 setTimeSlots(data.timeSlots);
             } else {
-                toast.error(`Failed to fetch time slots: ${data.message}`);
+                showMessage('error', `Failed to fetch time slots: ${data.message}`);
             }
         } catch (error) {
-            toast.error(`Error fetching time slots: ${error.message}`);
+            showMessage('error', `Error fetching time slots: ${error.message}`);
         } finally {
             setIsLoading(false);
         }
@@ -216,12 +225,12 @@ const DoctorDashboard = () => {
     // Memoized time slot handlers
     const handleAddTimeSlot = useCallback(async () => {
         if (!newSlot.startTime || !newSlot.endTime) {
-            toast.error('Please select both start and end times');
+            showMessage('error', 'Please select both start and end times');
             return;
         }
 
         if (newSlot.startTime >= newSlot.endTime) {
-            toast.error('End time must be after start time');
+            showMessage('error', 'End time must be after start time');
             return;
         }
 
@@ -245,13 +254,13 @@ const DoctorDashboard = () => {
             });
 
             if (response.status === 401) {
-                toast.error('Authentication error - please try logging in again');
+                showMessage('error', 'Authentication error - please try logging in again');
                 logout();
                 return;
             }
 
             if (!response.ok) {
-                toast.error(`Server error: ${response.status} ${response.statusText}`);
+                showMessage('error', `Server error: ${response.status} ${response.statusText}`);
                 setIsLoading(false);
                 return;
             }
@@ -259,14 +268,14 @@ const DoctorDashboard = () => {
             const data = await response.json();
 
             if (data.success) {
-                toast.success('Time slot added successfully');
+                showMessage('success', 'Time slot added successfully');
                 fetchTimeSlots();
                 setNewSlot({ startTime: '09:00', endTime: '09:30' });
             } else {
-                toast.error(data.message || 'Failed to add time slot');
+                showMessage('error', data.message || 'Failed to add time slot');
             }
         } catch (error) {
-            toast.error('Error adding time slot');
+            showMessage('error', 'Error adding time slot');
         } finally {
             setIsLoading(false);
         }
@@ -284,7 +293,7 @@ const DoctorDashboard = () => {
             });
 
             if (response.status === 401) {
-                toast.error('Authentication error - please try logging in again');
+                showMessage('error', 'Authentication error - please try logging in again');
                 logout();
                 return;
             }
@@ -292,13 +301,13 @@ const DoctorDashboard = () => {
             const data = await response.json();
 
             if (data.success) {
-                toast.success('Time slot deleted successfully');
+                showMessage('success', 'Time slot deleted successfully');
                 fetchTimeSlots();
             } else {
-                toast.error(data.message || 'Failed to delete time slot');
+                showMessage('error', data.message || 'Failed to delete time slot');
             }
         } catch (error) {
-            toast.error('Error deleting time slot');
+            showMessage('error', 'Error deleting time slot');
         } finally {
             setIsLoading(false);
         }
@@ -308,12 +317,12 @@ const DoctorDashboard = () => {
         try {
             const result = await logout();
             if (result.success) {
-                toast.success("Logged out successfully");
+                showMessage('success', "Logged out successfully");
             } else {
-                toast.error(result.message || "Failed to logout");
+                showMessage('error', result.message || "Failed to logout");
             }
         } catch (error) {
-            toast.error("An error occurred during logout");
+            showMessage('error', "An error occurred during logout");
         }
     }, [logout]);
 
@@ -328,7 +337,7 @@ const DoctorDashboard = () => {
 
     const updateAppointmentStatus = useCallback(async (appointmentId, status) => {
         if (!appointmentId) {
-            toast.error("Cannot update: Missing appointment ID");
+            showMessage('error', "Cannot update: Missing appointment ID");
             return;
         }
 
@@ -344,7 +353,7 @@ const DoctorDashboard = () => {
             });
 
             if (response.status === 401) {
-                toast.error('Authentication error - please try logging in again');
+                showMessage('error', 'Authentication error - please try logging in again');
                 setTimeout(() => {
                     logout();
                 }, 3000);
@@ -352,7 +361,7 @@ const DoctorDashboard = () => {
             }
 
             if (!response.ok) {
-                toast.error(`Server error: ${response.status} ${response.statusText}`);
+                showMessage('error', `Server error: ${response.status} ${response.statusText}`);
                 setIsLoading(false);
                 return;
             }
@@ -360,11 +369,11 @@ const DoctorDashboard = () => {
             const data = await response.json();
 
             if (data.success) {
-                toast.success(`Appointment ${status} successfully`);
+                showMessage('success', `Appointment ${status} successfully`);
 
                 const appointment = appointments.find(apt => apt._id === appointmentId);
                 if (appointment && status === 'cancelled') {
-                    toast.info(`A notification has been sent to ${appointment.patientName} about the cancellation`);
+                    showMessage('info', `A notification has been sent to ${appointment.patientName} about the cancellation`);
                 }
 
                 fetchAppointments();
@@ -373,10 +382,10 @@ const DoctorDashboard = () => {
                     fetchTimeSlots();
                 }
             } else {
-                toast.error(data.message || `Failed to ${status} appointment`);
+                showMessage('error', data.message || `Failed to ${status} appointment`);
             }
         } catch (error) {
-            toast.error(`Error ${status} appointment: ${error.message}`);
+            showMessage('error', `Error ${status} appointment: ${error.message}`);
         } finally {
             setIsLoading(false);
         }
@@ -384,7 +393,7 @@ const DoctorDashboard = () => {
 
     const viewAppointmentDetails = useCallback((appointment) => {
         if (!appointment) {
-            toast.error("Appointment details not available");
+            showMessage('error', "Appointment details not available");
             return;
         }
 
@@ -595,7 +604,7 @@ const DoctorDashboard = () => {
                     setIsLoading(false);
                 }
             } else if (user && user.role !== 'doctor') {
-                toast.error("You don't have permission to access the doctor dashboard");
+                showMessage('error', "You don't have permission to access the doctor dashboard");
                 setTimeout(() => {
                     navigate(user.role === 'admin' ? '/admin/dashboard' : '/patient/dashboard');
                 }, 1000);
@@ -648,6 +657,13 @@ const DoctorDashboard = () => {
 
     return (
         <>
+            {messageBox.show && (
+                <MessageBox
+                    type={messageBox.type}
+                    message={messageBox.message}
+                    onClose={closeMessageBox}
+                />
+            )}
             <div className="flex bg-gray-50 relative mt-24">
                 {/* Background Overlay */}
                 {sidebarOpen && (
@@ -726,7 +742,7 @@ const DoctorDashboard = () => {
                             <div className="flex items-center gap-4">
                                 {/* Container for notification button and floating box */}
                                 <div className="relative" ref={notificationsRef}>
-                                    <button 
+                                    <button
                                         className="relative p-2 text-gray-500 hover:text-[#007E85] transition-colors"
                                         onClick={toggleNotificationsModal}
                                     >

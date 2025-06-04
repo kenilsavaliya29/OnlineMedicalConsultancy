@@ -26,6 +26,13 @@ const doctorProfileSchema = new mongoose.Schema({
     type: String,
     unique: true
   },
+  consultationPrice: {
+    type: Number,
+    required: true,
+    default: 300,
+    min: 100,
+    max: 5000
+  },
   
   // Practice details
   bio: {

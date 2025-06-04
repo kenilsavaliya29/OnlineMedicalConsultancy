@@ -12,7 +12,7 @@ dotenv.config(); // Load environment variables
  */
 export const sendEmail = async (to, subject, body) => {
   try {
-    // Check if email configuration is available
+   
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
       console.warn('Email credentials not configured. Email not sent.');
       return {

@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { FaUserMd, FaPlus, FaTrash, FaEdit, FaSearch, FaFilter, FaTimes, FaCloudUploadAlt, FaUserCircle } from 'react-icons/fa';
+import React, { useState, useEffect, useContext, useRef } from 'react';
+import { FaUserMd, FaPlus, FaTrash, FaEdit, FaSearch, FaFilter, FaTimes, FaCloudUploadAlt, FaUserCircle, FaBars } from 'react-icons/fa';
 import { MdDashboard } from 'react-icons/md';
-import { toast } from 'react-toastify';
+import MessageBox from '../common/MessageBox.jsx';
 import { AuthContext } from '../../contexts/authContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-// Define options
 const qualificationOptions = [
   'MD', 'DO', 'MBBS', 'PhD', 'MS', 'DM'
 ];
@@ -26,6 +25,12 @@ const Admin = () => {
   const { user } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [doctorToDelete, setDoctorToDelete] = useState(null);
+  const deleteModalRef = useRef(null);
+  const [isSubmittingForm, setIsSubmittingForm] = useState(false);
+  const [messageBox, setMessageBox] = useState({ show: false, type: '', message: '' });
+  const [showFilterSidebar, setShowFilterSidebar] = useState(false);
 
   // Filter states
   const [filterSpecialization, setFilterSpecialization] = useState('');
@@ -43,7 +48,6 @@ const Admin = () => {
     lastname: '',
     phonenumber: '',
     email: '',
-    password: '',
     specialization: '',
     experience: '',
     qualification: '',
@@ -66,16 +70,23 @@ const Admin = () => {
   ];
 
   // Add this to the state variables section:
-  const [viewType, setViewType] = useState('card');
+  const [viewType, setViewType] = useState('table');
+
+  const showMessage = (type, message) => {
+    setMessageBox({ show: true, type, message });
+  };
+
+  const closeMessageBox = () => {
+    setMessageBox({ show: false, type: '', message: '' });
+  };
 
   // Fetch doctors on component mount
   useEffect(() => {
-
     if (user && user.role !== 'admin') {
       console.warn("Non-admin user trying to access admin dashboard:", user.role);
 
       const timer = setTimeout(() => {
-        toast.error("You don't have permission to access the admin dashboard");
+        showMessage('error', "You don't have permission to access the admin dashboard");
         window.location.href = '/';
       }, 500); // Small delay to avoid toast during normal navigation
 
@@ -93,7 +104,7 @@ const Admin = () => {
 
         if (!response.ok) {
           if (response.status === 401) {
-            toast.error('Authentication failed. Please log in again.');
+            showMessage('error', 'Authentication failed. Please log in again.');
             setError('Authentication failed. Please log in again.');
             return;
           }
@@ -107,12 +118,12 @@ const Admin = () => {
           setDoctors(data.doctors);
         } else {
           const errorMsg = 'Failed to fetch doctors: ' + (data.message || 'Unknown error');
-          toast.error(errorMsg);
+          showMessage('error', errorMsg);
           setError(errorMsg);
         }
       } catch (error) {
         const errorMsg = `Failed to fetch doctors: ${error.message}`;
-        toast.error(errorMsg);
+        showMessage('error', errorMsg);
         console.error('Error fetching doctors:', error);
         setError(errorMsg);
       } finally {
@@ -149,7 +160,7 @@ const Admin = () => {
       // Handle regular inputs and selects
       setFormData(prev => ({
         ...prev,
-        [name]: value
+        [name]: value.trim()
       }));
 
       // Clear validation error when field is filled
@@ -198,11 +209,6 @@ const Admin = () => {
         errors.email = 'Please enter a valid email address';
       }
 
-      // Password validation for new doctors
-      if (formData.password.length < 6) {
-        errors.password = 'Password must be at least 6 characters long';
-      }
-
       // Profile image validation for new doctors
       if (!profileImage && !profileImagePreview) {
         errors.profileImage = 'Profile image is required';
@@ -213,7 +219,8 @@ const Admin = () => {
       if (!hasAvailability) errors.availability = 'Please select at least one day';
 
       // Registration Number validation if provided
-      if (formData.registrationNumber.trim() && !/^[A-Za-z0-9]+$/.test(formData.registrationNumber.trim())) { // Example simple alphanumeric validation
+      if (!formData.registrationNumber.trim()) errors.registrationNumber = 'Registration number is required';
+      else if (!/^[A-Za-z0-9]+$/.test(formData.registrationNumber.trim())) { // Example simple alphanumeric validation
         errors.registrationNumber = 'Registration number must be alphanumeric';
       }
     } else {
@@ -225,11 +232,6 @@ const Admin = () => {
         if (!emailRegex.test(formData.email.trim())) {
           errors.email = 'Please enter a valid email address';
         }
-      }
-
-      // Password validation if provided (optional when editing)
-      if (formData.password.trim() && formData.password.length < 6) {
-        errors.password = 'Password must be at least 6 characters long';
       }
 
       // Registration Number validation if provided
@@ -247,54 +249,47 @@ const Admin = () => {
 
     // Validate form
     if (!validateForm()) {
-      toast.error('Please fix the validation errors');
+      showMessage('error', 'Please fix the validation errors');
       return;
     }
 
     console.log("Form data submitted:", formData);
+    setIsSubmittingForm(true);
 
     try {
-      // Format availability from object to array
       const availableDays = Object.entries(formData.availability)
         .filter(([_, isAvailable]) => isAvailable)
         .map(([day]) => day);
 
-      // Creating the data structure that matches what backend expects
       const doctorData = {
-        name: `${formData.firstname} ${formData.lastname}`, // Combine first and last name
+        fullName: `${formData.firstname} ${formData.lastname}`,
         specialization: formData.specialization,
         experience: formData.experience,
         qualification: formData.qualification,
         email: formData.email,
-        phone: formData.phonenumber, // Map phonenumber to phone
-        availability: availableDays, // Now it's an array
+        phone: formData.phonenumber,
+        availability: availableDays,
         registrationNumber: formData.registrationNumber
       };
 
-      // Only include password if it's provided (not empty)
-      if (formData.password.trim()) {
-        doctorData.password = formData.password;
-      }
-
       console.log("Sending doctor data to API:", doctorData);
 
-      // If we have an image, we'll need FormData instead of JSON
       let payload;
       let headers = {};
 
       if (profileImage) {
         payload = new FormData();
-        // Add all doctor data as form fields
+        
         Object.entries(doctorData).forEach(([key, value]) => {
-          if (value) { // Only add fields with values
+          if (value) { 
             payload.append(key, value);
           }
         });
-        // Add the image file
+       
         payload.append("profileImage", profileImage);
-        // FormData sets its own content-type with boundary
+       
       } else {
-        // For JSON payload, only include fields that have values
+       
         const cleanedData = Object.fromEntries(
           Object.entries(doctorData).filter(([_, v]) => v !== undefined && v !== '')
         );
@@ -332,12 +327,12 @@ const Admin = () => {
           setDoctors(doctors.map(doc =>
             doc._id === editingDoctor._id ? result.doctor : doc
           ));
-          toast.success('Doctor updated successfully!');
+          showMessage('success', 'Doctor updated successfully!');
           setEditingDoctor(null);
         } else {
           // Add the new doctor to the doctors array
           setDoctors([...doctors, result.doctor]);
-          toast.success('Doctor added successfully!');
+          showMessage('success', 'Doctor added successfully!');
           console.log("New doctor added:", result.doctor);
         }
 
@@ -361,17 +356,19 @@ const Admin = () => {
         setShowAddForm(false);
       } else {
         // Show detailed error message
-        toast.error(`Operation failed: ${result.message}`);
+        showMessage('error', `Operation failed: ${result.message}`);
         console.error("API returned error:", result);
       }
     } catch (error) {
       console.error("Error adding/updating doctor:", error);
-      toast.error(`Error: ${error.message}`);
+      showMessage('error', `Error: ${error.message}`);
 
       // Try to log more details if possible
       if (error.response) {
         console.error("Error response:", error.response);
       }
+    } finally {
+      setIsSubmittingForm(false);
     }
   };
 
@@ -458,24 +455,34 @@ const Admin = () => {
     }, 100);
   };
 
+  const openDeleteModal = (id) => {
+    setDoctorToDelete(id);
+    setIsDeleteModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setDoctorToDelete(null);
+  };
+
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this doctor?')) {
-      try {
-        const response = await fetch(`${API_URL}/api/doctors/${id}`, {
-          method: 'DELETE',
-          credentials: 'include'
-        });
-        const result = await response.json();
-        if (result.success) {
-          setDoctors(doctors.filter(doctor => doctor._id !== id));
-          toast.success('Doctor removed successfully!');
-        } else {
-          toast.error(result.message || 'Failed to delete doctor');
-        }
-      } catch (error) {
-        toast.error('Failed to delete doctor');
-        console.error('Error deleting doctor:', error);
+    try {
+      const response = await fetch(`${API_URL}/api/doctors/${id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      const result = await response.json();
+      if (result.success) {
+        setDoctors(doctors.filter(doctor => doctor._id !== id));
+        showMessage('success', 'Doctor removed successfully!');
+      } else {
+        showMessage('error', result.message || 'Failed to delete doctor');
       }
+    } catch (error) {
+      showMessage('error', 'Failed to delete doctor');
+      console.error('Error deleting doctor:', error);
+    } finally {
+      closeDeleteModal();
     }
   };
 
@@ -543,6 +550,13 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pt-24">
+      {messageBox.show && (
+        <MessageBox
+          type={messageBox.type}
+          message={messageBox.message}
+          onClose={closeMessageBox}
+        />
+      )}
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center">
@@ -558,11 +572,10 @@ const Admin = () => {
                 lastname: '',
                 phonenumber: '',
                 email: '',
-                password: '',
                 specialization: '',
                 experience: '',
                 qualification: '',
-                role: 'doctor', // Always set role to doctor
+                role: 'doctor',
                 availability: { ...initialAvailabilityState },
                 registrationNumber: ''
               });
@@ -581,7 +594,7 @@ const Admin = () => {
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
             <h2 className="text-xl font-semibold mb-4 text-gray-800">{editingDoctor ? 'Edit Doctor Details' : 'Add New Doctor'}</h2>
             <form onSubmit={handleSubmit}>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* First Column - Basic Information */}
                 <div className="space-y-4">
                   <div>
@@ -635,27 +648,6 @@ const Admin = () => {
                     />
                     {validationErrors.email && (
                       <p className="text-red-500 text-xs mt-1">{validationErrors.email}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-gray-700 mb-2">
-                      Password {!editingDoctor && <span className="text-red-500">*</span>}
-                      <span className="text-gray-500 text-xs ml-2">
-                        {editingDoctor ? '(Leave blank to keep current)' : '(Min 6 characters)'}
-                      </span>
-                    </label>
-                    <input
-                      type="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007E85] ${validationErrors.password ? 'border-red-500' : ''}`}
-                      required={!editingDoctor}
-                      placeholder={editingDoctor ? "Enter new password (optional)" : "Enter password (min 6 characters)"}
-                    />
-                    {validationErrors.password && (
-                      <p className="text-red-500 text-xs mt-1">{validationErrors.password}</p>
                     )}
                   </div>
                 </div>
@@ -745,7 +737,10 @@ const Admin = () => {
                       <p className="text-red-500 text-xs mt-1">{validationErrors.qualification}</p>
                     )}
                   </div>
+                </div>
 
+                {/* Third Column - Availability and Profile Image */}
+                <div className="space-y-4">
                   <div>
                     <label className="block text-gray-700 mb-2">
                       Registration Number {!editingDoctor && <span className="text-red-500">*</span>}
@@ -763,10 +758,6 @@ const Admin = () => {
                       <p className="text-red-500 text-xs mt-1">{validationErrors.registrationNumber}</p>
                     )}
                   </div>
-                </div>
-
-                {/* Third Column - Availability and Profile Image */}
-                <div className="space-y-4">
                   <div>
                     <label className="block text-gray-700 mb-2">
                       Availability {!editingDoctor && <span className="text-red-500">*</span>}
@@ -860,9 +851,20 @@ const Admin = () => {
               <div className="mt-6 flex justify-end">
                 <button
                   type="submit"
-                  className="bg-[#007E85] hover:bg-[#006b6f] text-white px-6 py-2 rounded-lg transition duration-300"
+                  disabled={isSubmittingForm}
+                  className="bg-[#007E85] hover:bg-[#006b6f] text-white px-6 py-2 rounded-lg font-semibold transition-colors duration-300 disabled:opacity-50"
                 >
-                  {editingDoctor ? 'Update Doctor' : 'Add Doctor'}
+                  {isSubmittingForm ? (
+                    <span className="flex items-center">
+                      <svg className="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      {editingDoctor ? 'Updating...' : 'Adding...'}
+                    </span>
+                  ) : (
+                    editingDoctor ? 'Update Doctor' : 'Add Doctor'
+                  )}
                 </button>
               </div>
             </form>
@@ -873,7 +875,102 @@ const Admin = () => {
           <div className="mb-6">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Manage Doctors</h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+            {/* Filter controls and filter button for small screens */}
+            <div className="flex justify-between items-center mb-4 md:hidden">
+              <h3 className="text-lg font-semibold text-gray-800">Filters</h3>
+              <button
+                onClick={() => setShowFilterSidebar(!showFilterSidebar)}
+                className="p-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700"
+              >
+                <FaBars className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Filter Sidebar for small screens */}
+            <div
+              className={`fixed inset-0 bg-black z-40 md:hidden transition-opacity duration-300 ease-in-out ${showFilterSidebar ? 'opacity-50 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+              onClick={() => setShowFilterSidebar(false)}
+            ></div>
+            <div
+              className={`fixed top-0 right-0 w-3/4 h-full bg-white p-6 shadow-lg overflow-y-auto transform transition-transform duration-300 ease-in-out z-50 md:hidden ${showFilterSidebar ? 'translate-x-0' : 'translate-x-full'}`}
+              onClick={(e) => e.stopPropagation()} // Prevent clicks inside from closing
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-gray-800">Filter Doctors</h3>
+                <button
+                  onClick={() => setShowFilterSidebar(false)}
+                  className="p-2 rounded-full text-gray-500 hover:bg-gray-100"
+                >
+                  <FaTimes className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Search Name</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search by name..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007E85] w-full"
+                    />
+                    <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Specialization</label>
+                  <select
+                    value={filterSpecialization}
+                    onChange={(e) => setFilterSpecialization(e.target.value)}
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007E85] bg-white"
+                  >
+                    <option value="">All</option>
+                    {specializations.map((spec) => (
+                      <option key={spec} value={spec}>{spec}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Experience</label>
+                  <select
+                    value={filterExperience}
+                    onChange={(e) => setFilterExperience(e.target.value)}
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007E85] bg-white"
+                  >
+                    <option value="">All</option>
+                    {experienceYears.map((year) => (
+                      <option key={year} value={year}>{year}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Qualification</label>
+                  <select
+                    value={filterQualification}
+                    onChange={(e) => setFilterQualification(e.target.value)}
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007E85] bg-white"
+                  >
+                    <option value="">All</option>
+                    {qualificationOptions.map((qual) => (
+                      <option key={qual} value={qual}>{qual}</option>
+                    ))}
+                  </select>
+                </div>
+                <button
+                  onClick={() => {
+                    resetFilters();
+                    setShowFilterSidebar(false); // Close sidebar after resetting
+                  }}
+                  className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#007E85]"
+                >
+                  <FaTimes className="mr-2" /> Reset Filters
+                </button>
+              </div>
+            </div>
+
+            {/* Filter controls for medium and larger devices */}
+            <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
               <div className="lg:col-span-1">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Search Name</label>
                 <div className="relative">
@@ -1012,7 +1109,7 @@ const Admin = () => {
                                     ? doctorInfo.profileImage
                                     : `${API_URL}${doctorInfo.profileImage}`}
                                   alt={`Dr. ${doctorInfo.firstName} ${doctorInfo.lastName}`}
-                                  className="h-full w-full object-cover"
+                                  className="h-full w-full object-cover "
                                   onError={(e) => {
                                     e.target.onerror = null;
                                     e.target.src = '/assets/images/profilephoto.svg';
@@ -1085,7 +1182,7 @@ const Admin = () => {
                                 <FaEdit className="w-5 h-5" />
                               </button>
                               <button
-                                onClick={() => handleDelete(doctorInfo.id)}
+                                onClick={() => openDeleteModal(doctorInfo.id)}
                                 className="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-50"
                                 title="Delete Doctor"
                               >
@@ -1178,7 +1275,7 @@ const Admin = () => {
                                 <FaEdit className="w-5 h-5" />
                               </button>
                               <button
-                                onClick={() => handleDelete(doctorInfo.id)}
+                                onClick={() => openDeleteModal(doctorInfo.id)}
                                 className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
                                 title="Delete Doctor"
                               >
@@ -1195,9 +1292,34 @@ const Admin = () => {
             )}
           </div>
         </div>
+
+        {/* Delete Confirmation Modal */}
+        {isDeleteModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+            <div className="bg-white rounded-lg shadow-xl p-6 w-11/12 max-w-sm mx-auto" ref={deleteModalRef}>
+              <h3 className="text-xl font-bold text-gray-800 mb-4">Confirm Deletion</h3>
+              <p className="text-gray-600 mb-6">Are you sure you want to delete this doctor? This action cannot be undone.</p>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={closeDeleteModal}
+                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-800 transition duration-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => doctorToDelete && handleDelete(doctorToDelete)}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white transition duration-200"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
 export default Admin;
+

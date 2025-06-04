@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback , useContext} from 'react';
 import { FaUserMd, FaSyncAlt } from 'react-icons/fa';
-import { toast } from 'react-toastify';
+import MessageBox from '../../common/MessageBox.jsx';
 import { AuthContext } from '../../../contexts/authContext.jsx';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -32,14 +32,14 @@ const MyDoctorTab = React.memo(() => {
             });
 
             if (response.status === 401) {
-                toast.error('Your session has expired. Please log in again.');
+                MessageBox.error('Your session has expired. Please log in again.');
                 // In a real app, you might trigger a logout here
                 // setTimeout(() => { logout(); }, 3000);
                 return;
             }
 
             if (!response.ok) {
-                toast.error(`Server error: ${response.status} ${response.statusText}`);
+                MessageBox.error(`Server error: ${response.status} ${response.statusText}`);
                 setIsLoading(false);
                 return;
             }
@@ -49,10 +49,10 @@ const MyDoctorTab = React.memo(() => {
             if (data.success) {
                 setDoctors(data.doctors || []);
             } else {
-                toast.error(`Failed to fetch doctors: ${data.message}`);
+                MessageBox.error(`Failed to fetch doctors: ${data.message}`);
             }
         } catch (error) {
-            toast.error(`Error fetching doctors: ${error.message}`);
+            MessageBox.error(`Error fetching doctors: ${error.message}`);
         } finally {
             setIsLoading(false);
         }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { toast } from 'react-toastify';
+import MessageBox from '../common/MessageBox';
 import { useNavigate } from 'react-router-dom';
 import { FaUtensils, FaWeight, FaRunning, FaCalendarAlt, FaHistory, FaUserMd } from 'react-icons/fa';
 
@@ -46,7 +46,7 @@ const DietPlan = () => {
         const profileData = await profileResponse.json();
         
         if (!profileResponse.ok && profileResponse.status !== 404) { // Handle non-404 errors
-          toast.error(profileData.message || 'Failed to fetch profile');
+          MessageBox.error(profileData.message || 'Failed to fetch profile');
           if (profileResponse.status === 401) {
             navigate('/login');
           }
@@ -81,12 +81,12 @@ const DietPlan = () => {
           }
         } else {
           // No diet plan found, show prompt
-          toast.info('No diet plan found. Please update your wellness profile.');
+          MessageBox.info('No diet plan found. Please update your wellness profile.');
           setShowPlanPrompt(true);
         }
       } catch (error) {
         console.error('Error fetching profile and diet plan:', error);
-        toast.error('Failed to connect to server');
+        MessageBox.error('Failed to connect to server');
       } finally {
         setLoading(false);
       }
@@ -103,7 +103,7 @@ const DietPlan = () => {
   // Generate a new diet plan
   const handleGenerateNewPlan = async () => {
     try {
-      toast.info('Generating new diet plan...');
+      MessageBox.info('Generating new diet plan...');
       
       const response = await fetch(`${API_URL}/api/wellness/diet-plan`, {
         method: 'POST',
@@ -119,16 +119,16 @@ const DietPlan = () => {
         setDietPlan(data.dietPlan);
         setPreviousPlan(prev => [data.dietPlan, ...prev]);
         setSelectedWeek(data.dietPlan.weekNumber);
-        toast.success('New diet plan generated successfully!');
+        MessageBox.success('New diet plan generated successfully!');
       } else {
-        toast.error(data.message || 'Failed to generate new diet plan');
+        MessageBox.error(data.message || 'Failed to generate new diet plan');
         if (response.status === 401) {
           navigate('/login');
         }
       }
     } catch (error) {
       console.error('Error generating new diet plan:', error);
-      toast.error('Failed to connect to server');
+      MessageBox.error('Failed to connect to server');
     }
   };
   
@@ -161,14 +161,14 @@ const DietPlan = () => {
         setSelectedWeek(week);
         setShowHistory(false);
       } else {
-        toast.error(data.message || 'Failed to fetch diet plan');
+        MessageBox.error(data.message || 'Failed to fetch diet plan');
         if (response.status === 401) {
           navigate('/login');
         }
       }
     } catch (error) {
       console.error('Error fetching diet plan:', error);
-      toast.error('Failed to connect to server');
+      MessageBox.error('Failed to connect to server');
     }
   };
   

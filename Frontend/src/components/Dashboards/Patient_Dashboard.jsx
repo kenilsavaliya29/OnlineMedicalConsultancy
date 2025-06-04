@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext, useCallback, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FaUserMd, FaCalendarCheck, FaFileMedical, FaWallet, FaComments, FaCog, FaChartLine, FaSignOutAlt, FaBell, FaHeartbeat, FaNotesMedical, FaUserCircle, FaPhone, FaEnvelope, FaMapMarkerAlt, FaKey, FaStar, FaDownload, FaSyncAlt, FaAppleAlt, FaHospitalUser, FaTimes, FaBars } from 'react-icons/fa'
-import { toast } from 'react-toastify'
 import { AuthContext } from '../../contexts/authContext.jsx'
 
 import OverViewTab from './PatientSideBar/OverViewTab.jsx'
@@ -13,6 +12,7 @@ import MessagesTab from './PatientSideBar/MessagesTab.jsx'
 import SettingsTab from './PatientSideBar/SettingsTab.jsx'
 import MyDoctorTab from './PatientSideBar/MyDoctorTab.jsx'
 import MedicalProfileTab from './PatientSideBar/MedicalProfileTab.jsx'
+import MessageBox from '../common/MessageBox.jsx'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
@@ -23,9 +23,18 @@ const Patient_Dashboard = () => {
   const [activeTab, setActiveTab] = useState('overview')
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [patientDetails, setPatientDetails] = useState(null)
-  const [isBasicProfileComplete, setIsBasicProfileComplete] = useState(true); // Prop to pass to MedicalProfileTab
+  const [isBasicProfileComplete, setIsBasicProfileComplete] = useState(true); 
   const [isNotificationsModalOpen, setIsNotificationsModalOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [messageBox, setMessageBox] = useState({ show: false, type: '', message: '' });
+
+  const showMessage = (type, message) => {
+    setMessageBox({ show: true, type, message });
+  };
+
+  const closeMessageBox = () => {
+    setMessageBox({ show: false, type: '', message: '' });
+  };
 
   const sidebarRef = useRef(null);
   const notificationsRef = useRef(null); // Assuming patient dashboard will also have notifications
@@ -38,7 +47,7 @@ const Patient_Dashboard = () => {
     } else if (user && user.role !== 'patient') {
 
       const timer = setTimeout(() => {
-        toast.error("You don't have permission to access the patient dashboard. Redirecting...")
+        showMessage('error', "You don't have permission to access the patient dashboard. Redirecting...")
 
         if (user.role === 'doctor') {
           window.location.href = '/doctor/dashboard'
@@ -51,7 +60,7 @@ const Patient_Dashboard = () => {
     } else {
 
       const timer = setTimeout(() => {
-        toast.error("Please log in to access the patient dashboard")
+        showMessage('error', "Please log in to access the patient dashboard")
         window.location.href = '/login'
       }, 500)
 
@@ -97,13 +106,13 @@ const Patient_Dashboard = () => {
     try {
       const result = await logout()
       if (result.success) {
-        toast.success("Logged out successfully")
+        showMessage('success', "Logged out successfully")
         // Redirect will be handled by AuthContext/ProtectedRoute
       } else {
-        toast.error(result.message || "Failed to logout")
+        showMessage('error', result.message || "Failed to logout")
       }
     } catch (error) {
-      toast.error("An error occurred during logout")
+      showMessage('error', "An error occurred during logout")
     }
   }, [logout])
 
@@ -127,7 +136,7 @@ const Patient_Dashboard = () => {
     { id: 'wellness', name: 'Wellness Program', icon: <FaAppleAlt /> },
     { id: 'payments', name: 'Bills & Payments', icon: <FaWallet /> },
     { id: 'messages', name: 'Messages', icon: <FaComments /> },
-    { id: 'settings', name: 'Settings', icon: <FaCog /> },
+    { id: 'settings', name: 'Account Settings', icon: <FaCog /> },
   ], [])
 
   // Memoize active tab title
@@ -224,6 +233,13 @@ const Patient_Dashboard = () => {
 
   return (
     <>
+      {messageBox.show && (
+        <MessageBox
+          type={messageBox.type}
+          message={messageBox.message}
+          onClose={closeMessageBox}
+        />
+      )}
       <div className="flex bg-gray-50 relative mt-24">
         {/* Background Overlay */}
         {sidebarOpen && (
