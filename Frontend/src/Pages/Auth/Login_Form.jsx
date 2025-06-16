@@ -1,16 +1,14 @@
-import React from "react";
-import { useForm } from "react-hook-form";
+import { useForm } from "react-hook-form"
 import { Link, useNavigate, NavLink, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { useContext } from "react";
+import { React, useState, useEffect, useContext } from "react";
 import { AuthContext } from "../../contexts/authContext.jsx";
 
 const Login_Form = () => {
   let open_eye = "/assets/images/opened.svg";
   let close_eye = "/assets/images/closed.svg";
 
-  // Use the auth context
-  const { login, getRedirectPath, user, getAndClearReturnPath } = useContext(AuthContext);
+
+  const { login, getRedirectPath, getAndClearReturnPath } = useContext(AuthContext);
 
   const [showPassword, setShowPassword] = useState(false);
   const [imgToggle, setimgToggle] = useState(false);
@@ -24,10 +22,10 @@ const Login_Form = () => {
 
   // Get query parameters for appointment booking
   useEffect(() => {
-    // Check if there are query parameters to restore appointment data
+
     if (location.search) {
       const queryParams = new URLSearchParams(location.search);
-      // If doctorId exists, it indicates we're coming from appointment booking
+
       if (queryParams.has('doctorId')) {
         console.log("Login form loaded with appointment booking query params");
       }
@@ -61,23 +59,23 @@ const Login_Form = () => {
     setFormSubmitting(true);
     setLoginError(""); // Clear previous errors
     setErrorType(null);
-    
+
     try {
       console.log(`Attempting login with email: ${data.email}, isDoctor: ${isDoctor}`);
-      
+
       // Add isDoctor to the credentials object
       const credentials = {
         email: data.email,
         password: data.password,
         isDoctor: isDoctor
       };
-      
+
       // Use AuthContext login method which handles the API call and user state
       const result = await login(credentials);
-      
+
       if (result.success) {
         console.log("Login successful, user role:", result.user.role);
-        
+
         // Validate that the user's role matches their login attempt
         if (isDoctor && result.user.role !== 'doctor') {
           setLoginError("This account is not registered as a doctor. Please uncheck the 'I am a doctor' checkbox.");
@@ -85,14 +83,14 @@ const Login_Form = () => {
           setFormSubmitting(false);
           return;
         }
-        
+
         if (!isDoctor && result.user.role === 'doctor') {
           setLoginError("This is a doctor account. Please check the 'I am a doctor' checkbox.");
           setErrorType("roleError");
           setFormSubmitting(false);
           return;
         }
-        
+
         // Check if user is trying to access doctor dashboard without being a doctor
         if (result.user.role !== 'doctor' && location.pathname.includes('/doctor')) {
           setLoginError("You don't have permission to access the doctor dashboard");
@@ -100,7 +98,7 @@ const Login_Form = () => {
           setFormSubmitting(false);
           return;
         }
-        
+
         // Important: Add a small delay to ensure auth state is fully propagated
         // before navigating to a protected route to prevent false "access denied" errors
         const handleSuccessfulLogin = () => {
@@ -108,24 +106,24 @@ const Login_Form = () => {
           if (location.search && new URLSearchParams(location.search).has('doctorId')) {
             const queryParams = new URLSearchParams(location.search);
             const doctorId = queryParams.get('doctorId');
-            
+
             // Redirect back to appointment booking with query params as state
             const appointmentData = {};
             queryParams.forEach((value, key) => {
               appointmentData[key] = value;
             });
-            
+
             navigate(`/doctors/${doctorId}/book`, { state: appointmentData });
             return;
           }
-          
+
           // Check if there's a return path stored in context
           const contextReturnPath = getAndClearReturnPath();
           if (contextReturnPath) {
             navigate(contextReturnPath);
             return;
           }
-          
+
           // Check if there's a specific location to redirect to from state
           if (location.state && location.state.from) {
             // Redirect to the original location
@@ -137,7 +135,7 @@ const Login_Form = () => {
             navigate(redirectPath, { state: { postLogin: true } });
           }
         };
-        
+
         // Add short delay to ensure authentication state is fully propagated
         setTimeout(handleSuccessfulLogin, 300);
       } else {
@@ -160,8 +158,8 @@ const Login_Form = () => {
 
   // Function to get error CSS class based on error type
   const getErrorClass = (field) => {
-    if ((errorType === "notFound" && field === "email") || 
-        (errorType === "invalidPassword" && field === "password")) {
+    if ((errorType === "notFound" && field === "email") ||
+      (errorType === "invalidPassword" && field === "password")) {
       return "border-red-500 focus:border-red-500";
     }
     return "border-gray-200 focus:border-[#007E85]";
@@ -169,8 +167,8 @@ const Login_Form = () => {
 
   // Function to get error icon if needed
   const renderErrorIcon = (field) => {
-    if ((errorType === "notFound" && field === "email") || 
-        (errorType === "invalidPassword" && field === "password")) {
+    if ((errorType === "notFound" && field === "email") ||
+      (errorType === "invalidPassword" && field === "password")) {
       return (
         <svg className="h-5 w-5 text-red-500 absolute right-12 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -184,12 +182,12 @@ const Login_Form = () => {
     <div className="bg-gradient-to-br from-[#007E85] to-[#00565c] pb-14 pt-36">
       <div className="container mx-auto flex items-center justify-center px-4">
         <div className="w-full max-w-5xl rounded-2xl bg-white shadow-2xl flex overflow-hidden">
-          
+
           {/* Left Side - Image */}
           <div className="hidden lg:block w-5/12 relative">
-            <img 
+            <img
               src="https://images.unsplash.com/photo-1651008376811-b90baee60c1f?auto=format&fit=crop&q=80"
-              alt="Medical Professional" 
+              alt="Medical Professional"
               className="h-full w-full object-cover"
             />
             <div className="absolute inset-0 bg-[#007E85] bg-opacity-30 flex items-center justify-center">
@@ -257,7 +255,7 @@ const Login_Form = () => {
                 <label className="block text-gray-700 text-sm font-medium mb-2 font-dmSans">Email Address</label>
                 <div className="relative">
                   <input
-                    {...register("email", { 
+                    {...register("email", {
                       required: "Email is required",
                       pattern: {
                         value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
@@ -280,7 +278,7 @@ const Login_Form = () => {
                 <label className="block text-gray-700 text-sm font-medium mb-2">Password</label>
                 <div className="relative">
                   <input
-                    {...register("password", { 
+                    {...register("password", {
                       required: "Password is required",
                       minLength: {
                         value: 6,
@@ -293,7 +291,7 @@ const Login_Form = () => {
                     disabled={formSubmitting}
                   />
                   {renderErrorIcon("password")}
-                  <button 
+                  <button
                     type="button"
                     onClick={togglePasswordVisibility}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2"
@@ -327,9 +325,10 @@ const Login_Form = () => {
                 <label htmlFor="doctor-login" className="ml-2 text-sm font-medium text-gray-700">
                   I am a doctor
                 </label>
+
               </div>
 
-              <button 
+              <button
                 type="submit"
                 className="w-full bg-[#007E85] text-white py-2.5 rounded-xl font-medium hover:bg-[#006b6f] transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-[#007E85] text-sm"
                 disabled={formSubmitting}

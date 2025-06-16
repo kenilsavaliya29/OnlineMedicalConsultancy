@@ -12,7 +12,7 @@ const getUserWithProfile = async (userId) => {
     if (!user) return null;
 
     const userData = user.toObject();
-    delete userData.password; // Remove password for security
+    delete userData.password; 
 
     // Fetch role-specific profile
     if (user.role === 'doctor') {
@@ -131,7 +131,6 @@ export const verifyAdmin = (req, res, next) => {
  * Middleware to verify if the user is a patient
  * Must be used after verifyUser
  */
-
 export const verifyPatient = async (req, res, next) => {
 
   try {
@@ -145,7 +144,7 @@ export const verifyPatient = async (req, res, next) => {
       });
     }
 
-    // Verify token
+    
     let decoded;
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET);

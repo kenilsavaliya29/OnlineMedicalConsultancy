@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaUserMd, FaCalendarAlt, FaClock, FaMapMarkerAlt, FaPhone, FaEnvelope, FaStar, FaStarHalfAlt, FaRegStar, FaArrowLeft, FaCertificate, FaRegCalendarCheck } from 'react-icons/fa';
+import { FaUserMd, FaClock, FaStar, FaStarHalfAlt, FaRegStar, FaArrowLeft, FaCertificate, FaRegCalendarCheck } from 'react-icons/fa';
 import { MdOutlineVerified } from 'react-icons/md';
 
 const API_URL = 'http://localhost:3000/api/doctors';
@@ -16,7 +16,6 @@ const DoctorProfile = () => {
   const [selectedDay, setSelectedDay] = useState(null);
   const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
 
-  // Days of the week
   const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   // Fetch doctor details
@@ -25,7 +24,7 @@ const DoctorProfile = () => {
       setLoading(true);
       setError(null);
 
-      // Check if ID is valid before making the API call
+
       if (!id) {
         console.error("Doctor ID is undefined or invalid");
         setError("Invalid doctor ID. Please go back and try again.");
@@ -34,7 +33,7 @@ const DoctorProfile = () => {
       }
 
       try {
-        // console.log(`Fetching doctor with ID: ${id}`);
+
         const response = await fetch(`${API_URL}/${id}`, {
           method: 'GET',
           headers: {
@@ -143,7 +142,7 @@ const DoctorProfile = () => {
 
   // Helper function to check if a day is available
   const isDayAvailable = (day) => {
-    // Checks if doctor and profile and availability exist, and if the day is in the availability array
+
     return doctor.profile.availability?.includes(day);
   };
 
@@ -283,8 +282,7 @@ const DoctorProfile = () => {
               <div className="p-6">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">About Doctor</h2>
                 <p className="text-gray-600">
-                  Dr. {doctor.name} is a highly qualified {doctor.specialization} with {doctor.experience} of experience.
-                  {/* In a real app, you'd have a more detailed bio from the database */}
+                  Dr. {doctor.firstName + " " + doctor.lastName} is a highly qualified {doctor.specialization} with {doctor.profile.experience} of experience.
                   They specialize in providing comprehensive healthcare services and are committed to delivering
                   personalized treatment plans for each patient.
                 </p>
@@ -313,7 +311,7 @@ const DoctorProfile = () => {
                     <h3 className="font-semibold text-gray-700 mb-2">Specialization</h3>
                     <div className="bg-gray-50 p-3 rounded-lg">
                       <p className="font-medium">{doctor.specialization}</p>
-                      <p className="text-sm text-gray-600">{doctor.experience} of experience</p>
+                      <p className="text-sm text-gray-600">{doctor.profile.experience} of experience</p>
                     </div>
                   </div>
                 </div>
