@@ -8,7 +8,7 @@ const doctorProfileSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
-  
+
   // Professional details
   specialization: {
     type: String,
@@ -31,34 +31,44 @@ const doctorProfileSchema = new mongoose.Schema({
     required: true,
     default: 300,
     min: 100,
-    max: 5000
   },
-  
+
   // Practice details
   bio: {
     type: String,
     default: ''
   },
-  consultationFee: {
-    type: Number,
-    default: 0
-  },
-  availability: {
-    type: [String],
-    default: []
-  },
+
+  availability: [
+    {
+      dayOfWeek: {
+        type: String,
+        enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+      },
+      startTime: String,   // e.g. "10:00"
+      endTime: String,     // e.g. "13:00"
+      repeat: {
+        type: String,
+        enum: ['weekly', 'none'],
+        default: 'weekly'
+      },
+      fromDate: Date,      // e.g. 2025-06-01
+      toDate: Date         // e.g. 2025-08-30
+    }
+  ],
+  
   languages: {
     type: [String],
     default: ['English']
   },
-  
+
   // Verification
   isVerified: {
     type: Boolean,
     default: false
   },
   verificationDocuments: [{
-    type: { 
+    type: {
       type: String,
       enum: ['license', 'degree', 'certification', 'other'],
     },
@@ -71,7 +81,7 @@ const doctorProfileSchema = new mongoose.Schema({
     verificationDate: Date,
     notes: String
   }],
-  
+
   // Ratings and reviews
   ratings: {
     average: {
@@ -102,7 +112,7 @@ const doctorProfileSchema = new mongoose.Schema({
       default: Date.now
     }
   }],
-  
+
   // Timestamps
   createdAt: {
     type: Date,
@@ -115,17 +125,17 @@ const doctorProfileSchema = new mongoose.Schema({
 });
 
 // Calculate average rating when reviews change
-doctorProfileSchema.pre('save', function(next) {
+doctorProfileSchema.pre('save', function (next) {
   // Update timestamp
   this.updatedAt = new Date();
-  
+
   // Recalculate average rating if reviews exist
   if (this.reviews && this.reviews.length > 0) {
     const totalRating = this.reviews.reduce((sum, review) => sum + review.rating, 0);
     this.ratings.average = totalRating / this.reviews.length;
     this.ratings.count = this.reviews.length;
   }
-  
+
   next();
 });
 

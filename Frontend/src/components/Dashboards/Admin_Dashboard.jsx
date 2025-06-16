@@ -52,7 +52,6 @@ const Admin = () => {
     experience: '',
     qualification: '',
     role: 'doctor',
-    availability: { ...initialAvailabilityState },
     registrationNumber: ''
   });
 
@@ -141,14 +140,6 @@ const Admin = () => {
 
     if (type === 'checkbox' && daysOfWeek.includes(name)) {
       // Handle availability checkboxes
-      setFormData(prev => ({
-        ...prev,
-        availability: {
-          ...prev.availability,
-          [name]: checked
-        }
-      }));
-
       // Clear validation error when checked
       if (checked) {
         setValidationErrors(prev => ({
@@ -214,10 +205,6 @@ const Admin = () => {
         errors.profileImage = 'Profile image is required';
       }
 
-      // Availability validation for new doctors
-      const hasAvailability = Object.values(formData.availability).some(v => v);
-      if (!hasAvailability) errors.availability = 'Please select at least one day';
-
       // Registration Number validation if provided
       if (!formData.registrationNumber.trim()) errors.registrationNumber = 'Registration number is required';
       else if (!/^[A-Za-z0-9]+$/.test(formData.registrationNumber.trim())) { // Example simple alphanumeric validation
@@ -257,10 +244,6 @@ const Admin = () => {
     setIsSubmittingForm(true);
 
     try {
-      const availableDays = Object.entries(formData.availability)
-        .filter(([_, isAvailable]) => isAvailable)
-        .map(([day]) => day);
-
       const doctorData = {
         fullName: `${formData.firstname} ${formData.lastname}`,
         specialization: formData.specialization,
@@ -268,7 +251,6 @@ const Admin = () => {
         qualification: formData.qualification,
         email: formData.email,
         phone: formData.phonenumber,
-        availability: availableDays,
         registrationNumber: formData.registrationNumber
       };
 
@@ -342,12 +324,10 @@ const Admin = () => {
           lastname: '',
           phonenumber: '',
           email: '',
-          password: '',
           specialization: '',
           experience: '',
           qualification: '',
           role: 'doctor',
-          availability: { ...initialAvailabilityState },
           registrationNumber: ''
         });
         setProfileImage(null);
@@ -376,21 +356,6 @@ const Admin = () => {
     setEditingDoctor(doctor);
     console.log("Editing doctor data:", doctor);
 
-    // Parse availability to set checkbox state
-    const availabilityState = { ...initialAvailabilityState };
-    if (doctor.availability) {
-      // Handle both array and string formats
-      const availableDays = Array.isArray(doctor.availability) ?
-        doctor.availability :
-        doctor.availability.split(',').map(day => day.trim());
-
-      availableDays.forEach(day => {
-        if (availabilityState.hasOwnProperty(day)) {
-          availabilityState[day] = true;
-        }
-      });
-    }
-
     // For mapping existing doctor fields to form fields
     let firstName = '';
     let lastName = '';
@@ -411,7 +376,6 @@ const Admin = () => {
       qualification: doctor.qualification,
       experience: doctor.experience,
       profileImage: doctor.profileImage,
-      availability: doctor.availability,
       registrationNumber: doctor.registrationNumber || doctor.profile?.registrationNumber || ''
     });
 
@@ -420,12 +384,10 @@ const Admin = () => {
       lastname: lastName,
       phonenumber: doctor.phone || doctor.phoneNumber || '',
       email: doctor.email || '',
-      password: '', // Password is always optional when editing
       specialization: doctor.specialization || '',
       experience: doctor.experience || '',
       qualification: doctor.qualification || '',
       role: doctor.role || 'doctor',
-      availability: availabilityState,
       registrationNumber: doctor.registrationNumber || doctor.profile?.registrationNumber || ''
     });
 
@@ -543,7 +505,6 @@ const Admin = () => {
       specialization: doctor.specialization || (doctor.profile?.specialization) || '',
       qualification: doctor.qualification || (doctor.profile?.qualification) || '',
       experience: doctor.experience || (doctor.profile?.experience) || '',
-      availability: doctor.availability || (doctor.profile?.availability) || [],
       registrationNumber: doctor.registrationNumber || (doctor.profile?.registrationNumber) || ''
     };
   };
@@ -576,7 +537,6 @@ const Admin = () => {
                 experience: '',
                 qualification: '',
                 role: 'doctor',
-                availability: { ...initialAvailabilityState },
                 registrationNumber: ''
               });
               setProfileImage(null);
@@ -756,29 +716,6 @@ const Admin = () => {
                     />
                     {validationErrors.registrationNumber && (
                       <p className="text-red-500 text-xs mt-1">{validationErrors.registrationNumber}</p>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-gray-700 mb-2">
-                      Availability {!editingDoctor && <span className="text-red-500">*</span>}
-                      {editingDoctor && <span className="text-gray-500 text-xs ml-2">(Optional when editing)</span>}
-                    </label>
-                    <div className={`flex flex-wrap gap-x-4 gap-y-2 p-3 border rounded-lg ${validationErrors.availability ? 'border-red-500' : ''}`}>
-                      {daysOfWeek.map((day) => (
-                        <label key={day} className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            name={day}
-                            checked={formData.availability[day]}
-                            onChange={handleInputChange}
-                            className="focus:ring-[#007E85] h-4 w-4 text-[#007E85] border-gray-300 rounded"
-                          />
-                          <span>{day}</span>
-                        </label>
-                      ))}
-                    </div>
-                    {validationErrors.availability && (
-                      <p className="text-red-500 text-xs mt-1">{validationErrors.availability}</p>
                     )}
                   </div>
 
@@ -1088,7 +1025,6 @@ const Admin = () => {
                     <div className="col-span-1">Doctor Info</div>
                     <div className="col-span-1">Qualifications</div>
                     <div className="col-span-1">Contact</div>
-                    <div className="col-span-1">Registration / Availability</div>
                     <div className="col-span-1 text-right">Actions</div>
                   </div>
                 </div>
@@ -1109,7 +1045,7 @@ const Admin = () => {
                                     ? doctorInfo.profileImage
                                     : `${API_URL}${doctorInfo.profileImage}`}
                                   alt={`Dr. ${doctorInfo.firstName} ${doctorInfo.lastName}`}
-                                  className="h-full w-full object-cover "
+                                  className="h-full w-full object-cover"
                                   onError={(e) => {
                                     e.target.onerror = null;
                                     e.target.src = '/assets/images/profilephoto.svg';
@@ -1122,7 +1058,7 @@ const Admin = () => {
                           </div>
 
                           {/* Doctor Info */}
-                          <div className="flex-grow grid grid-cols-1 md:grid-cols-5 gap-4 mt-4 md:mt-0">
+                          <div className="flex-grow grid grid-cols-1 md:grid-cols-4 gap-4 mt-4 md:mt-0">
                             {/* Name and Specialization */}
                             <div className="md:col-span-1">
                               <h4 className="font-bold text-lg text-gray-800">
@@ -1165,10 +1101,6 @@ const Admin = () => {
                               <div className="mb-2">
                                 <span className="block text-xs text-gray-500 uppercase">Registration No.</span>
                                 <span className="font-medium">{doctorInfo.registrationNumber || 'N/A'}</span>
-                              </div>
-                              <span className="block text-xs text-gray-500 uppercase">Availability</span>
-                              <div className="mt-1">
-                                {formatAvailabilityForDisplay(doctorInfo.availability)}
                               </div>
                             </div>
 
@@ -1218,9 +1150,6 @@ const Admin = () => {
                         Registration No.
                       </th>
                       <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Availability
-                      </th>
-                      <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
@@ -1260,11 +1189,6 @@ const Admin = () => {
                           <td className="px-4 py-4 border-b">{doctorInfo.qualification || 'N/A'}</td>
                           <td className="px-4 py-4 border-b">{doctorInfo.experience || 'N/A'}</td>
                           <td className="px-4 py-4 border-b">{doctorInfo.registrationNumber || 'N/A'}</td>
-                          <td className="px-4 py-4 border-b">
-                            <div className="flex flex-wrap">
-                              {formatAvailabilityForDisplay(doctorInfo.availability)}
-                            </div>
-                          </td>
                           <td className="px-4 py-4 border-b">
                             <div className="flex space-x-2">
                               <button

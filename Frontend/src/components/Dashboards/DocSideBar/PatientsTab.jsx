@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { FaUsers } from 'react-icons/fa';
 
-const PatientsTab = ({ appointments }) => {
+const PatientsTab = () => {
+    const [appointments, setappointments] = useState([])
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4">My Patients</h2>

@@ -12,11 +12,10 @@ const AppoinmentsTab = React.memo(() => {
     const [appointments, setAppointments] = useState([])
     const [isLoading, setIsLoading] = useState(false)
 
-    // Fetch patient appointments (Moved from Patient_Dashboard)
+
     const fetchAppointments = useCallback(async () => {
 
         if (!user._id) {
-
             console.log("Patient details not available for appointment fetch");
             setIsLoading(false);
             return;

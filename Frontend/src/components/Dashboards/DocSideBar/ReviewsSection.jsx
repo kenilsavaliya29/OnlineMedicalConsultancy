@@ -1,7 +1,10 @@
 import React from 'react';
 import { FaStar, FaComments } from 'react-icons/fa';
 
-const ReviewsSection = ({ reviews, isLoading }) => {
+const ReviewsSection = ({ }) => {
+
+    const reviews = []; // Temporary solution, replace with actual reviews data
+    let isLoading = false; // Temporary solution, replace with actual loading state
     return (
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
             <h2 className="text-xl font-bold text-gray-800 mb-4">Patient Reviews</h2>
@@ -16,7 +19,6 @@ const ReviewsSection = ({ reviews, isLoading }) => {
                         <div key={review._id} className="p-4 bg-gray-50 rounded-lg">
                             <div className="flex items-center justify-between mb-2">
                                 <p className="font-semibold">{review.patientName || 'Anonymous'}</p>
-                                {/* Display star rating - assuming review has a 'rating' property */}
                                 <div className="flex items-center">
                                     {[...Array(5)].map((_, i) => (
                                         <FaStar
@@ -31,7 +33,7 @@ const ReviewsSection = ({ reviews, isLoading }) => {
                         </div>
                     ))}
                 </div>
-            ) : ( !isLoading &&
+            ) : (!isLoading &&
                 <div className="text-center py-8 bg-gray-50 rounded-lg">
                     <FaComments className="text-4xl text-gray-300 mb-3" />
                     <p className="text-gray-500 font-medium">No reviews yet</p>

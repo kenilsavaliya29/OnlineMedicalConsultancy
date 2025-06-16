@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form"
 import { Link, useNavigate, NavLink, useLocation } from "react-router-dom";
 import { React, useState, useEffect, useContext } from "react";
 import { AuthContext } from "../../contexts/authContext.jsx";
+import { Checkbox } from "@material-tailwind/react";
 
 const Login_Form = () => {
   let open_eye = "/assets/images/opened.svg";
@@ -309,23 +310,22 @@ const Login_Form = () => {
               </div>
 
               {/* Doctor Login Checkbox */}
-              <div className="flex items-center">
-                <input
-                  id="doctor-login"
-                  type="checkbox"
+              <div className="mt-2">
+                <Checkbox
                   checked={isDoctor}
                   onChange={() => {
                     setIsDoctor(!isDoctor);
                     setLoginError("");
                     setErrorType(null);
                   }}
-                  className="w-4 h-4 text-[#007E85] border-gray-300 rounded focus:ring-[#007E85]"
+                  color="teal"
+                  label={
+                    <span className="text-sm text-gray-700">
+                      I am a doctor
+                    </span>
+                  }
                   disabled={formSubmitting}
                 />
-                <label htmlFor="doctor-login" className="ml-2 text-sm font-medium text-gray-700">
-                  I am a doctor
-                </label>
-
               </div>
 
               <button

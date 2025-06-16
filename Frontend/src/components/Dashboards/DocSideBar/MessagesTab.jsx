@@ -1,6 +1,9 @@
-import React from 'react'
+import React, { useState } from 'react'
 
-const MessagesTab = ({ isLoading, appointments, selectedAppointment, setSelectedAppointment }) => {
+const MessagesTab = () => {
+    const [appointments, setAppointments] = useState([])
+    const isLoading = false;
+
     return (
         <div className="space-y-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4">Chat with Patients</h2>
@@ -60,7 +63,7 @@ const MessagesTab = ({ isLoading, appointments, selectedAppointment, setSelected
 
                 {/* Chat Interface */}
                 <div className="lg:col-span-3 h-full">
-                    {/* Chat Interface content will be updated later */}
+
                 </div>
             </div>
         </div>

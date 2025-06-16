@@ -26,7 +26,6 @@ const getUserWithProfile = async (userId) => {
         userData.profile = patientProfile.toObject();
       }
     }
-
     return userData;
   } catch (error) {
     console.error('Error in getUserWithProfile:', error);

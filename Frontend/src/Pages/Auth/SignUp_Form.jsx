@@ -270,7 +270,7 @@ const SignUp_Form = () => {
                   color="teal"
                   label={
                     <span className="text-sm text-gray-700">
-                      I accept the <Link to="#" className="text-[#007E85] hover:underline">terms and conditions</Link>
+                      I accept the <Link to="/about/terms-and-conditions" className="text-[#007E85] hover:underline">terms and conditions</Link>
                     </span>
                   }
                 />
