@@ -4,7 +4,7 @@ import { FaUserMd, FaCalendarDay, FaClock, FaArrowLeft, FaCheckCircle, FaExclama
 import { AuthContext } from '../../contexts/authContext.jsx';
 import MessageBox from '../../components/common/MessageBox.jsx';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 const AppointmentBooking = () => {
   const { id } = useParams();

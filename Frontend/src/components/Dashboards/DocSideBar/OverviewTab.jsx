@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react'
 import { FaCalendarCheck, FaUsers, FaWallet, FaPhone, FaEnvelope, FaStar, FaClock, FaCalendarAlt, FaComments } from 'react-icons/fa';
 import { AuthContext } from '../../../contexts/authContext';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 const OverviewTab = () => {
 

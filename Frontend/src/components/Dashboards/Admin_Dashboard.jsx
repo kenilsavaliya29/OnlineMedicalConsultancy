@@ -4,7 +4,7 @@ import { MdDashboard } from 'react-icons/md';
 import MessageBox from '../common/MessageBox.jsx';
 import { AuthContext } from '../../contexts/authContext';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 const qualificationOptions = [
   'MD', 'DO', 'MBBS', 'PhD', 'MS', 'DM'

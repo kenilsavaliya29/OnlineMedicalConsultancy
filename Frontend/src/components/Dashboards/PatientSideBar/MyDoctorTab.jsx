@@ -3,7 +3,7 @@ import { FaUserMd, FaSyncAlt } from 'react-icons/fa';
 import MessageBox from '../../common/MessageBox.jsx';
 import { AuthContext } from '../../../contexts/authContext.jsx';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 const MyDoctorTab = React.memo(() => {
     const [doctors, setDoctors] = useState([]);

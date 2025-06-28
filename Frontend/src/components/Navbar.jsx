@@ -13,7 +13,7 @@ const Navbar = ({ cookieCounter }) => {
   const [scrolled, setScrolled] = useState(false);
   
 
-  const { user, loading, logout } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext);
   const userName = user ? user.firstName : "";
 
   // Function to get correct profile image URL
@@ -26,7 +26,7 @@ const Navbar = ({ cookieCounter }) => {
     }
     
   
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
     return `${API_URL}${user.profileImage}`;
   };
 

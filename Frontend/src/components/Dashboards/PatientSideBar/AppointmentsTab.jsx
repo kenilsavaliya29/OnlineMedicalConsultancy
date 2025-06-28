@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback, useContext } from 'react'
 import { FaCalendarCheck, FaSyncAlt } from 'react-icons/fa'
 import MessageBox from '../../common/MessageBox.jsx'
-import { AuthContext } from '../../../contexts/authContext'
+import { AuthContext } from '../../../contexts/authContext.jsx'
 
 
 const API_URL = import.meta.env.BACKEND_URL || 'http://localhost:3000'
 
-const AppoinmentsTab = React.memo(() => {
+const AppointmentsTab = React.memo(() => {
 
     const { user, logout } = useContext(AuthContext)
     const [appointments, setAppointments] = useState([])
@@ -271,4 +271,4 @@ const AppoinmentsTab = React.memo(() => {
     );
 })
 
-export default AppoinmentsTab
+export default AppointmentsTab

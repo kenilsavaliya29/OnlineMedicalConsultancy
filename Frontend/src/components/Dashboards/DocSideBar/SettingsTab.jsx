@@ -3,7 +3,7 @@ import { FaEnvelope, FaUserMd, FaKey, FaSignOutAlt } from 'react-icons/fa';
 import { AuthContext } from '../../../contexts/authContext';
 
 // Assuming API_URL is accessible or passed as a prop if needed here
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 const SettingsTab = () => {
     const { user, logout } = useContext(AuthContext);

@@ -5,7 +5,7 @@ import { FaUtensils, FaWeight, FaRunning, FaCalendarAlt, FaHistory, FaUserMd } f
 
 const DietPlan = () => {
   const navigate = useNavigate();
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+  const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
   
   const [loading, setLoading] = useState(true);
   const [dietPlan, setDietPlan] = useState(null);

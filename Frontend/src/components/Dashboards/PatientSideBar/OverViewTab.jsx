@@ -1,14 +1,66 @@
-import React, { useState, useMemo, useContext, useEffect } from 'react'
+import React, { useState, useMemo, useContext, useEffect, useCallback } from 'react'
 import { FaUserMd, FaCalendarCheck, FaFileMedical, FaWallet, FaComments, FaCog, FaChartLine, FaSignOutAlt, FaBell, FaUser, FaHeartbeat, FaNotesMedical, FaUserCircle, FaPhone, FaEnvelope, FaMapMarkerAlt, FaKey, FaStar, FaDownload, FaSyncAlt, FaAppleAlt } from 'react-icons/fa'
 import { AuthContext } from '../../../contexts/authContext';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+import MessageBox from '../../common/MessageBox'; 
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 const OverViewTab = React.memo(() => {
 
-    const { user } = useContext(AuthContext);
+    const { user, logout } = useContext(AuthContext);
 
     const [appointments, setAppointments] = useState([]);
+
+    // Fetch upcoming appointments
+    const fetchUpcomingAppointments = useCallback(async () => {
+        if (!user || !user._id) {
+            console.log("User details not available for fetching upcoming appointments.");
+            return;
+        }
+
+        try {
+            
+            const response = await fetch(`${API_URL}/api/appointments/upcoming`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                credentials: 'include' 
+            });
+
+            if (response.status === 401) {
+                MessageBox.error('Your session has expired. Please log in again.');
+                setTimeout(() => {
+                    logout();
+                }, 3000);
+                return;
+            }
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                MessageBox.error(`Failed to fetch upcoming appointments: ${errorData.message || response.statusText}`);
+                return;
+            }
+
+            const data = await response.json();
+            if (data.success) {
+                setAppointments(data.appointments || []);
+            } else {
+                MessageBox.error(data.message || 'Failed to fetch upcoming appointments.');
+            }
+
+        } catch (error) {
+            console.error('Error fetching upcoming appointments:', error);
+            MessageBox.error(`Network error: ${error.message}`);
+        }
+    }, [user, logout]); 
+
+   
+    useEffect(() => {
+        if (user && user._id) {
+            fetchUpcomingAppointments();
+        }
+    }, [user, fetchUpcomingAppointments]);
 
     return (
         <div className="space-y-6">
@@ -32,7 +84,7 @@ const OverViewTab = React.memo(() => {
                         </div>
                         <div>
                             <p className="text-sm text-gray-500">Appointments</p>
-                            <h3 className="text-2xl font-bold text-gray-800">{0}</h3>
+                            <h3 className="text-2xl font-bold text-gray-800">{appointments.length}</h3>
                         </div>
                     </div>
                 </div>

@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import MessageBox from '../common/MessageBox.jsx';
 
 import OverviewTab from './DocSideBar/OverviewTab.jsx';
-import AppointmentsTab from './DocSideBar/AppoinmentsTab.jsx';
+import AppointmentsTab from './DocSideBar/AppointmentsTab.jsx';
 import AvailabilityTab from './DocSideBar/AvailabilityTab.jsx';
 import PatientsTab from './DocSideBar/PatientsTab.jsx';
 import PaymentsTab from './DocSideBar/PaymentsTab.jsx';
@@ -14,7 +14,7 @@ import RecordsTab from './DocSideBar/RecordsTab.jsx';
 import SettingsTab from './DocSideBar/SettingsTab.jsx';
 import ReviewsSection from './DocSideBar/ReviewsSection.jsx';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 const DoctorDashboard = () => {
     const { user, logout } = useContext(AuthContext);

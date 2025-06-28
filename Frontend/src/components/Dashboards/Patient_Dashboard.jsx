@@ -4,7 +4,7 @@ import { FaUserMd, FaCalendarCheck, FaFileMedical, FaWallet, FaComments, FaCog, 
 import { AuthContext } from '../../contexts/authContext.jsx'
 
 import OverViewTab from './PatientSideBar/OverViewTab.jsx'
-import AppoinmentsTab from './PatientSideBar/AppoinmentsTab.jsx'
+import AppointmentsTab from './PatientSideBar/AppointmentsTab.jsx'
 import RecordsTab from './PatientSideBar/RecordsTab.jsx'
 import PrescriptionsTab from './PatientSideBar/PrescriptionsTab.jsx'
 import HealthTab from './PatientSideBar/HealthTab.jsx'
@@ -14,7 +14,7 @@ import MyDoctorTab from './PatientSideBar/MyDoctorTab.jsx'
 import MedicalProfileTab from './PatientSideBar/MedicalProfileTab.jsx'
 import MessageBox from '../common/MessageBox.jsx'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'
 
 const Patient_Dashboard = () => {
 
@@ -37,7 +37,7 @@ const Patient_Dashboard = () => {
   };
 
   const sidebarRef = useRef(null);
-  const notificationsRef = useRef(null); // Assuming patient dashboard will also have notifications
+  const notificationsRef = useRef(null);
   const logoutModalRef = useRef(null);
 
   // Check if user is logged in and is a patient
@@ -173,7 +173,7 @@ const Patient_Dashboard = () => {
         return <OverViewTab />
 
       case 'appointments':
-        return <AppoinmentsTab />
+        return <AppointmentsTab />
 
       case 'records':
         return <RecordsTab />
