@@ -261,17 +261,17 @@ const Admin = () => {
 
       if (profileImage) {
         payload = new FormData();
-        
+
         Object.entries(doctorData).forEach(([key, value]) => {
-          if (value) { 
+          if (value) {
             payload.append(key, value);
           }
         });
-       
+
         payload.append("profileImage", profileImage);
-       
+
       } else {
-       
+
         const cleanedData = Object.fromEntries(
           Object.entries(doctorData).filter(([_, v]) => v !== undefined && v !== '')
         );
@@ -610,6 +610,28 @@ const Admin = () => {
                       <p className="text-red-500 text-xs mt-1">{validationErrors.email}</p>
                     )}
                   </div>
+
+                  <div>
+                    <label className="block text-gray-700 mb-2">
+                      Qualification {!editingDoctor && <span className="text-red-500">*</span>}
+                      {editingDoctor && <span className="text-gray-500 text-xs ml-2">(Optional when editing)</span>}
+                    </label>
+                    <select
+                      name="qualification"
+                      value={formData.qualification}
+                      onChange={handleInputChange}
+                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007E85] ${validationErrors.qualification ? 'border-red-500' : ''}`}
+                      required={!editingDoctor}
+                    >
+                      <option value="">Select Qualification</option>
+                      {qualificationOptions.map((qual) => (
+                        <option key={qual} value={qual}>{qual}</option>
+                      ))}
+                    </select>
+                    {validationErrors.qualification && (
+                      <p className="text-red-500 text-xs mt-1">{validationErrors.qualification}</p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Second Column - Professional Information */}
@@ -678,31 +700,6 @@ const Admin = () => {
 
                   <div>
                     <label className="block text-gray-700 mb-2">
-                      Qualification {!editingDoctor && <span className="text-red-500">*</span>}
-                      {editingDoctor && <span className="text-gray-500 text-xs ml-2">(Optional when editing)</span>}
-                    </label>
-                    <select
-                      name="qualification"
-                      value={formData.qualification}
-                      onChange={handleInputChange}
-                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#007E85] ${validationErrors.qualification ? 'border-red-500' : ''}`}
-                      required={!editingDoctor}
-                    >
-                      <option value="">Select Qualification</option>
-                      {qualificationOptions.map((qual) => (
-                        <option key={qual} value={qual}>{qual}</option>
-                      ))}
-                    </select>
-                    {validationErrors.qualification && (
-                      <p className="text-red-500 text-xs mt-1">{validationErrors.qualification}</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Third Column - Availability and Profile Image */}
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-gray-700 mb-2">
                       Registration Number {!editingDoctor && <span className="text-red-500">*</span>}
                       {editingDoctor && <span className="text-gray-500 text-xs ml-2">(Optional when editing)</span>}
                     </label>
@@ -719,40 +716,18 @@ const Admin = () => {
                     )}
                   </div>
 
+                </div>
+
+                {/* Third Column - Availability and Profile Image */}
+                <div className="space-y-4">
+
                   <div>
                     <label className="block text-gray-700 mb-2">
                       Profile Image {!editingDoctor && <span className="text-red-500">*</span>}
                       {editingDoctor && <span className="text-gray-500 text-xs ml-2">(Optional when editing)</span>}
                     </label>
-                    <div className="flex items-center mb-4">
-                      <input
-                        type="file"
-                        onChange={handleProfileImageChange}
-                        className="opacity-0 absolute"
-                        id="profile-image-upload"
-                        accept="image/*"
-                        name="profileImage"
-                        aria-label="Profile Image Upload"
-                      />
-                      <label
-                        htmlFor="profile-image-upload"
-                        className={`cursor-pointer ${validationErrors.profileImage
-                          ? 'bg-red-500 hover:bg-red-700'
-                          : ' bg-[#007E85] hover:bg-[#006b6f]'
-                          } text-white font-bold py-2 px-4 rounded`}
-                      >
-                        {editingDoctor ? 'Change Image' : 'Choose Image'}
-                      </label>
-                      <span className="ml-3 text-sm text-gray-600">
-                        {profileImage ? profileImage.name : (profileImagePreview ? "Current image" : "No file chosen")}
-                      </span>
-                    </div>
-                    {validationErrors.profileImage && (
-                      <p className="text-red-500 text-xs mt-1">{validationErrors.profileImage}</p>
-                    )}
 
-                    {/* Preview Area */}
-                    <div className="mt-4 w-fit">
+                    <div className="mt-4 w-fit mb-4">
                       {profileImagePreview ? (
                         <div className="relative">
                           <div className="pr-5">
@@ -782,6 +757,36 @@ const Admin = () => {
                         </div>
                       )}
                     </div>
+
+                    <div className="flex items-center ">
+                      <input
+                        type="file"
+                        onChange={handleProfileImageChange}
+                        className="opacity-0 absolute"
+                        id="profile-image-upload"
+                        accept="image/*"
+                        name="profileImage"
+                        aria-label="Profile Image Upload"
+                      />
+                      <label
+                        htmlFor="profile-image-upload"
+                        className={`cursor-pointer ${validationErrors.profileImage
+                          ? 'bg-red-500 hover:bg-red-700'
+                          : ' bg-[#007E85] hover:bg-[#006b6f]'
+                          } text-white font-bold py-2 px-4 rounded`}
+                      >
+                        {editingDoctor ? 'Change Image' : 'Choose Image'}
+                      </label>
+                      <span className="ml-3 text-sm text-gray-600">
+                        {profileImage ? profileImage.name : (profileImagePreview ? "Current image" : "No file chosen")}
+                      </span>
+                    </div>
+                    {validationErrors.profileImage && (
+                      <p className="text-red-500 text-xs mt-1">{validationErrors.profileImage}</p>
+                    )}
+
+                    {/* Preview Area */}
+
                   </div>
                 </div>
               </div>

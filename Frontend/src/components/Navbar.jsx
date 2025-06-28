@@ -310,7 +310,7 @@ const Navbar = ({ cookieCounter }) => {
         ) : (
           <div className='items-center hidden sm:flex gap-4'>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <NavLink to="/signup" className="font-medium bg-[#007E85] text-white rounded-xl px-6 py-3 hover:bg-[#006b6f] transition-colors">
+              <NavLink to="/signup" className="font-medium bg-[#007E85] text-white rounded-xl border-2 border-[#007E85] px-6 py-3 hover:bg-[#006b6f] transition-colors">
                 Sign Up
               </NavLink>
             </motion.div>
