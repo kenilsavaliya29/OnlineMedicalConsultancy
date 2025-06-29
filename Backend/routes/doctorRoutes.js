@@ -8,7 +8,7 @@ import {
   createDoctor,
   updateDoctor,
   deleteDoctor,
-  // updateDoctorProfile
+  updateDoctorProfile
 } from '../controllers/doctorController.js';
 import { verifyToken, authorizeRoles } from '../middleware/authMiddleware.js';
 import { upload } from '../middleware/uploadMiddleware.js';
@@ -21,8 +21,8 @@ router.get('/:id', getDoctorById);
 router.get('/:id/reviews', getDoctorReviews);
 
 // Protected routes
+router.put('/updateProfile', verifyToken, authorizeRoles(['doctor']), upload.single('profileImage'), updateDoctorProfile);
 router.put('/:id/availability', verifyToken, authorizeRoles(['doctor']), updateAvailability);
-// router.put('/:id/updateProfile', verifyToken, authorizeRoles(['doctor']), updateDoctorProfile);
 router.post('/:id/reviews', verifyToken, authorizeRoles(['patient']), addDoctorReview);
 
 // Admin routes

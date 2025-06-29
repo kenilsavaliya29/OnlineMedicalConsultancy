@@ -292,7 +292,8 @@ export const updateProfile = async (req, res) => {
   try {
     const profileData = req.body;
     const userId = req.user?._id; // From middleware
-    
+    const profileImage = req.file ? `/uploads/${req.file.filename}` : undefined; // Path to uploaded image
+
     // Find user
     const user = await User.findById(userId);
     if (!user) {
@@ -317,10 +318,6 @@ export const updateProfile = async (req, res) => {
     
     if (profileData.gender) {
       user.gender = profileData.gender;
-    }
-    
-    if (profileData.profileImage) {
-      user.profileImage = profileData.profileImage;
     }
 
     await user.save();
@@ -355,13 +352,18 @@ export const updateProfile = async (req, res) => {
           doctorProfile.languages = profileData.languages;
         }
 
+        // Update profile image if a new one is uploaded
+        if (profileImage) {
+          doctorProfile.profileImage = profileImage;
+        }
+
         await doctorProfile.save();
       }
     } else if (user.role === 'patient') {
       // Update patient profile if needed
       const patientProfile = await PatientProfile.findOne({ userId: user._id });
       
-      if (patientProfile && profileData.patientProfile) {
+      if (patientProfile) {
         const patientProfileData = profileData.patientProfile;
         
         if (patientProfileData.dateOfBirth) {
@@ -378,6 +380,11 @@ export const updateProfile = async (req, res) => {
         
         if (patientProfileData.chronicConditions) {
           patientProfile.chronicConditions = patientProfileData.chronicConditions;
+        }
+
+        // Update profile image if a new one is uploaded
+        if (profileImage) {
+          patientProfile.profileImage = profileImage;
         }
         
         await patientProfile.save();

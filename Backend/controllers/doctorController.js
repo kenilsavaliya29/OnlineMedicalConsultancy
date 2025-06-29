@@ -157,22 +157,63 @@ export const updateAvailability = async (req, res) => {
   }
 };
 
-// export const updateDoctorProfile = async (req, res) => {
-//   try {
-//     const { bio, languages } = req.body;
-//     const { id } = req.user;
-//     console.log(id)
+export const updateDoctorProfile = async (req, res) => {
+  try {
+    const { bio, languages } = req.body;
+    const userId = req.user.id; // User ID from verifyToken
+    const profileImage = req.file ? `/${req.file.destination}/${req.file.filename}` : undefined; // Path to uploaded image
 
-//   }
-//   catch (error) {
-//     console.error('Error updating doctor profile:', error);
-//     res.status(500).json({
-//       success: false,
-//       message: 'Failed to update doctor profile',
-//       error: error.message
-//     });
-//   }
-// }
+    // Find the doctor profile associated with the user ID
+    const doctorProfile = await DoctorProfile.findOne({ userId });
+
+    if (!doctorProfile) {
+      return res.status(404).json({
+        success: false,
+        message: 'Doctor profile not found'
+      });
+    }
+
+    // Update bio if provided
+    if (bio !== undefined) {
+      doctorProfile.bio = bio;
+    }
+
+    // Update profile image if a new one is uploaded
+    if (profileImage) {
+      // Optionally, delete the old profile image from the server if it exists
+      // For now, we'll just update the path in the DB.
+      doctorProfile.profileImage = profileImage;
+    }
+
+    // Handle languages if needed
+    if (languages !== undefined) {
+      doctorProfile.languages = languages; // Assuming languages is an array of strings
+    }
+
+    await doctorProfile.save();
+
+    // Also update the main user model if the profile image is stored there as well
+    if (profileImage) {
+      await User.findByIdAndUpdate(userId, { profileImage });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Doctor profile updated successfully',
+      doctorProfile: doctorProfile,
+      profileImage: profileImage // Send back the updated image path
+    });
+
+  }
+  catch (error) {
+    console.error('Error updating doctor profile:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update doctor profile',
+      error: error.message
+    });
+  }
+}
 
 /**
  * Get doctor reviews
@@ -369,11 +410,6 @@ export const createDoctor = async (req, res) => {
       role: 'doctor'
     });
 
-    // Handle profile image if provided
-    if (req.file) {
-      newUser.profileImage = `/uploads/doctors/${req.file.filename}`;
-    }
-
     await newUser.save();
 
     // 2. Create doctor profile
@@ -388,7 +424,8 @@ export const createDoctor = async (req, res) => {
         dateSpecific: dateSpecificAvailability || [],
         recurringWeekly: recurringWeeklyAvailability || [],
       },
-      registrationNumber: registrationNumber // Add registrationNumber to profile
+      registrationNumber: registrationNumber, // Add registrationNumber to profile
+      profileImage: req.file ? `/uploads/doctors/${req.file.filename}` : null, // Add profileImage to doctor profile
     });
 
     await doctorProfile.save();
@@ -406,7 +443,7 @@ export const createDoctor = async (req, res) => {
       name: `${newUser.firstName} ${newUser.lastName}`,
       email: newUser.email,
       phone: newUser.phoneNumber,
-      profileImage: newUser.profileImage,
+      profileImage: doctorProfile.profileImage,
       role: newUser.role,
       specialization: doctorProfile.specialization,
       qualification: doctorProfile.qualification,
@@ -478,11 +515,6 @@ export const updateDoctor = async (req, res) => {
     if (phone) user.phoneNumber = phone;
     if (password && password.trim() !== '') user.password = password;
 
-    // Handle profile image if provided
-    if (req.file) {
-      user.profileImage = `/uploads/doctors/${req.file.filename}`;
-    }
-
     await user.save();
 
     // 2. Update doctor profile
@@ -515,6 +547,10 @@ export const updateDoctor = async (req, res) => {
     if (registrationNumber) {
       doctorProfile.registrationNumber = registrationNumber;
     }
+    // Update profile image if a new one is uploaded
+    if (req.file) {
+      doctorProfile.profileImage = `/uploads/doctors/${req.file.filename}`;
+    }
 
     await doctorProfile.save();
 
@@ -524,12 +560,12 @@ export const updateDoctor = async (req, res) => {
       fullName: `${user.firstName} ${user.lastName}`,
       email: user.email,
       phone: user.phoneNumber,
-      profileImage: user.profileImage,
+      profileImage: doctorProfile.profileImage,
       specialization: doctorProfile.specialization,
       qualification: doctorProfile.qualification,
       experience: doctorProfile.experience,
       availability: doctorProfile.availability,
-      registrationNumber: doctorProfile.registrationNumber // Include registrationNumber in response
+      registrationNumber: doctorProfile.registrationNumber
     };
 
     res.json({

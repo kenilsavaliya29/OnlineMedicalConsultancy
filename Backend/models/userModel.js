@@ -41,11 +41,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['male', 'female', 'other', 'prefer_not_to_say']
   },
-  profileImage: {
-    type: String,
-    default: null
-  },
-  
+
   // Authentication management
   isActive: {
     type: Boolean,

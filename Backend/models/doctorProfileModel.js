@@ -39,6 +39,11 @@ const doctorProfileSchema = new mongoose.Schema({
     default: ''
   },
   
+  profileImage: {
+    type: String,
+    default: null
+  },
+  
   availability: {
     dateSpecific: [{
       startTime: {

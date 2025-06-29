@@ -100,6 +100,7 @@ export const updatePatientMedicalProfile = async (req, res) => {
       insurance,
       healthMetrics
     } = req.body;
+    const profileImage = req.file ? `/${req.file.destination}/${req.file.filename}` : undefined; // Path to uploaded image
 
     let patientProfile = await PatientProfile.findOne({ userId });
 
@@ -121,6 +122,11 @@ export const updatePatientMedicalProfile = async (req, res) => {
     patientProfile.emergencyContact = emergencyContact || patientProfile.emergencyContact;
     patientProfile.insurance = insurance || patientProfile.insurance;
     patientProfile.healthMetrics = healthMetrics || patientProfile.healthMetrics;
+
+    // Update profile image if a new one is uploaded
+    if (profileImage) {
+      patientProfile.profileImage = profileImage;
+    }
 
     await patientProfile.save();
 

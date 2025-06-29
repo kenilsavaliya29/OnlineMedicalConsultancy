@@ -105,7 +105,7 @@ const OverviewTab = () => {
                             <div>
                                 <div className="flex items-center gap-4 mb-6">
                                     <img
-                                        src={user?.profileImage ? `${API_URL}${user.profileImage.startsWith('/') ? '' : '/'}${user.profileImage}` : "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg"}
+                                        src={user.profile.profileImage ? `${API_URL}${user.profile.profileImage.startsWith('/') ? '' : '/'}${user.profile.profileImage}` : "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg"}
                                         alt="Doctor Profile"
                                         className="w-20 h-20 rounded-full border-2 border-[#007E85] object-cover"
                                     />

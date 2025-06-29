@@ -12,7 +12,7 @@ import PatientsTab from './DocSideBar/PatientsTab.jsx';
 import PaymentsTab from './DocSideBar/PaymentsTab.jsx';
 import MessagesTab from './DocSideBar/MessagesTab.jsx';
 import RecordsTab from './DocSideBar/RecordsTab.jsx';
-import SettingsTab from './DocSideBar/SettingsTab.jsx';
+import ProfileSettingsTab from './DocSideBar/ProfileSettingsTab.jsx';
 import ReviewsSection from './DocSideBar/ReviewsSection.jsx';
 
 
@@ -52,7 +52,7 @@ const DoctorDashboard = () => {
         { id: 'payments', name: 'Payments', icon: <FaWallet /> },
         { id: 'messages', name: 'Messages', icon: <FaComments /> },
         { id: 'records', name: 'Medical Records', icon: <FaClipboardList /> },
-        { id: 'settings', name: 'Settings', icon: <FaCog /> },
+        { id: 'profile_settings', name: 'Profile Settings', icon: <FaCog /> },
     ], []);
 
 
@@ -66,7 +66,7 @@ const DoctorDashboard = () => {
             'payments': 'Payment History',
             'messages': 'Messages',
             'records': 'Medical Records',
-            'settings': 'Account Settings',
+            'profile_settings': 'Profile Settings',
             'update_availability': 'Update Availability'
         };
         return titles[activeTab] || 'Dashboard';
@@ -192,8 +192,8 @@ const DoctorDashboard = () => {
                 return <MessagesTab />;
             case 'records':
                 return <RecordsTab />;
-            case 'settings':
-                return <SettingsTab />;
+            case 'profile_settings':
+                return <ProfileSettingsTab />;
             default:
                 return <div>Select a tab</div>;
         }
@@ -229,7 +229,7 @@ const DoctorDashboard = () => {
                         {/* Doctor Profile Summary in Sidebar */}
                         <div className="flex items-center gap-3 mb-6">
                             <img
-                                src={`${API_URL}${user.profileImage.startsWith('/') ? '' : '/'}${user.profileImage}`}
+                                src={`${API_URL}${user.profile.profileImage ? '' : '/'}${user.profile.profileImage}`}
                                 alt="Doctor"
                                 className="w-12 h-12 rounded-full border-2 border-[#007E85] object-cover"
                             />
