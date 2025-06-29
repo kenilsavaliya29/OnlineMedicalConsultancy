@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import { FaEnvelope, FaUserMd, FaKey, FaSignOutAlt } from 'react-icons/fa';
 import { AuthContext } from '../../../contexts/authContext';
 
@@ -6,18 +6,26 @@ import { AuthContext } from '../../../contexts/authContext';
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 const SettingsTab = () => {
-    const { user, logout } = useContext(AuthContext);
-
-    console.log("Doctor Details:", user);
+    const { user } = useContext(AuthContext);
+    const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
 
     const handleLogout = () => { }
+
+    const handleEditProfileClick = () => {
+        setIsEditProfileModalOpen(true);
+    };
+
+    const handleCloseEditProfileModal = () => {
+        setIsEditProfileModalOpen(false);
+    };
+
     return (
         <div className="space-y-6">
             {/* Profile Header */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 <div className="flex items-center gap-6">
                     <img
-                        src={user?.profileImage ? `${API_URL}${user.profileImage.startsWith('/') ? '' : '/'}${user.profileImage}` : "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg"}
+                        src={user.profileImage ? `${API_URL}${user.profileImage.startsWith('/') ? '' : '/'}${user.profileImage}` : "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg"}
                         alt="Doctor Profile"
                         className="w-24 h-24 rounded-full border-4 border-[#007E85] object-cover"
                     />
@@ -45,44 +53,13 @@ const SettingsTab = () => {
                             <p className="text-sm text-gray-500">View and edit your information</p>
                         </div>
                     </div>
-                    <button className="w-full bg-[#007E85] text-white py-2 rounded-lg hover:bg-[#006b6f] transition-colors">
+                    <button
+                        onClick={handleEditProfileClick}
+                        className="w-full bg-[#007E85] text-white py-2 rounded-lg hover:bg-[#006b6f] transition-colors">
                         Edit Profile
                     </button>
                 </div>
 
-                {/* Change Password */}
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all">
-                    <div className="flex items-center gap-4 mb-4">
-                        <div className="bg-[#6EAB36]/10 p-4 rounded-lg">
-                            <FaKey className="text-2xl text-[#6EAB36]" />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-lg">Password</h3>
-                            <p className="text-sm text-gray-500">Change your password</p>
-                        </div>
-                    </div>
-                    <button className="w-full bg-[#6EAB36] text-white py-2 rounded-lg hover:bg-[#5a9025] transition-colors">
-                        Change Password
-                    </button>
-                </div>
-
-                {/* Logout */}
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all">
-                    <div className="flex items-center gap-4 mb-4">
-                        <div className="bg-red-100 p-4 rounded-lg">
-                            <FaSignOutAlt className="text-2xl text-red-500" />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-lg">Logout</h3>
-                            <p className="text-sm text-gray-500">Sign out of your account</p>
-                        </div>
-                    </div>
-                    <button
-                        onClick={handleLogout}
-                        className="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors">
-                        Logout
-                    </button>
-                </div>
             </div>
         </div>
     );

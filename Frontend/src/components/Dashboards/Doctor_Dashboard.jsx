@@ -6,6 +6,7 @@ import MessageBox from '../common/MessageBox.jsx';
 
 import OverviewTab from './DocSideBar/OverviewTab.jsx';
 import AppointmentsTab from './DocSideBar/AppointmentsTab.jsx';
+import UpdateAvailabilityTab from './DocSideBar/UpdateAvailability.jsx';
 import AvailabilityTab from './DocSideBar/AvailabilityTab.jsx';
 import PatientsTab from './DocSideBar/PatientsTab.jsx';
 import PaymentsTab from './DocSideBar/PaymentsTab.jsx';
@@ -13,6 +14,8 @@ import MessagesTab from './DocSideBar/MessagesTab.jsx';
 import RecordsTab from './DocSideBar/RecordsTab.jsx';
 import SettingsTab from './DocSideBar/SettingsTab.jsx';
 import ReviewsSection from './DocSideBar/ReviewsSection.jsx';
+
+
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
@@ -31,8 +34,6 @@ const DoctorDashboard = () => {
     const sidebarRef = useRef(null);
     const logoutModalRef = useRef(null);
 
-    console.log(user)
-
     const showMessage = (type, message) => {
         setMessageBox({ show: true, type, message });
     };
@@ -46,7 +47,8 @@ const DoctorDashboard = () => {
         { id: 'overview', name: 'Overview', icon: <FaChartBar /> },
         { id: 'appointments', name: 'Appointments', icon: <FaCalendarCheck /> },
         { id: 'patients', name: 'My Patients', icon: <FaUsers /> },
-        { id: 'availability', name: 'My Availability', icon: <FaClock /> },
+        { id: 'availability', name: 'My Availability', icon: <FaBell /> },
+        { id: 'update_availability', name: 'Update Availability', icon: <FaClock /> },
         { id: 'payments', name: 'Payments', icon: <FaWallet /> },
         { id: 'messages', name: 'Messages', icon: <FaComments /> },
         { id: 'records', name: 'Medical Records', icon: <FaClipboardList /> },
@@ -64,7 +66,8 @@ const DoctorDashboard = () => {
             'payments': 'Payment History',
             'messages': 'Messages',
             'records': 'Medical Records',
-            'settings': 'Account Settings'
+            'settings': 'Account Settings',
+            'update_availability': 'Update Availability'
         };
         return titles[activeTab] || 'Dashboard';
     }, [activeTab]);
@@ -153,7 +156,7 @@ const DoctorDashboard = () => {
             if (isLogoutModalOpen && logoutModalRef.current && !logoutModalRef.current.contains(event.target)) {
                 closeLogoutModal();
             }
-            
+
             const sidebarToggleButton = document.querySelector('button.lg\\:hidden');
 
             if (sidebarOpen && sidebarRef.current && !sidebarRef.current.contains(event.target) &&
@@ -181,6 +184,8 @@ const DoctorDashboard = () => {
                 return <PatientsTab />;
             case 'availability':
                 return <AvailabilityTab />;
+            case 'update_availability':
+                return <UpdateAvailabilityTab />;
             case 'payments':
                 return <PaymentsTab />;
             case 'messages':

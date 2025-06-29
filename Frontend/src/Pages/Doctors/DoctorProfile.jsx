@@ -3,8 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FaUserMd, FaClock, FaStar, FaStarHalfAlt, FaRegStar, FaArrowLeft, FaCertificate, FaRegCalendarCheck } from 'react-icons/fa';
 import { MdOutlineVerified } from 'react-icons/md';
 
-const API_URL = 'http://localhost:3000/api/doctors';
-const TIME_SLOTS_API_URL = 'http://localhost:3000/api/timeslots';
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+
 
 const DoctorProfile = () => {
   const { id } = useParams();
@@ -14,7 +14,7 @@ const DoctorProfile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
-  const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
+  const [filteredTimeSlots, setFilteredTimeSlots] = useState([]);
 
   const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -34,7 +34,7 @@ const DoctorProfile = () => {
 
       try {
 
-        const response = await fetch(`${API_URL}/${id}`, {
+        const response = await fetch(`${API_URL}/api/doctors/${id}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -43,23 +43,22 @@ const DoctorProfile = () => {
           credentials: 'include'
         });
 
+
         if (!response.ok) {
           throw new Error(`Failed to fetch doctor details. Status: ${response.status}`);
         }
 
         const data = await response.json();
-        console.log('Doctor data received:', data);
+        console.log(data.doctor.profile.availability)
 
         if (data.success) {
           setDoctor(data.doctor);
-          if (data.doctor.profile?.availability && Array.isArray(data.doctor.profile.availability) && data.doctor.profile.availability.length > 0) {
-            const availableDays = data.doctor.profile.availability;
-
-            setSelectedDay(availableDays[0]);
-            fetchTimeSlots(id, availableDays[0]);
+          if (data.doctor.profile?.availability?.recurringWeekly?.length > 0) {
+            setSelectedDay(data.doctor.profile.availability.recurringWeekly[0].dayOfWeek);
+          } else if (data.doctor.profile?.availability?.dateSpecific?.length > 0) {
+            setSelectedDay(new Date(data.doctor.profile.availability.dateSpecific[0].date).toLocaleDateString(undefined, { weekday: 'short' }));
           } else {
             setSelectedDay(null);
-            setAvailableTimeSlots([]);
           }
         } else {
           throw new Error(data.message || 'Error fetching doctor details');
@@ -75,43 +74,26 @@ const DoctorProfile = () => {
     fetchDoctorDetails();
   }, [id]);
 
-  // Fetch time slots when day changes
   useEffect(() => {
-    if (id && selectedDay) {
-      fetchTimeSlots(id, selectedDay);
-    }
-  }, [id, selectedDay]);
+    if (doctor && selectedDay) {
+      let slots = [];
+      const dayName = daysOfWeek.find(day => day.startsWith(selectedDay.substring(0, 3)));
 
-  const fetchTimeSlots = async (doctorId, day) => {
-    if (!doctorId || !day) {
-      console.error("Missing doctorId or day for time slots");
-      return;
-    }
-
-    try {
-      const response = await fetch(`${TIME_SLOTS_API_URL}/available/${doctorId}/${day}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        console.error(`Failed to fetch time slots. Status: ${response.status}`);
-        return;
+      if (doctor.profile?.availability?.recurringWeekly) {
+        slots = slots.concat(doctor.profile.availability.recurringWeekly.filter(slot => slot.dayOfWeek.startsWith(dayName)));
       }
 
-      const data = await response.json();
-
-      if (data.success) {
-        setAvailableTimeSlots(data.timeSlots);
-      } else {
-        console.error('Error fetching time slots:', data.message);
+      if (doctor.profile?.availability?.dateSpecific) {
+        const dateSpecificSlots = doctor.profile.availability.dateSpecific.filter(slot => {
+          const slotDate = new Date(slot.date);
+          return slotDate.toLocaleDateString(undefined, { weekday: 'short' }) === selectedDay;
+        });
+        slots = slots.concat(dateSpecificSlots);
       }
-    } catch (error) {
-      console.error('Error fetching time slots:', error);
+
+      setFilteredTimeSlots(slots);
     }
-  };
+  }, [doctor, selectedDay]);
 
   // Helper function to render star ratings
   const renderStars = (rating) => {
@@ -142,20 +124,15 @@ const DoctorProfile = () => {
 
   // Helper function to check if a day is available
   const isDayAvailable = (day) => {
-
-    return doctor.profile.availability?.includes(day);
+    const shortDay = day.substring(0, 3);
+    const hasRecurring = doctor.profile.availability?.recurringWeekly?.some(item => item.dayOfWeek.startsWith(shortDay));
+    const hasDateSpecific = doctor.profile.availability?.dateSpecific?.some(item => new Date(item.date).toLocaleDateString(undefined, { weekday: 'short' }) === shortDay);
+    return hasRecurring || hasDateSpecific;
   };
 
   // Function to handle booking appointment
   const handleBookAppointment = (timeSlot) => {
-    navigate(`/doctors/${id}/book`, {
-      state: {
-        doctor,
-        selectedDay,
-        selectedTime: `${timeSlot.startTime} - ${timeSlot.endTime}`,
-        timeSlotId: timeSlot._id
-      }
-    });
+    // Booking logic will be implemented here by the user
   };
 
   if (loading) {
@@ -246,7 +223,7 @@ const DoctorProfile = () => {
                   {renderStars(4.8)}
                 </div>
 
-                <div className="mt-4 flex flex-wrap justify-center md:justify-start gap-4">
+                <div className="mt-4 justify-center md:justify-start gap-4">
                   <div className="flex items-center text-gray-700">
                     <FaClock className="mr-2 text-[#007E85]" />
                     <span>
@@ -254,9 +231,34 @@ const DoctorProfile = () => {
                     </span>
                   </div>
 
-                  <div className="flex items-center text-gray-700">
+                  <div className="flex text-gray-700 mt-2">
                     <FaRegCalendarCheck className="mr-2 text-[#007E85]" />
-                    <span>Available: {doctor.availability || 'Contact for details'}</span>
+                    <span>
+                      {doctor.profile?.availability?.recurringWeekly?.length > 0 && (
+                        <>
+                          <span className="font-semibold">Weekly:</span>{" "}
+                          {doctor.profile.availability.recurringWeekly.map((item, idx) => (
+                            <span key={idx}>
+                              {item.dayOfWeek} ({item.startTime} - {item.endTime}){idx < doctor.profile.availability.recurringWeekly.length - 1 ? ', ' : ''}
+                            </span>
+                          ))}
+                        </>
+                      )}
+                      {doctor.profile?.availability?.dateSpecific?.length > 0 && (
+                        <>
+                          {doctor.profile.availability.recurringWeekly?.length > 0 && <br />}
+                          <span className="font-semibold">Dates:</span>{" "}
+                          {doctor.profile.availability.dateSpecific.map((item, idx) => (
+                            <span key={idx}>
+                              {new Date(item.date).toLocaleDateString()} ({item.startTime} - {item.endTime}){idx < doctor.profile.availability.dateSpecific.length - 1 ? ', ' : ''}
+                            </span>
+                          ))}
+                        </>
+                      )}
+                      {!doctor.profile?.availability?.recurringWeekly?.length &&
+                        !doctor.profile?.availability?.dateSpecific?.length &&
+                        "Contact for details"}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -276,6 +278,140 @@ const DoctorProfile = () => {
         {/* Main Content - Two Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Doctor Details */}
+
+          <div id="booking-section">
+            <div className="bg-white rounded-xl shadow-md overflow-hidden sticky top-24">
+              <div className="p-6">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">Book an Appointment</h2>
+
+                {/* Day Selector */}
+                <div className="mb-6">
+                  <h3 className="font-semibold text-gray-700 mb-2">Select Day</h3>
+                  <div className="grid grid-cols-7 gap-2">
+                    {daysOfWeek.map((day) => (
+                      <button
+                        key={day}
+                        onClick={() => isDayAvailable(day) && setSelectedDay(day)}
+                        className={`p-2 rounded-lg text-center text-sm ${isDayAvailable(day)
+                          ? selectedDay === day
+                            ? 'bg-[#007E85] text-white'
+                            : 'bg-[#007E85]/10 text-[#007E85] hover:bg-[#007E85]/20'
+                          : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          }`}
+                        disabled={!isDayAvailable(day)}
+                      >
+                        {day}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Time Slots */}
+                <div>
+                  <h3 className="font-semibold text-gray-700 mb-2">Select Time</h3>
+                  {selectedDay ? (
+                    filteredTimeSlots.length > 0 ? (
+                      <div className="grid grid-cols-2 gap-2">
+                        {filteredTimeSlots.map((slot) => (
+                          <button
+                            key={slot._id}
+                            onClick={() => handleBookAppointment(slot)}
+                            className="p-2 border border-[#007E85] rounded-lg text-center text-sm text-[#007E85] hover:bg-[#007E85] hover:text-white transition-colors"
+                          >
+                            {slot.startTime} - {slot.endTime}
+                            {'date' in slot && ` (${new Date(slot.date).toLocaleDateString()})`}
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="bg-yellow-50 text-yellow-700 p-3 rounded-lg text-center">
+                        No available time slots for this day
+                      </div>
+                    )
+                  ) : (
+                    <div className="bg-yellow-50 text-yellow-700 p-3 rounded-lg text-center">
+                      Please select an available day first
+                    </div>
+                  )}
+                </div>
+
+                {/* Availability Summary */}
+                <div className="mt-8">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Doctor Availability</h3>
+
+                  {/* Recurring Weekly Slots */}
+                  {doctor.profile?.availability?.recurringWeekly?.length > 0 && (
+                    <div className="mb-6">
+                      <h4 className="font-medium text-gray-700 mb-2">Recurring Weekly Slots</h4>
+                      <div className="flex flex-col gap-3">
+                        {doctor.profile.availability.recurringWeekly.map((slot) => (
+                          <div
+                            key={slot._id}
+                            className="flex items-center justify-between border border-[#007E85]/50 rounded-lg p-3"
+                          >
+                            <div className="flex items-center gap-2 text-gray-700">
+                              <FaRegCalendarCheck className="text-[#007E85]" />
+                              <span className="font-semibold">{slot.dayOfWeek}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-[#007E85]">
+                              <FaClock />
+                              <span>
+                                {slot.startTime} - {slot.endTime}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Date-Specific Slots */}
+                  {doctor.profile?.availability?.dateSpecific?.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-gray-700 mb-2">Date-Specific Slots</h4>
+                      <div className="flex flex-col gap-3">
+                        {doctor.profile.availability.dateSpecific.map((slot) => (
+                          <div
+                            key={slot._id}
+                            className="flex flex-col md:flex-row md:items-center md:justify-between border border-[#007E85]/50 rounded-lg p-3"
+                          >
+                            <div className="flex items-center gap-2 text-gray-700">
+                              <FaRegCalendarCheck className="text-[#007E85]" />
+                              <span className="font-semibold">
+                                {new Date(slot.date).toLocaleDateString(undefined, {
+                                  weekday: 'long',
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                })}
+                              </span>
+                            </div>
+                            <div className="mt-2 md:mt-0 flex items-center gap-2 text-[#007E85]">
+                              <FaClock />
+                              <span>
+                                {slot.startTime} - {slot.endTime}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* No Availability */}
+                  {!doctor.profile?.availability?.recurringWeekly?.length &&
+                    !doctor.profile?.availability?.dateSpecific?.length && (
+                      <div className="bg-yellow-50 text-yellow-700 p-3 rounded-lg text-center mt-4">
+                        No availability information provided by the doctor.
+                      </div>
+                    )}
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column - Booking Section */}
           <div className="lg:col-span-2">
             {/* About Doctor */}
             <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
@@ -319,64 +455,7 @@ const DoctorProfile = () => {
             </div>
           </div>
 
-          {/* Right Column - Booking Section */}
-          <div id="booking-section">
-            <div className="bg-white rounded-xl shadow-md overflow-hidden sticky top-24">
-              <div className="p-6">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">Book an Appointment</h2>
 
-                {/* Day Selector */}
-                <div className="mb-6">
-                  <h3 className="font-semibold text-gray-700 mb-2">Select Day</h3>
-                  <div className="grid grid-cols-7 gap-2">
-                    {daysOfWeek.map((day) => (
-                      <button
-                        key={day}
-                        onClick={() => isDayAvailable(day) && setSelectedDay(day)}
-                        className={`p-2 rounded-lg text-center text-sm ${isDayAvailable(day)
-                          ? selectedDay === day
-                            ? 'bg-[#007E85] text-white'
-                            : 'bg-[#007E85]/10 text-[#007E85] hover:bg-[#007E85]/20'
-                          : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                          }`}
-                        disabled={!isDayAvailable(day)}
-                      >
-                        {day}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Time Slots */}
-                <div>
-                  <h3 className="font-semibold text-gray-700 mb-2">Select Time</h3>
-                  {selectedDay ? (
-                    availableTimeSlots.length > 0 ? (
-                      <div className="grid grid-cols-2 gap-2">
-                        {availableTimeSlots.map((slot) => (
-                          <button
-                            key={slot._id}
-                            onClick={() => handleBookAppointment(slot)}
-                            className="p-2 border border-[#007E85] rounded-lg text-center text-sm text-[#007E85] hover:bg-[#007E85] hover:text-white transition-colors"
-                          >
-                            {slot.startTime} - {slot.endTime}
-                          </button>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="bg-yellow-50 text-yellow-700 p-3 rounded-lg text-center">
-                        No available time slots for this day
-                      </div>
-                    )
-                  ) : (
-                    <div className="bg-yellow-50 text-yellow-700 p-3 rounded-lg text-center">
-                      Please select an available day first
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

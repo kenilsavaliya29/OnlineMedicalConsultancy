@@ -38,29 +38,45 @@ const doctorProfileSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-
-  availability: [
-    {
-      availabilityType: {
+  
+  availability: {
+    dateSpecific: [{
+      startTime: {
         type: String,
-        enum: ['dateSpecific', 'recurringWeekly'],
         required: true
       },
-      // For 'recurringWeekly' type
+      endTime: {
+        type: String,
+        required: true
+      },
+      date: {
+        type: Date,
+        required: true
+      }
+    }],
+    recurringWeekly: [{
       dayOfWeek: {
         type: String,
-        enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+        required: true
       },
-      startTime: String,
-      endTime: String,
-      // For 'dateSpecific' type
-      date: Date,
-      // For 'recurringWeekly' type - optional period
-      recurringFromDate: Date,
-      recurringToDate: Date
-    }
-  ],
-  
+      startTime: {
+        type: String,
+        required: true
+      },
+      endTime: {
+        type: String,
+        required: true
+      },
+      recurringFromDate: {
+        type: Date
+      },
+      recurringToDate: {
+        type: Date
+      }
+    }]
+  },
+
   languages: {
     type: [String],
     default: ['English']

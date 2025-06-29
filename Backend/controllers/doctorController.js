@@ -1,7 +1,6 @@
 import User from '../models/userModel.js';
 import DoctorProfile from '../models/doctorProfileModel.js';
 import { sendEmail } from '../utils/email.js';
-import crypto from 'crypto';
 
 /**
  * Get all doctors
@@ -9,24 +8,51 @@ import crypto from 'crypto';
 export const getAllDoctors = async (req, res) => {
   try {
     const doctors = await User.find({ role: 'doctor' }).select('-password');
-    
+
     // Get doctor profiles
     const doctorProfiles = await DoctorProfile.find({
       userId: { $in: doctors.map(doc => doc._id) }
     });
-    
+
     // Combine user data with profile data
     const doctorsWithProfiles = doctors.map(doctor => {
       const profile = doctorProfiles.find(
         profile => profile.userId.toString() === doctor._id.toString()
       );
-      
+
+      // If profile exists and availability is in the old array format, transform it
+      if (profile && Array.isArray(profile.availability)) {
+        const transformedAvailability = {
+          dateSpecific: [],
+          recurringWeekly: [],
+        };
+
+        profile.availability.forEach(slot => {
+          if (slot.availabilityType === 'dateSpecific') {
+            transformedAvailability.dateSpecific.push({
+              date: slot.date,
+              startTime: slot.startTime,
+              endTime: slot.endTime,
+            });
+          } else if (slot.availabilityType === 'recurringWeekly') {
+            transformedAvailability.recurringWeekly.push({
+              dayOfWeek: slot.dayOfWeek,
+              startTime: slot.startTime,
+              endTime: slot.endTime,
+              recurringFromDate: slot.recurringFromDate,
+              recurringToDate: slot.recurringToDate,
+            });
+          }
+        });
+        profile.availability = transformedAvailability;
+      }
+
       return {
         ...doctor._doc,
         profile: profile || null
       };
     });
-    
+
     res.json({
       success: true,
       doctors: doctorsWithProfiles
@@ -47,22 +73,22 @@ export const getAllDoctors = async (req, res) => {
 export const getDoctorById = async (req, res) => {
   try {
     const { id } = req.params;
-    
-    const doctor = await User.findOne({ 
+
+    const doctor = await User.findOne({
       _id: id,
       role: 'doctor'
     }).select('-password');
-    
+
     if (!doctor) {
       return res.status(404).json({
         success: false,
         message: 'Doctor not found'
       });
     }
-    
+
     // Get doctor profile
     const profile = await DoctorProfile.findOne({ userId: id });
-    
+
     res.json({
       success: true,
       doctor: {
@@ -86,8 +112,8 @@ export const getDoctorById = async (req, res) => {
 export const updateAvailability = async (req, res) => {
   try {
     const { id } = req.params;
-    const { availability } = req.body;
-    
+    const { dateSpecificAvailability, recurringWeeklyAvailability } = req.body;
+
     // Verify the doctor exists
     const doctor = await User.findOne({ _id: id, role: 'doctor' });
     if (!doctor) {
@@ -96,7 +122,7 @@ export const updateAvailability = async (req, res) => {
         message: 'Doctor not found'
       });
     }
-    
+
     // Update the doctor profile
     const doctorProfile = await DoctorProfile.findOne({ userId: id });
     if (!doctorProfile) {
@@ -105,19 +131,21 @@ export const updateAvailability = async (req, res) => {
         message: 'Doctor profile not found'
       });
     }
-    
+
     // Update availability
-    if (Array.isArray(availability)) {
-      doctorProfile.availability = availability;
-    } else if (typeof availability === 'string') {
-      doctorProfile.availability = availability.split(',').map(day => day.trim());
+    if (dateSpecificAvailability) {
+      doctorProfile.availability.dateSpecific = dateSpecificAvailability;
     }
+    if (recurringWeeklyAvailability) {
+      doctorProfile.availability.recurringWeekly = recurringWeeklyAvailability;
+    }
+
     await doctorProfile.save();
-    
+
     res.json({
       success: true,
       message: 'Availability updated successfully',
-      availability: doctorProfile.availability
+      availability: doctorProfile.availability,
     });
   } catch (error) {
     console.error('Error updating doctor availability:', error);
@@ -129,13 +157,30 @@ export const updateAvailability = async (req, res) => {
   }
 };
 
+// export const updateDoctorProfile = async (req, res) => {
+//   try {
+//     const { bio, languages } = req.body;
+//     const { id } = req.user;
+//     console.log(id)
+
+//   }
+//   catch (error) {
+//     console.error('Error updating doctor profile:', error);
+//     res.status(500).json({
+//       success: false,
+//       message: 'Failed to update doctor profile',
+//       error: error.message
+//     });
+//   }
+// }
+
 /**
  * Get doctor reviews
  */
 export const getDoctorReviews = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // Verify the doctor exists
     const doctor = await User.findOne({ _id: id, role: 'doctor' });
     if (!doctor) {
@@ -144,7 +189,7 @@ export const getDoctorReviews = async (req, res) => {
         message: 'Doctor not found'
       });
     }
-    
+
     // Find the doctor profile
     const doctorProfile = await DoctorProfile.findOne({ userId: id });
     if (!doctorProfile) {
@@ -153,14 +198,14 @@ export const getDoctorReviews = async (req, res) => {
         message: 'Doctor profile not found'
       });
     }
-    
+
     // Get populated reviews
     const populatedProfile = await DoctorProfile.findOne({ userId: id })
       .populate({
         path: 'reviews.patientId',
         select: 'firstName lastName profileImage'
       });
-    
+
     res.json({
       success: true,
       reviews: populatedProfile.reviews,
@@ -184,7 +229,7 @@ export const addDoctorReview = async (req, res) => {
     const { doctorId } = req.params;
     const { rating, comment } = req.body;
     const patientId = req.user._id;
-    
+
     // Validate inputs
     if (!rating || rating < 1 || rating > 5) {
       return res.status(400).json({
@@ -192,7 +237,7 @@ export const addDoctorReview = async (req, res) => {
         message: 'Rating must be between 1 and 5'
       });
     }
-    
+
     // Find doctor profile
     const doctorProfile = await DoctorProfile.findOne({ userId: doctorId });
     if (!doctorProfile) {
@@ -201,12 +246,12 @@ export const addDoctorReview = async (req, res) => {
         message: 'Doctor profile not found'
       });
     }
-    
+
     // Check if patient has already reviewed this doctor
     const existingReviewIndex = doctorProfile.reviews.findIndex(
       review => review.patientId.toString() === patientId.toString()
     );
-    
+
     if (existingReviewIndex !== -1) {
       // Update existing review
       doctorProfile.reviews[existingReviewIndex].rating = rating;
@@ -221,10 +266,10 @@ export const addDoctorReview = async (req, res) => {
         date: new Date()
       });
     }
-    
+
     // Save profile - pre save hook will update average rating
     await doctorProfile.save();
-    
+
     res.json({
       success: true,
       message: 'Review submitted successfully',
@@ -245,12 +290,12 @@ export const addDoctorReview = async (req, res) => {
 const generateRandomPassword = (length = 10) => {
   const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
   let password = '';
-  
+
   for (let i = 0; i < length; i++) {
     const randomIndex = Math.floor(Math.random() * charset.length);
     password += charset[randomIndex];
   }
-  
+
   return password;
 };
 
@@ -258,7 +303,7 @@ const generateRandomPassword = (length = 10) => {
 const sendWelcomeEmail = async (doctorName, email, password) => {
   console.log("hello")
   const subject = 'Welcome to Medical Consultancy - Your Account Details';
-  
+
   const body = `
 Dear Dr. ${doctorName},
 
@@ -275,7 +320,7 @@ If you have any questions, please contact our support team.
 Best regards,
 Medical Consultancy Team
   `;
-  
+
   return await sendEmail(email, subject, body);
 };
 
@@ -286,15 +331,16 @@ Medical Consultancy Team
 export const createDoctor = async (req, res) => {
   try {
     console.log(req.body)
-    const { 
-      fullName, 
-      email, 
-      phone, 
-      specialization, 
-      qualification, 
-      experience, 
-      availability,
-      registrationNumber 
+    const {
+      fullName,
+      email,
+      phone,
+      specialization,
+      qualification,
+      experience,
+      dateSpecificAvailability,
+      recurringWeeklyAvailability,
+      registrationNumber
     } = req.body;
 
     const nameParts = fullName.split(' ');
@@ -318,7 +364,7 @@ export const createDoctor = async (req, res) => {
       firstName,
       lastName,
       email,
-      password: generatedPassword, 
+      password: generatedPassword,
       phoneNumber: phone,
       role: 'doctor'
     });
@@ -338,8 +384,10 @@ export const createDoctor = async (req, res) => {
       experience: parseInt(experience, 10) || 0,
       bio: req.body.bio || '',
       languages: req.body.languages ? JSON.parse(req.body.languages) : ['English'],
-      availability: Array.isArray(availability) ? availability : 
-                  (availability ? availability.split(',').map(day => day.trim()) : []),
+      availability: {
+        dateSpecific: dateSpecificAvailability || [],
+        recurringWeekly: recurringWeeklyAvailability || [],
+      },
       registrationNumber: registrationNumber // Add registrationNumber to profile
     });
 
@@ -347,7 +395,7 @@ export const createDoctor = async (req, res) => {
 
     // 3. Send welcome email with login credentials
     const emailResult = await sendWelcomeEmail(fullName, email, generatedPassword);
-    
+
     if (!emailResult.success) {
       console.warn('Failed to send welcome email:', emailResult.error);
     }
@@ -389,16 +437,17 @@ export const createDoctor = async (req, res) => {
 export const updateDoctor = async (req, res) => {
   try {
     const { id } = req.params;
-    const { 
-      fullName, 
-      email, 
-      password, 
-      phone, 
-      specialization, 
-      qualification, 
-      experience, 
-      availability,
-      registrationNumber // Extract registrationNumber
+    const {
+      fullName,
+      email,
+      password,
+      phone,
+      specialization,
+      qualification,
+      experience,
+      dateSpecificAvailability,
+      recurringWeeklyAvailability,
+      registrationNumber
     } = req.body;
 
     // 1. Update user account
@@ -424,7 +473,7 @@ export const updateDoctor = async (req, res) => {
       user.firstName = nameParts[0];
       user.lastName = nameParts.slice(1).join(' ');
     }
-    
+
     if (email) user.email = email;
     if (phone) user.phoneNumber = phone;
     if (password && password.trim() !== '') user.password = password;
@@ -449,9 +498,11 @@ export const updateDoctor = async (req, res) => {
     if (specialization) doctorProfile.specialization = specialization;
     if (qualification) doctorProfile.qualification = qualification;
     if (experience) doctorProfile.experience = parseInt(experience, 10) || doctorProfile.experience;
-    if (availability) {
-      doctorProfile.availability = Array.isArray(availability) ? availability : 
-                                  availability.split(',').map(day => day.trim());
+    if (dateSpecificAvailability) {
+      doctorProfile.availability.dateSpecific = dateSpecificAvailability;
+    }
+    if (recurringWeeklyAvailability) {
+      doctorProfile.availability.recurringWeekly = recurringWeeklyAvailability;
     }
     if (req.body.bio) doctorProfile.bio = req.body.bio;
     if (req.body.languages) {

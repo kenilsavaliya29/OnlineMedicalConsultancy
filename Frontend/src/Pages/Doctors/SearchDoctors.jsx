@@ -4,8 +4,7 @@ import { GiMedicines, GiStomach } from 'react-icons/gi';
 import { MdPregnantWoman, MdOutlineVerified } from 'react-icons/md';
 import { Link, useNavigate } from 'react-router-dom';
 
-const API_URL = 'http://localhost:3000/api/doctors';
-const BACKEND_URL = 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 const SearchDoctors = () => {
   const navigate = useNavigate();
@@ -125,13 +124,14 @@ const SearchDoctors = () => {
     setError(null);
 
     try {
-      const response = await fetch(API_URL, {
+      const response = await fetch(`${API_URL}/api/doctors`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
         },
-        credentials: 'include' // Include cookies if needed for authentication
+        credentials: 'include'
       });
+
 
       if (!response.ok) {
         throw new Error('Failed to fetch doctors');
@@ -285,7 +285,7 @@ const SearchDoctors = () => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-gray-50 to-blue-50 pt-24 pb-12">
+    <div className="min-h-screen bg-gradient-to-tr from-gray-50 to-blue-50 pt-32 pb-12 ">
       <div className="container mx-auto px-4">
         {/* Hero Section */}
         <div className="mb-10 text-center">
@@ -495,7 +495,7 @@ const SearchDoctors = () => {
                       <div className="h-16 w-16 rounded-full overflow-hidden bg-[#007E85]/10 flex items-center justify-center text-[#007E85] text-3xl mr-4">
                         {doctor.profileImage ? (
                           <img
-                            src={`${BACKEND_URL}${doctor.profileImage}`}
+                            src={`${API_URL}${doctor.profileImage}`}
                             alt={`Dr. ${doctor.name}`}
                             className="h-full w-full object-cover"
                             onError={(e) => {
@@ -524,12 +524,37 @@ const SearchDoctors = () => {
                     <div className="mt-4 pt-4 border-t border-gray-100">
                       <div className="flex items-center text-gray-700 text-sm mb-2">
                         <FaClock className="mr-2 text-[#007E85]" />
-                        <span>{doctor.profile?.experience} years experience</span>
+                        <span>{doctor.profile.experience} years experience</span>
                       </div>
 
                       <div className="flex items-center text-gray-700 text-sm">
                         <FaCalendarAlt className="mr-2 text-[#007E85]" />
-                        <span>Available: {doctor.profile?.availability?.join(', ') || 'Contact for details'}</span>
+                        <span>
+                          {doctor.profile.availability.recurringWeekly.length > 0 && (
+                            <>
+                              <span className="font-semibold">Weekly:</span>{" "}
+                              {doctor.profile.availability.recurringWeekly.map((item, idx) => (
+                                <span key={idx}>
+                                  {item.dayOfWeek} ({item.startTime} - {item.endTime}){idx < doctor.profile.availability.recurringWeekly.length - 1 ? ', ' : ''}
+                                </span>
+                              ))}
+                            </>
+                          )}
+                          {doctor.profile.availability.dateSpecific.length > 0 && (
+                            <>
+                              {doctor.profile.availability.recurringWeekly?.length > 0 && <br />}
+                              <span className="font-semibold">Dates:</span>{" "}
+                              {doctor.profile.availability.dateSpecific.map((item, idx) => (
+                                <span key={idx}>
+                                  {new Date(item.date).toLocaleDateString()} ({item.startTime} - {item.endTime}){idx < doctor.profile.availability.dateSpecific.length - 1 ? ', ' : ''}
+                                </span>
+                              ))}
+                            </>
+                          )}
+                          {!doctor.profile.availability.recurringWeekly.length &&
+                            !doctor.profile.availability.dateSpecific.length &&
+                            "Contact for details"}
+                        </span>
                       </div>
                     </div>
                   </div>
