@@ -3,10 +3,10 @@ import { AuthContext } from '../contexts/authContext.jsx';
 import { FaUser, FaLock, FaBell, FaEnvelope, FaShieldAlt, FaEye, FaEyeSlash, FaEdit, FaCheck, FaTimes } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { generatePatientPdf } from '../utils/pdfGenerator.js';
 
 
 const SuccessModal = ({ onClose }) => {
-
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
@@ -128,12 +128,11 @@ const EditableField = ({ label, name, value, onChange, error }) => {
 const Settings = () => {
   const { user, setUser } = useContext(AuthContext);
 
-  // Removed successMessage, showErrorBox, errorMessage states
   const [errors, setErrors] = useState({});
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const [formData, setFormData] = useState({
-    firstName: '', // Corrected from fullName
+    firstName: '',
     lastName: '',
     email: '',
     phone: '',
@@ -143,15 +142,17 @@ const Settings = () => {
     showPassword: false
   });
 
+  const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+
   // Initialize form with user data when component mounts
   useEffect(() => {
     if (user) {
       setFormData(prevData => ({
         ...prevData,
-        firstName: user.firstName || '', // Use user.firstName
-        lastName: user.lastName || '',   // Use user.lastName
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
         email: user.email || '',
-        phone: user.phoneNumber || '' // Use user.phoneNumber
+        phone: user.phoneNumber || ''
       }));
     }
   }, [user]);
@@ -166,11 +167,11 @@ const Settings = () => {
       [name]: newValue
     }));
 
-    // Clear specific error when the user starts typing in that field
+
     setErrors(prevErrors => ({
       ...prevErrors,
-      [name]: undefined, // Clear the specific field error
-      general: undefined // Clear general error on any change
+      [name]: undefined,
+      general: undefined
     }));
   };
 
@@ -191,21 +192,18 @@ const Settings = () => {
     if (Object.keys(newErrors).length > 0) return;
 
     try {
-      // Different data structure and endpoint based on user role
       if (user.role === 'doctor') {
-        // Data for doctor update
         const doctorUpdateData = {
           email: formData.email,
-          name: `${formData.firstName} ${formData.lastName}`, // Combine first and last for doctor name
+          name: `${formData.firstName} ${formData.lastName}`,
           phone: formData.phone,
-          // Keep existing doctor specific fields if they exist on user object
           specialization: user.specialization,
           experience: user.experience,
           qualification: user.qualification,
           availability: user.availability
         };
 
-        const response = await fetch(`http://localhost:3000/auth/update-doctor`, {
+        const response = await fetch(`${API_URL}/auth/update-doctor`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -217,34 +215,31 @@ const Settings = () => {
         const data = await response.json();
 
         if (data.success) {
-          // Update the user in context with new information
           setUser(prev => ({
             ...prev,
-            firstName: formData.firstName, // Update firstName
-            lastName: formData.lastName,   // Update lastName
+            firstName: formData.firstName,
+            lastName: formData.lastName,
             email: formData.email,
-            phoneNumber: formData.phone, // Update phoneNumber
-            name: `${formData.firstName} ${formData.lastName}` // Update combined name
+            phoneNumber: formData.phone,
+            name: `${formData.firstName} ${formData.lastName}`
           }));
 
-          // Show the success modal
           setShowSuccessModal(true);
 
-          // Removed window.location.reload()
         } else {
           setErrors({
             general: data.message || 'Failed to update doctor profile'
           });
         }
-      } else { // Assuming 'patient' or other roles
+      } else {
         const updateData = {
-          firstname: formData.firstName, // Use firstname for patient endpoint
-          lastname: formData.lastName,   // Use lastname for patient endpoint
+          firstname: formData.firstName,
+          lastname: formData.lastName,
           email: formData.email,
-          phonenumber: formData.phone    // Use phonenumber for patient endpoint
+          phonenumber: formData.phone
         };
 
-        const response = await fetch(`http://localhost:3000/auth/update-profile`, {
+        const response = await fetch(`${API_URL}/auth/update-profile`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -256,19 +251,16 @@ const Settings = () => {
         const data = await response.json();
 
         if (data.success) {
-          // Update the user in context with new information
           setUser(prev => ({
             ...prev,
-            firstName: formData.firstName, // Update firstName
-            lastName: formData.lastName,   // Update lastName
+            firstName: formData.firstName,
+            lastName: formData.lastName,
             email: formData.email,
-            phoneNumber: formData.phone    // Update phoneNumber
+            phoneNumber: formData.phone
           }));
 
-          // Show the success modal
           setShowSuccessModal(true);
 
-          // Removed window.location.reload()
         } else {
           setErrors({
             general: data.message || 'Failed to update profile'
@@ -276,34 +268,31 @@ const Settings = () => {
         }
       }
     } catch (error) {
-      console.error("Profile update error:", error); // Log the error
+      console.error("Profile update error:", error);
       setErrors({
         general: 'An unexpected error occurred during profile update.'
       });
     }
-  }; // Correctly closed handleProfileSubmit
+  };
 
-  // Defined handleSecuritySubmit separately
   const handleSecuritySubmit = async (e) => {
     e.preventDefault();
 
     let newErrors = {};
     if (!formData.currentPassword) newErrors.currentPassword = "Current password is required";
     if (!formData.newPassword) newErrors.newPassword = "New password is required";
-    // Add more validation for new password if needed (e.g., length, complexity)
 
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
 
-    // Data being sent to server
     const passwordData = {
-      email: user.email, // Assuming email is needed for password change
+      email: user.email,
       currentPassword: formData.currentPassword,
       newPassword: formData.newPassword
     };
 
     try {
-      const response = await fetch(`http://localhost:3000/auth/update-password`, {
+      const response = await fetch(`${API_URL}/auth/update-password`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -313,18 +302,14 @@ const Settings = () => {
       });
 
       const data = await response.json();
-      console.log(data)
-      if (data.success) {
-        // Clear password fields
-        setFormData(prev => ({ ...prev, currentPassword: '', newPassword: '' }));
-        setErrors({}); // Clear any previous errors
 
-        // Show success modal
+      if (data.success) {
+        setFormData(prev => ({ ...prev, currentPassword: '', newPassword: '' }));
+        setErrors({});
+
         setShowSuccessModal(true);
-        console.log("Password updated successfully")
-        // Removed window.location.reload()
+
       } else {
-        // Check for specific error messages from the backend
         if (data.message === 'Current password is incorrect') {
           setErrors({ currentPassword: 'Incorrect current password' });
         } else {
@@ -334,18 +319,17 @@ const Settings = () => {
         }
       }
     } catch (error) {
-      console.error("Password update error:", error); // Log the error
+      console.error("Password update error:", error);
       setErrors({
         general: 'An unexpected error occurred during password change.'
       });
     }
-  }; // Correctly closed handleSecuritySubmit
+  };
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#e6e9f0] to-[#eef1f5] py-12 px-4 sm:px-6 lg:px-8"> {/* Added background */}
+    <div className="min-h-screen bg-gradient-to-br from-[#e6e9f0] to-[#eef1f5] py-12 px-4 sm:px-6 lg:px-8">
       {showSuccessModal && <SuccessModal onClose={() => setShowSuccessModal(false)} />}
-      {/* Removed ErrorBox component usage */}
 
       <div className="max-w-4xl mx-auto">
         <div className="mb-8 flex items-center gap-2 text-sm font-lato text-[#007E85]">
@@ -356,7 +340,6 @@ const Settings = () => {
 
         <h1 className="text-4xl font-bold text-[#007E85] mb-8 font-dm">Account Settings</h1>
 
-        {/* Removed successMessage display as showSuccessModal is used */}
 
         {errors.general && (
           <motion.div
@@ -456,7 +439,7 @@ const Settings = () => {
                   style={{ outline: 'none' }}
                   required
                 />
-                 {/* Add error display for new password if needed */}
+                {/* Add error display for new password if needed */}
               </div>
 
               <button
@@ -497,12 +480,15 @@ const Settings = () => {
         {/* Corrected and cleaned up the Data & Privacy section */}
         <SettingSection title="Data & Privacy" icon={<FaShieldAlt />}> {/* Changed icon to FaShieldAlt */}
           <div className="space-y-4">
-            <a href="/api/download/personal-data" download={user?.firstName || 'personal-data'}> {/* Added optional chaining and default filename */}
-              <button className="w-full flex items-center justify-between p-4 bg-[#007E85]/5 hover:bg-[#007E85]/10 rounded-xl transition-colors">
+            {(user?.role === 'doctor' || user?.role === 'patient') && (
+              <button
+                onClick={() => generatePatientPdf(user)}
+                className="w-full flex items-center justify-between p-4 bg-[#007E85]/5 hover:bg-[#007E85]/10 rounded-xl transition-colors"
+              >
                 <span className="font-medium text-gray-800 font-lato">Download Personal Data</span>
                 <FaEnvelope className="text-[#007E85]" />
               </button>
-            </a>
+            )}
             {/* Assuming Privacy Settings is just a link or placeholder */}
             <button className="w-full flex items-center justify-between p-4 bg-[#007E85]/5 hover:bg-[#007E85]/10 rounded-xl transition-colors">
               <span className="font-medium text-gray-800 font-lato">Privacy Settings</span> {/* Corrected typo "Settins" */}

@@ -20,7 +20,7 @@ const ContactUs = () => {
   return (
     <>
       <div className="bg-gray-50">
-        <div className="relative h-[400px] overflow-hidden">
+        <div className="relative h-[500px] overflow-hidden">
           <img 
             src="assets/images/contact-hero.png" 
             alt="Contact Us Hero" 

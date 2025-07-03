@@ -5,7 +5,7 @@ import Footer from '../components/Footer'
 const About = () => {
     return (
         <>
-            <div className="container mx-auto px-4 py-24">
+            <div className="container mx-auto px-4 py-28">
                 <div className="text-center mb-16">
                     <h1 className="text-5xl font-bold text-[#007E85] mb-6">About Us</h1>
                     <p className="text-gray-600 text-xl max-w-3xl mx-auto">Transforming lives through compassionate mental healthcare and innovative support services tailored to your unique journey.</p>
@@ -26,7 +26,7 @@ const About = () => {
                     <div className="relative">
                         <img src="https://img.freepik.com/free-photo/medium-shot-doctor-with-crossed-arms_23-2148868176.jpg" 
                             alt="Caring Healthcare Professional" 
-                            className="rounded-2xl shadow-2xl hover:shadow-3xl transition-shadow duration-300 w-full h-[400px] object-cover"
+                            className="rounded-2xl shadow-2xl hover:shadow-3xl transition-shadow duration-300 w-full h-[500px] object-cover"
                         />
                         <div className="absolute -bottom-6 -right-6 bg-[#007E85] text-white p-6 rounded-lg hidden md:block">
                             <p className="text-2xl font-bold">20+ Years</p>
