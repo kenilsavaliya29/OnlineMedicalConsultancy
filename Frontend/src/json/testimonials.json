@@ -1,0 +1,44 @@
+[
+    {
+      "name": "Dr. Sarah Johnson",
+      "role": "Patient",
+      "image": "/assets/images/profilephoto.svg",
+      "rating": 5,
+      "text": "I was skeptical about online consultations, but this platform exceeded my expectations. The doctor was thorough, professional, and solved my issue within 20 minutes. Saved me hours of travel and waiting!"
+    },
+    {
+      "name": "Rajesh Kumar",
+      "role": "Patient",
+      "image": "/assets/images/profilephoto.svg",
+      "rating": 5,
+      "text": "The wellness program transformed my health completely. Lost 15kg in 4 months with their personalized diet plan and exercise routine. The AI recommendations were spot-on for my lifestyle."
+    },
+    {
+      "name": "Emily Rodriguez",
+      "role": "Patient",
+      "image": "/assets/images/profilephoto.svg",
+      "rating": 4,
+      "text": "As a working mother, finding time for doctor visits was impossible. This platform let me consult specialists during lunch breaks. The convenience is unmatched, and the quality of care is excellent."
+    },
+    {
+      "name": "Michael Chen",
+      "role": "Patient",
+      "image": "/assets/images/profilephoto.svg",
+      "rating": 5,
+      "text": "Dealing with chronic conditions requires regular monitoring. The follow-up system here is fantastic - my doctor checks in regularly, adjusts medications, and I never miss important health updates."
+    },
+    {
+      "name": "Dr. Priya Patel",
+      "role": "Patient",
+      "image": "/assets/images/profilephoto.svg",
+      "rating": 5,
+      "text": "Even as a doctor myself, I use this platform for consultations outside my specialty. The quality of doctors here is exceptional, and the seamless experience makes healthcare accessible to everyone."
+    },
+    {
+      "name": "James Wilson",
+      "role": "Patient",
+      "image": "/assets/images/profilephoto.svg",
+      "rating": 4,
+      "text": "The mental health support through this platform helped me through a difficult time. Having 24/7 access to counselors and psychiatrists made all the difference in my recovery journey."
+    }
+]

@@ -24,6 +24,8 @@ import AppointmentBooking from './Pages/Doctors/AppointmentBooking';
 import WellnessProgram from './pages/Patient/WellnessProgram';
 import { AuthProvider } from './contexts/authContext';
 import NotFoundPage from './404Page';
+import HowAppointmentsWork from './Pages/Info/HowAppointmentsWork';
+import HowConsultationWorks from './Pages/Info/HowConsultationWorks';
 
 function App() {
   const router = createBrowserRouter([
@@ -82,6 +84,14 @@ function App() {
       element: <ProtectedRoute allowedRoles={['admin']}><Layout><Admin /></Layout></ProtectedRoute>,
     },
     // Common routes
+    {
+      path: "/info/appointments",
+      element: <Layout><HowAppointmentsWork /></Layout>
+    },
+    {
+      path: "/info/consultations",
+      element: <Layout> <HowConsultationWorks /></Layout>
+    },
     {
       path: "/services",
       element: <Layout><Services /></Layout>,

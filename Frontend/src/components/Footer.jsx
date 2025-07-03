@@ -23,8 +23,8 @@ const Footer = () => {
                     <div className="font-lexend">
                         <h2 className="text-xl font-bold mb-4 text-white">Services</h2>
                         <ul className="space-y-3">
-                            <li><NavLink to="/appointments" className="hover:text-gray-300 hover:underline transition-all duration-300">Appointments</NavLink></li>
-                            <li><NavLink to="/chat" className="hover:text-gray-300 hover:underline transition-all duration-300">Consultations</NavLink></li>
+                            <li><NavLink to="/info/appointments" className="hover:text-gray-300 hover:underline transition-all duration-300">Appointments</NavLink></li>
+                            <li><NavLink to="/info/consultations" className="hover:text-gray-300 hover:underline transition-all duration-300">Consultations</NavLink></li>
                             <li><NavLink to="/services" className="hover:text-gray-300 hover:underline transition-all duration-300">Health Checkups</NavLink></li>
                             <li><NavLink to="/wellness" className="hover:text-gray-300 hover:underline transition-all duration-300">Wellness Program</NavLink></li>
                         </ul>

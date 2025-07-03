@@ -1,0 +1,34 @@
+[
+    {
+      "question": "How do I book a consultation with a doctor?",
+      "answer": "Simply browse our list of available doctors, select the specialist you need, choose your preferred time slot, and complete the booking with payment. You'll receive instant confirmation with session details."
+    },
+    {
+      "question": "What are the consultation fees?",
+      "answer": "Consultation fees vary by doctor and specialty, typically ranging from ₹299 to ₹999. Each doctor's profile shows their consultation fee upfront, and you can filter by price range to find doctors within your budget."
+    },
+    {
+      "question": "How does the live chat session work?",
+      "answer": "Once you book and pay, you'll receive a secure chat link. At your appointment time, click the link to start your video/text consultation. Sessions are private, encrypted, and can include file sharing for medical reports."
+    },
+    {
+      "question": "What is included in the Wellness Program?",
+      "answer": "Our AI-powered wellness program provides personalized diet plans, exercise routines, health goal tracking, and progress monitoring. You'll get customized recommendations based on your health profile, goals, and preferences."
+    },
+    {
+      "question": "Are online consultations as effective as in-person visits?",
+      "answer": "Yes! Studies show online consultations are highly effective for most conditions. Our doctors can diagnose, prescribe medications, order tests, and provide follow-up care. For cases requiring physical examination, doctors will recommend in-person visits."
+    },
+    {
+      "question": "Is my medical information secure?",
+      "answer": "Absolutely. We use bank-level encryption and comply with healthcare privacy regulations. All consultations are confidential, and your medical data is stored securely with restricted access only to your treating doctors."
+    },
+    {
+      "question": "Can I get prescriptions online?",
+      "answer": "Yes, doctors can issue digital prescriptions during consultations. You'll receive a secure e-prescription that's valid at pharmacies nationwide, along with medication guidance and dosage instructions."
+    },
+    {
+      "question": "What if I need to cancel or reschedule?",
+      "answer": "You can cancel or reschedule up to 2 hours before your appointment through your patient dashboard. Cancellations made 24+ hours in advance receive full refunds, while later cancellations may incur a small fee."
+    }
+]
