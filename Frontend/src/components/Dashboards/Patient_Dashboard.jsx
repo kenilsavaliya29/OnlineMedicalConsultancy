@@ -9,7 +9,7 @@ import RecordsTab from './PatientSideBar/RecordsTab.jsx'
 import PrescriptionsTab from './PatientSideBar/PrescriptionsTab.jsx'
 import HealthTab from './PatientSideBar/HealthTab.jsx'
 import MessagesTab from './PatientSideBar/MessagesTab.jsx'
-import SettingsTab from './PatientSideBar/SettingsTab.jsx'
+import AccountSettingsTab from './PatientSideBar/AccountSettingsTab.jsx'
 import MyDoctorTab from './PatientSideBar/MyDoctorTab.jsx'
 import MedicalProfileTab from './PatientSideBar/MedicalProfileTab.jsx'
 import MessageBox from '../common/MessageBox.jsx'
@@ -23,7 +23,6 @@ const Patient_Dashboard = () => {
   const [activeTab, setActiveTab] = useState('overview')
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [patientDetails, setPatientDetails] = useState(null)
-  const [isBasicProfileComplete, setIsBasicProfileComplete] = useState(true); 
   const [isNotificationsModalOpen, setIsNotificationsModalOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [messageBox, setMessageBox] = useState({ show: false, type: '', message: '' });
@@ -188,7 +187,7 @@ const Patient_Dashboard = () => {
         return <MessagesTab />
 
       case 'settings':
-        return <SettingsTab patientDetails={patientDetails} setPatientDetails={setPatientDetails} handleLogout={handleLogout} />
+        return <AccountSettingsTab  />
 
       case 'doctors':
         return <MyDoctorTab />
@@ -259,9 +258,9 @@ const Patient_Dashboard = () => {
           </div>
           <div className="flex items-center gap-3 mb-6">
             <img
-              src={patientDetails?.profileImage ? `${API_URL}${patientDetails.profileImage}` : "https://img.freepik.com/free-vector/businessman-character-avatar-isolated_24877-60111.jpg?w=740&t=st=1693113479~exp=1693114079~hmac=740079bac9709276b095b4d1410b49850d0d9b1c27e95efcad33ad86ce483e26"}
-              alt="Patient"
-              className="w-12 h-12 rounded-full border-2 border-[#007E85] object-cover"
+              src={patientDetails?.profile?.profileImage ? `${API_URL}${patientDetails.profile.profileImage.startsWith('/') ? '' : '/'}${patientDetails.profile.profileImage}` : "https://img.freepik.com/free-vector/businessman-character-avatar-isolated_24877-60111.jpg?w=740&t=st=1693113479~exp=1693114079~hmac=740079bac9709276b095b4d1410b49850d0d9b1c27e95efcad33ad86ce483e26"}
+              alt="Patient Profile"
+              className="w-16 h-1w-16 rounded-full border-4 border-[#007E85] object-cover"
             />
             <div>
               <h3 className="font-bold text-gray-800 capitalize">{patientDetails?.fullName || "Patient"}</h3>

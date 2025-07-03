@@ -193,12 +193,9 @@ const DoctorProfile = () => {
           <div className="p-6 md:p-8">
             <div className="flex flex-col md:flex-row md:items-center">
               <div className="h-32 w-32 rounded-full overflow-hidden bg-[#007E85]/10 flex items-center justify-center text-[#007E85] text-6xl mx-auto md:mx-0 md:mr-8 mb-4 md:mb-0">
-                {doctor.profileImage ? (
+                {doctor.profile.profileImage ? (
                   <img
-                    src={doctor.profileImage.startsWith('http')
-                      ? doctor.profileImage
-                      : `http://localhost:3000${doctor.profileImage}`}
-                    alt={`Dr. ${doctor.firstName}`}
+                    src={`${API_URL}${doctor.profile.profileImage.startsWith('/') ? '' : '/'}${doctor.profile.profileImage}`}
                     className="h-full w-full object-cover"
                     onError={(e) => {
                       e.target.onerror = null;

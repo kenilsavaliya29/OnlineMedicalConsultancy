@@ -167,17 +167,17 @@ const SearchDoctors = () => {
       );
     }
 
-    // Apply active category filter (from specialty cards)
+    // Apply active category filter (from Speciality cards)
     if (activeCategory) {
       result = result.filter(doctor =>
-        doctor.specialization === activeCategory
+        doctor.profile?.specialization === activeCategory
       );
     }
 
     // Apply dropdown filters
     if (filters.specialization) {
       result = result.filter(doctor =>
-        doctor.specialization === filters.specialization
+        doctor.profile?.specialization === filters.specialization
       );
     }
 
@@ -210,7 +210,6 @@ const SearchDoctors = () => {
 
   const handleCategoryClick = (categoryName) => {
     if (activeCategory === categoryName) {
-      // If clicking on already active category, deselect it
       setActiveCategory(null);
     } else {
       setActiveCategory(categoryName);
@@ -310,7 +309,7 @@ const SearchDoctors = () => {
                     onChange={handleSearchChange}
                     onBlur={handleBlur}
                     onFocus={() => searchQuery.trim() !== '' && suggestions.length > 0 && setShowSuggestions(true)}
-                    placeholder="Search doctors by name, specialty, or qualification..."
+                    placeholder="Search doctors by name, speciality, or qualification..."
                     className="pl-10 w-full py-3 border border-gray-300 rounded-lg focus:ring-[#007E85] focus:border-[#007E85] focus:outline-none"
                   />
                   {showSuggestions && suggestions.length > 0 && (
@@ -422,23 +421,23 @@ const SearchDoctors = () => {
 
         {/* Specialties Section */}
         <div className="mb-10">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Browse by Specialty</h2>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Browse by Speciality</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {specializations.map((specialty) => (
+            {specializations.map((Speciality) => (
               <div
-                key={specialty.name}
-                onClick={() => handleCategoryClick(specialty.name)}
-                className={`p-4 rounded-xl cursor-pointer transition-all ${activeCategory === specialty.name
+                key={Speciality.name}
+                onClick={() => handleCategoryClick(Speciality.name)}
+                className={`p-4 rounded-xl cursor-pointer transition-all ${activeCategory === Speciality.name
                   ? 'bg-[#007E85] text-white shadow-lg transform scale-105'
-                  : `${specialty.color} hover:shadow-md`
+                  : `${Speciality.color} hover:shadow-md`
                   }`}
               >
                 <div className="flex flex-col items-center text-center">
-                  <div className={`text-3xl mb-2 ${activeCategory === specialty.name ? 'text-white' : ''
+                  <div className={`text-3xl mb-2 ${activeCategory === Speciality.name ? 'text-white' : ''
                     }`}>
-                    {specialty.icon}
+                    {Speciality.icon}
                   </div>
-                  <div className="text-sm font-medium">{specialty.name}</div>
+                  <div className="text-sm font-medium">{Speciality.name}</div>
                 </div>
               </div>
             ))}
@@ -493,10 +492,10 @@ const SearchDoctors = () => {
                   <div className="p-6">
                     <div className="flex items-start">
                       <div className="h-16 w-16 rounded-full overflow-hidden bg-[#007E85]/10 flex items-center justify-center text-[#007E85] text-3xl mr-4">
-                        {doctor.profileImage ? (
+                        {doctor.profile.profileImage ? (
                           <img
-                            src={`${API_URL}${doctor.profileImage}`}
-                            alt={`Dr. ${doctor.name}`}
+                            src={`${API_URL}${doctor.profile.profileImage.startsWith('/') ? '' : '/'}${doctor.profile.profileImage}`}
+                            alt={`Dr. ${doctor.firstName}`}
                             className="h-full w-full object-cover"
                             onError={(e) => {
                               e.target.onerror = null;
@@ -513,7 +512,7 @@ const SearchDoctors = () => {
                           Dr. {doctor.firstName} {doctor.lastName}
                           <MdOutlineVerified className="ml-1 text-blue-500" />
                         </h3>
-                        <p className="text-sm text-gray-600">{doctor.profile?.qualification} - {doctor.profile?.specialization}</p>
+                        <p className="text-sm text-gray-600">{doctor.profile.qualification} - {doctor.profile.specialization}</p>
                         <div className="mt-1">
                           {/* Either use the real rating from the API or a default */}
                           {renderStars(4.5)}

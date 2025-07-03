@@ -4,12 +4,14 @@ import { AuthContext } from '../../../contexts/authContext';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
-const OverviewTab = () => {
+const OverviewTab = ({ setActiveTab }) => {
 
     const [appointments, setappointments] = useState([])
     const { user } = useContext(AuthContext);
 
-    
+    const handleTabChange = () => {
+        setActiveTab('update_availability')
+    }
     return (
         <div className="space-y-6">
             {/* Stats Grid */}
@@ -151,7 +153,7 @@ const OverviewTab = () => {
                                     <div>
                                         <h4 className="font-semibold text-gray-700 mb-1">Availability</h4>
                                         <button
-                                           
+                                            onClick={handleTabChange}
                                             className="text-[#007E85] hover:underline flex items-center text-sm"
                                         >
                                             <FaCalendarAlt className="mr-1" />

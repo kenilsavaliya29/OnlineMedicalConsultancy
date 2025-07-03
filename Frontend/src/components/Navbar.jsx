@@ -227,7 +227,7 @@ const Navbar = () => {
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             >
               <img
-                src={user && user.profile && user.profile.profileImage ? `${API_URL}${user.profile.profileImage.startsWith('/') ? '' : '/'}${user.profile.profileImage}` : "https://img.freepik.com/free-photo/doctor-with-his-arms-crossed-white-background_1368-5790.jpg"}
+                src={user && user.profile && user.profile.profileImage ? `${API_URL}${user.profile.profileImage.startsWith('/') ? '' : '/'}${user.profile.profileImage}` : "https://img.freepik.com/free-vector/businessman-character-avatar-isolated_24877-60111.jpg?w=740&t=st=1693113479~exp=1693114079~hmac=740079bac9709276b095b4d1410b49850d0d9b1c27e95efcad33ad86ce483e26"}
                 alt="Profile"
                 className="w-8 h-8 rounded-full border-2 border-[#007E85] group-hover:border-white transition-colors object-cover"
                 onError={(e) => {
@@ -236,7 +236,7 @@ const Navbar = () => {
                 }}
               />
               <span className='hidden sm:inline font-medium capitalize'>
-                {user.role === 'admin' ? "Admin" : user.role === "doctor" ? "Dr. " + user.firstName : ""}
+                {user.role === 'admin' ? "Admin" : user.role === "doctor" ? "Dr. " + user.firstName : user.firstName}
               </span>
               <motion.img
                 animate={{ rotate: isDropdownOpen ? 180 : 0 }}

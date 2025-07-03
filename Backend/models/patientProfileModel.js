@@ -78,6 +78,10 @@ const patientProfileSchema = new mongoose.Schema({
     notes: String
   }],
 
+  languages: {
+    type: [String],
+    default: ['English']
+  },
 
   communicationPreferences: {
     appointmentReminders: {

@@ -179,7 +179,7 @@ const OverViewTab = React.memo(() => {
                         <div>
                             <div className="flex items-center gap-4 mb-6">
                                 <img
-                                    src={user?.profileImage ? `${API_URL}${user.profileImage}` : "https://img.freepik.com/free-vector/businessman-character-avatar-isolated_24877-60111.jpg?w=740&t=st=1693113479~exp=1693114079~hmac=740079bac9709276b095b4d1410b49850d0d9b1c27e95efcad33ad86ce483e26"}
+                                   src={user?.profile?.profileImage ? `${API_URL}${user.profile.profileImage.startsWith('/') ? '' : '/'}${user.profile.profileImage}` : "https://img.freepik.com/free-vector/businessman-character-avatar-isolated_24877-60111.jpg?w=740&t=st=1693113479~exp=1693114079~hmac=740079bac9709276b095b4d1410b49850d0d9b1c27e95efcad33ad86ce483e26"}
                                     alt="Patient Profile"
                                     className="w-20 h-20 rounded-full border-2 border-[#007E85] object-cover"
                                 />

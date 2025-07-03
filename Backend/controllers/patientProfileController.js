@@ -54,7 +54,7 @@ export const getPatientProfileStatus = async (req, res) => {
 // get the actual medical profile of the patient
 
 export const getMedicalProfile = async (req, res) => {
-  
+
   try {
     const userId = req.user._id;
     const patientProfile = await PatientProfile.findOne({ userId });
@@ -94,11 +94,12 @@ export const updatePatientMedicalProfile = async (req, res) => {
       height,
       weight,
       allergies,
-      medicalConditions, 
+      medicalConditions,
       medications,
       emergencyContact,
       insurance,
-      healthMetrics
+      healthMetrics,
+      languages
     } = req.body;
     const profileImage = req.file ? `/${req.file.destination}/${req.file.filename}` : undefined; // Path to uploaded image
 
@@ -116,12 +117,17 @@ export const updatePatientMedicalProfile = async (req, res) => {
     patientProfile.bloodGroup = bloodGroup || patientProfile.bloodGroup;
     patientProfile.height = height || patientProfile.height;
     patientProfile.weight = weight || patientProfile.weight;
-    patientProfile.allergies = allergies || patientProfile.allergies; // Ensure it's an array
+    patientProfile.allergies = allergies || patientProfile.allergies;
     patientProfile.medicalConditions = medicalConditions || patientProfile.medicalConditions; // Ensure it's an array
     patientProfile.medications = medications || patientProfile.medications;
     patientProfile.emergencyContact = emergencyContact || patientProfile.emergencyContact;
     patientProfile.insurance = insurance || patientProfile.insurance;
     patientProfile.healthMetrics = healthMetrics || patientProfile.healthMetrics;
+
+    // Update languages if provided
+    if (languages !== undefined) {
+      patientProfile.languages = languages;
+    }
 
     // Update profile image if a new one is uploaded
     if (profileImage) {
@@ -143,4 +149,56 @@ export const updatePatientMedicalProfile = async (req, res) => {
       error: error.message,
     });
   }
-}; 
+};
+
+
+export const updateAccountProfile = async (req, res) => {
+  try {
+    const userId = req.user._id; // Get user ID from authenticated request
+    const profileImage = req.file ? `/${req.file.destination}/${req.file.filename}` : undefined; // Path to uploaded image
+    let languages = req.body.languages; // languages will be a JSON string from formData
+
+    if (languages) {
+        try {
+            languages = JSON.parse(languages); // Parse the JSON string back into an array
+        } catch (parseError) {
+            console.error('Error parsing languages JSON:', parseError);
+            return res.status(400).json({ success: false, message: 'Invalid languages format' });
+        }
+    }
+
+    let patientProfile = await PatientProfile.findOne({ userId });
+
+    if (!patientProfile) {
+      return res.status(404).json({
+        success: false,
+        message: 'Patient profile not found.'
+      });
+    }
+
+    // Update profile image if a new one is uploaded
+    if (profileImage) {
+      patientProfile.profileImage = profileImage;
+    }
+
+    // Update languages if provided
+    if (languages !== undefined) {
+      patientProfile.languages = languages;
+    }
+
+    await patientProfile.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Account profile updated successfully',
+      profile: patientProfile, // Return the updated profile
+    });
+  } catch (error) {
+    console.error('Error in updateAccountProfile:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update account profile',
+      error: error.message,
+    });
+  }
+}

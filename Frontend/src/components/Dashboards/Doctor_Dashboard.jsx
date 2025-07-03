@@ -177,7 +177,7 @@ const DoctorDashboard = () => {
     const renderTabContent = useCallback(() => {
         switch (activeTab) {
             case 'overview':
-                return <OverviewTab />;
+                return <OverviewTab setActiveTab={setActiveTab} />;
             case 'appointments':
                 return <AppointmentsTab />;
             case 'patients':
