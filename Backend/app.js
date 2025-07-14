@@ -8,6 +8,7 @@ import timeslotRoutes from './routes/timeslotRoutes.js';
 import patientProfileRoutes from './routes/patientProfileRoutes.js';
 import wellnessRoutes from './routes/wellnessRoute.js';
 import cookieParser from 'cookie-parser';
+import chatbotRoutes from './routes/chatbotRoutes.js';
 
 const app = express();
 
@@ -41,5 +42,6 @@ app.use("/api/prescriptions", prescriptionRoutes);
 app.use('/api/timeslots', timeslotRoutes);
 app.use('/api/patient', patientProfileRoutes);
 app.use('/api/wellness', wellnessRoutes);
+app.use('/api/chatbot', chatbotRoutes);
 
 export default app; 

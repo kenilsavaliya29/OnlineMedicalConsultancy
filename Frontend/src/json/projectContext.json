@@ -1,0 +1,283 @@
+[
+  {
+    "id": "homePage",
+    "title": "Home Page",
+    "description": "The main landing page of the application, providing an overview of services and features.",
+    "endpoint": "/",
+    "keywords": ["home", "landing page", "start"],
+    "roles": ["all"]
+  },
+  {
+    "id": "loginPage",
+    "title": "Login Page",
+    "description": "Allows users to log into their existing accounts (patients, doctors, and admins).",
+    "endpoint": "/login",
+    "keywords": ["login", "sign in", "access account", "auth"],
+    "roles": ["all"]
+  },
+  {
+    "id": "signUpPage",
+    "title": "Sign Up Page",
+    "description": "Enables new users to register for an account, choosing between patient and doctor roles.",
+    "endpoint": "/SignUp",
+    "keywords": ["signup", "register", "create account", "new user"],
+    "roles": ["all"]
+  },
+  {
+    "id": "forgotPasswordPage",
+    "title": "Forgot Password Page",
+    "description": "Assists users in initiating the password reset process if they have forgotten their password.",
+    "endpoint": "/login/forgotpassword",
+    "keywords": ["forgot password", "reset password", "password help"],
+    "roles": ["all"]
+  },
+  {
+    "id": "patientDashboard",
+    "title": "Patient Dashboard Overview",
+    "description": "The central hub for patients to view their health summary, upcoming appointments, and access various sections.",
+    "endpoint": "/patient/dashboard",
+    "keywords": ["patient dashboard", "my account", "patient portal", "patient home"],
+    "roles": ["patient"]
+  },
+  {
+    "id": "patientAppointments",
+    "title": "My Appointments (Patient)",
+    "description": "View and manage all your scheduled appointments with doctors.",
+    "endpoint": "/patient/dashboard",
+    "keywords": ["my appointments", "patient appointments", "view bookings", "schedule"],
+    "roles": ["patient"]
+  },
+  {
+    "id": "patientMedicalProfile",
+    "title": "My Medical Profile (Patient)",
+    "description": "Access and update your personal medical information, including allergies, conditions, and medications.",
+    "endpoint": "/patient/dashboard",
+    "keywords": ["medical profile", "my health data", "patient info"],
+    "roles": ["patient"]
+  },
+  {
+    "id": "patientMedicalRecords",
+    "title": "Medical Records (Patient)",
+    "description": "Review your past consultation notes, lab results, imaging reports, and other health records.",
+    "endpoint": "/patient/dashboard",
+    "keywords": ["medical records", "patient records", "health reports"],
+    "roles": ["patient"]
+  },
+  {
+    "id": "patientPrescriptions",
+    "title": "Prescriptions (Patient)",
+    "description": "View details of your prescribed medications.",
+    "endpoint": "/patient/dashboard",
+    "keywords": ["prescriptions", "my medicines", "medication list"],
+    "roles": ["patient"]
+  },
+  {
+    "id": "patientHealthMetrics",
+    "title": "Health Metrics (Patient)",
+    "description": "Track and monitor your key health indicators like blood pressure, heart rate, and weight.",
+    "endpoint": "/patient/dashboard",
+    "keywords": ["health metrics", "vitals", "health tracking"],
+    "roles": ["patient"]
+  },
+  {
+    "id": "wellnessProgram",
+    "title": "Wellness Program",
+    "description": "Access personalized wellness plans, including dietary preferences and fitness goals.",
+    "endpoint": "/patient/wellness",
+    "keywords": ["wellness program", "diet plan", "fitness goals", "patient wellness"],
+    "roles": ["patient"]
+  },
+  {
+    "id": "patientMessages",
+    "title": "Messages (Patient)",
+    "description": "Communicate securely with your doctors.",
+    "endpoint": "/patient/dashboard",
+    "keywords": ["patient messages", "chat with doctor", "secure messaging"],
+    "roles": ["patient"]
+  },
+  {
+    "id": "patientAccountSettings",
+    "title": "Account Settings (Patient)",
+    "description": "Manage your personal information, communication preferences, and security settings.",
+    "endpoint": "/patient/dashboard",
+    "keywords": ["patient settings", "account management"],
+    "roles": ["patient"]
+  },
+  {
+    "id": "doctorDashboard",
+    "title": "Doctor Dashboard Overview",
+    "description": "The main dashboard for doctors to manage their practice, view appointments, and interact with patients.",
+    "endpoint": "/doctor/dashboard",
+    "keywords": ["doctor dashboard", "my practice", "doctor home"],
+    "roles": ["doctor"]
+  },
+  {
+    "id": "doctorAppointments",
+    "title": "Appointments (Doctor)",
+    "description": "View and manage your patient appointments, including confirming and updating statuses.",
+    "endpoint": "/doctor/dashboard",
+    "keywords": ["doctor appointments", "patient schedule", "manage bookings"],
+    "roles": ["doctor"]
+  },
+  {
+    "id": "doctorPatients",
+    "title": "My Patients (Doctor)",
+    "description": "Access a list of your patients and their associated medical records.",
+    "endpoint": "/doctor/dashboard",
+    "keywords": ["my patients", "doctor patient list", "patient management"],
+    "roles": ["doctor"]
+  },
+  {
+    "id": "doctorAvailability",
+    "title": "Manage Availability (Doctor)",
+    "description": "Set and update your available time slots for appointments.",
+    "endpoint": "/doctor/dashboard",
+    "keywords": ["doctor availability", "time slots", "schedule management"],
+    "roles": ["doctor"]
+  },
+  {
+    "id": "doctorPayments",
+    "title": "Payments (Doctor)",
+    "description": "View your payment history from consultations.",
+    "endpoint": "/doctor/dashboard",
+    "keywords": ["doctor payments", "earnings", "billing"],
+    "roles": ["doctor"]
+  },
+  {
+    "id": "doctorMessages",
+    "title": "Messages (Doctor)",
+    "description": "Communicate securely with your patients.",
+    "endpoint": "/doctor/dashboard",
+    "keywords": ["doctor messages", "chat with patient", "secure messaging"],
+    "roles": ["doctor"]
+  },
+  {
+    "id": "doctorMedicalRecords",
+    "title": "Medical Records (Doctor)",
+    "description": "Access and update medical records for your patients.",
+    "endpoint": "/doctor/dashboard",
+    "keywords": ["doctor records", "patient medical records"],
+    "roles": ["doctor"]
+  },
+  {
+    "id": "doctorProfileSettings",
+    "title": "Profile Settings (Doctor)",
+    "description": "Manage your professional profile, including specialization, qualifications, and consultation fees.",
+    "endpoint": "/doctor/dashboard",
+    "keywords": ["doctor profile", "edit doctor details", "doctor settings"],
+    "roles": ["doctor"]
+  },
+  {
+    "id": "adminDashboard",
+    "title": "Admin Dashboard",
+    "description": "Centralized dashboard for administrators to manage doctors and other system-wide settings.",
+    "endpoint": "/admin/dashboard",
+    "keywords": ["admin dashboard", "manage doctors", "admin panel"],
+    "roles": ["admin"]
+  },
+  {
+    "id": "searchDoctors",
+    "title": "Search Doctors",
+    "description": "Find doctors by specialization, name, or other criteria to book appointments.",
+    "endpoint": "/doctors",
+    "keywords": ["find a doctor", "search doctors", "book doctor"],
+    "roles": ["all"]
+  },
+  {
+    "id": "doctorProfilePublic",
+    "title": "Doctor Public Profile",
+    "description": "View a doctor's detailed profile before booking an appointment, including their bio, experience, and reviews.",
+    "endpoint": "/doctors/:id",
+    "keywords": ["doctor profile", "doctor info", "doctor details"],
+    "roles": ["all"]
+  },
+  {
+    "id": "appointmentBooking",
+    "title": "Book an Appointment",
+    "description": "Schedule a new appointment with a chosen doctor.",
+    "endpoint": "/doctors/:id/book",
+    "keywords": ["book appointment", "schedule visit", "new booking"],
+    "roles": ["patient"]
+  },
+  {
+    "id": "howAppointmentsWork",
+    "title": "How Appointments Work",
+    "description": "Information about the process of scheduling and managing appointments.",
+    "endpoint": "/info/appointments",
+    "keywords": ["appointment process", "how to book", "appointment guide"],
+    "roles": ["all"]
+  },
+  {
+    "id": "howConsultationWorks",
+    "title": "How Consultation Works",
+    "description": "Details on how online consultations are conducted, including chat and video options.",
+    "endpoint": "/info/consultations",
+    "keywords": ["online consultation", "chat consultation", "video consultation guide"],
+    "roles": ["all"]
+  },
+  {
+    "id": "servicesPage",
+    "title": "Our Services",
+    "description": "Explore the range of medical services offered by the platform.",
+    "endpoint": "/services",
+    "keywords": ["services", "what we offer", "medical services"],
+    "roles": ["all"]
+  },
+  {
+    "id": "contactUsPage",
+    "title": "Contact Us",
+    "description": "Find information on how to get in touch with support.",
+    "endpoint": "/contactus",
+    "keywords": ["contact", "support", "help"],
+    "roles": ["all"]
+  },
+  {
+    "id": "blogsPage",
+    "title": "Blogs",
+    "description": "Read articles and insights on various health and wellness topics.",
+    "endpoint": "/blogs",
+    "keywords": ["blogs", "articles", "health news"],
+    "roles": ["all"]
+  },
+  {
+    "id": "aboutUsPage",
+    "title": "About Us",
+    "description": "Learn more about the mission, vision, and team behind the medical consultancy platform.",
+    "endpoint": "/about",
+    "keywords": ["about us", "our mission", "company info"],
+    "roles": ["all"]
+  },
+  {
+    "id": "termsAndConditions",
+    "title": "Terms and Conditions",
+    "description": "Review the terms of service governing the use of the platform.",
+    "endpoint": "/about/terms-and-conditions",
+    "keywords": ["terms", "conditions", "legal"],
+    "roles": ["all"]
+  },
+  {
+    "id": "privacyPolicy",
+    "title": "Privacy Policy",
+    "description": "Understand how your personal and health data is collected, used, and protected.",
+    "endpoint": "/about/privacy-policy",
+    "keywords": ["privacy", "data protection", "privacy policy"],
+    "roles": ["all"]
+  },
+  {
+    "id": "settingsPage",
+    "title": "Settings",
+    "description": "General application settings.",
+    "endpoint": "/settings",
+    "keywords": ["settings", "app settings"],
+    "roles": ["all"]
+  },
+  {
+    "id": "limitationsNotice",
+    "title": "Platform Limitations",
+    "description": "The platform currently does NOT support live video or virtual consultations. All doctor connections are done through chat only.",
+    "endpoint": "",
+    "keywords": ["virtual", "video consultation", "zoom", "meet", "live call", "not available", "limitations", "no video"],
+    "roles": ["all"]
+  }
+  
+]

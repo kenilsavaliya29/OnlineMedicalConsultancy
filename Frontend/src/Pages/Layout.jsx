@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import AIChatbot from '../components/common/AIChatbot';
 import { useContext } from 'react'
 import { AuthContext } from '../contexts/authContext.jsx'
 import { useLocation } from 'react-router-dom'
@@ -68,6 +69,7 @@ const Layout = ({ children }) => {
             {alert && <AccessDeniedAlert message={alert} onClose={handleCloseAlert} />}
             {children}
             <Footer />
+            <AIChatbot />
         </>
     )
 }

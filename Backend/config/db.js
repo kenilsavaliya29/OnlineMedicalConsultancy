@@ -6,13 +6,13 @@ dotenv.config();
 
 /**
  * Connect to MongoDB
- * This function supports both MONGO_URI and MONGODB_URI environment variables
+ * This function supports both MONGO_URI and ATLAS_MONGO_URI environment variables
  * @returns {Promise<mongoose.Connection|null>} Mongoose connection object or null if connection fails
  */
 const connectDB = async () => {
   try {
-    // Support both MONGO_URI and MONGODB_URI for flexibility
-    const connectionString = process.env.MONGO_URI || process.env.MONGODB_URI;
+    // Support both MONGO_URI and ATLAS_MONGO_URI for flexibility
+    const connectionString = process.env.MONGO_URI || process.env.ATLAS_MONGO_URI;
     
     if (!connectionString) {
       console.error('MongoDB connection string not found in environment variables');

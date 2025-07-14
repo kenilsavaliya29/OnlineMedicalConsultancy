@@ -26,6 +26,7 @@ import { AuthProvider } from './contexts/authContext';
 import NotFoundPage from './404Page';
 import HowAppointmentsWork from './Pages/Info/HowAppointmentsWork';
 import HowConsultationWorks from './Pages/Info/HowConsultationWorks';
+import AIChatbot from './components/common/AIChatbot';
 
 function App() {
   const router = createBrowserRouter([
@@ -158,12 +159,8 @@ function App() {
 
   return (
     <AuthProvider>
-      <RouterProvider router={router}>
-        <Navbar />
-        <div className=''>
-          <img src="assets/images/trial.svg" alt="" />
-        </div>
-      </RouterProvider>
+      <RouterProvider router={router} />
+      {/* <AIChatbot /> */}
     </AuthProvider>
   );
 }

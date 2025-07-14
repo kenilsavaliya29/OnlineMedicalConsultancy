@@ -42,7 +42,7 @@ const port = process.env.PORT || 3001;
  * Connect to MongoDB
  */
 // Ensure a database name is specified
-const dbURI = process.env.MONGO_URI || process.env.MONGODB_URI || 'mongodb://localhost:27017/wellness-app';
+const dbURI = process.env.MONGO_URI || process.env.ATLAS_MONGO_URI || 'mongodb://localhost:27017/wellness-app';
 mongoose.connect(dbURI)
   .then(() => {
     console.log('MongoDB Connected to database:', dbURI.split('/').pop().split('?')[0]);
