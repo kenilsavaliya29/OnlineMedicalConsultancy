@@ -13,17 +13,14 @@ export const getUserAppointments = async (req, res) => {
     if (req.user.role === 'doctor') {
       // First get all appointments
       const appointmentsData = await Appointment.find({ doctorId: userId }).lean();
-      console.log('Found appointments:', appointmentsData.length);
       
       // Then get all unique patient IDs
       const patientIds = [...new Set(appointmentsData.map(apt => apt.patientId.toString()))];
-      console.log('Patient IDs to fetch:', patientIds);
       
       // Fetch all patients data in one query
       const patients = await User.find({ _id: { $in: patientIds } })
         .select('firstName lastName profileImage')
         .lean();
-      console.log('Found patients:', patients);
       
       // Create a map of patient data for quick lookup
       const patientMap = {};
@@ -36,7 +33,6 @@ export const getUserAppointments = async (req, res) => {
           profileImage: patient.profileImage
         };
       });
-      console.log('Patient map:', patientMap);
       
       // Get doctor's profile once
       const doctorProfile = await DoctorProfile.findOne({ userId }).lean();
@@ -44,7 +40,6 @@ export const getUserAppointments = async (req, res) => {
       // Map the appointments with patient data
       appointments = appointmentsData.map(apt => {
         const patientData = patientMap[apt.patientId.toString()];
-        console.log(`Mapping appointment ${apt._id}, patientId: ${apt.patientId}, found data:`, patientData);
         
         return {
           ...apt,
@@ -156,8 +151,6 @@ export const getUserAppointments = async (req, res) => {
 
     // Sort appointments by dateTime
     appointments.sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
-    
-    console.log('Final appointments to send:', JSON.stringify(appointments, null, 2));
     
     res.json({
       success: true,
@@ -435,17 +428,14 @@ export const getAppointmentsForDoctor = async (req, res) => {
     
     // First get all appointments
     const appointmentsData = await Appointment.find({ doctorId }).lean();
-    console.log('Found appointments for doctor:', appointmentsData.length);
     
     // Then get all unique patient IDs
     const patientIds = [...new Set(appointmentsData.map(apt => apt.patientId.toString()))];
-    console.log('Patient IDs to fetch:', patientIds);
     
     // Fetch all patients data in one query
     const patients = await User.find({ _id: { $in: patientIds } })
       .select('firstName lastName profileImage')
       .lean();
-    console.log('Found patients:', patients);
     
     // Create a map of patient data for quick lookup
     const patientMap = {};
@@ -458,7 +448,6 @@ export const getAppointmentsForDoctor = async (req, res) => {
         profileImage: patient.profileImage
       };
     });
-    console.log('Patient map:', patientMap);
     
     // Get doctor's profile once
     const doctorProfile = await DoctorProfile.findOne({ userId: doctorId }).lean();
@@ -466,7 +455,6 @@ export const getAppointmentsForDoctor = async (req, res) => {
     // Map the appointments with patient data
     const appointments = appointmentsData.map(apt => {
       const patientData = patientMap[apt.patientId.toString()];
-      console.log(`Mapping appointment ${apt._id}, patientId: ${apt.patientId}, found data:`, patientData);
       
       return {
         ...apt,
@@ -487,9 +475,7 @@ export const getAppointmentsForDoctor = async (req, res) => {
 
     // Sort appointments by dateTime
     finalAppointments.sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
-    
-    console.log('Final appointments to send:', JSON.stringify(finalAppointments, null, 2));
-      
+  
     res.json({
       success: true,
       appointments: finalAppointments
