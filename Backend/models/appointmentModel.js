@@ -22,22 +22,17 @@ const appointmentSchema = new mongoose.Schema({
     type: Number, // in minutes
     default: 30
   },
-  type: {
-    type: String,
-    enum: ['in-person', 'video', 'chat'],
-    required: true
-  },
   
   // Status tracking
   status: {
     type: String,
-    enum: ['requested', 'confirmed', 'completed', 'cancelled', 'no-show'],
-    default: 'requested'
+    enum: ['0', '1', 'completed', 'no-show'], // 0: confirmed, 1: cancelled
+    default: '0'
   },
   statusUpdates: [{
     status: {
       type: String,
-      enum: ['requested', 'confirmed', 'completed', 'cancelled', 'no-show', 'rescheduled']
+      enum: ['0', '1', 'completed', 'no-show', 'rescheduled']
     },
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,

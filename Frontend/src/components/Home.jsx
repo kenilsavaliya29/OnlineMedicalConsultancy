@@ -190,12 +190,12 @@ const Home = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center lg:justify-start mb-8">
-            <button className='px-6 sm:px-8 py-3 sm:py-4 bg-[#007E85] text-white rounded-lg font-lexend hover:bg-[#006b6f] transform hover:scale-105 transition-all flex items-center justify-center gap-2 text-sm sm:text-base shadow-lg'>
+            <Link to='/doctors' className='px-6 sm:px-8 py-3 sm:py-4 bg-[#007E85] text-white rounded-lg font-lexend hover:bg-[#006b6f] transform hover:scale-105 transition-all flex items-center justify-center gap-2 text-sm sm:text-base shadow-lg'>
               <MessageCircle className="w-5 h-5" /> Start Chat Consultation
-            </button>
-            <button className='px-6 sm:px-8 py-3 sm:py-4 border-2 border-[#6EAB36] text-[#6EAB36] rounded-lg font-lexend hover:bg-[#6EAB36] hover:text-white transform hover:scale-105 transition-all flex items-center justify-center gap-2 text-sm sm:text-base shadow-lg'>
+            </Link>
+            <Link to='/doctors' className='px-6 sm:px-8 py-3 sm:py-4 border-2 border-[#6EAB36] text-[#6EAB36] rounded-lg font-lexend hover:bg-[#6EAB36] hover:text-white transform hover:scale-105 transition-all flex items-center justify-center gap-2 text-sm sm:text-base shadow-lg'>
               <Calendar className="w-5 h-5" /> Book Appointment
-            </button>
+            </Link>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 text-sm text-gray-600 mb-4">

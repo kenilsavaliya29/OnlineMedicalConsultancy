@@ -626,3 +626,44 @@ export const deleteDoctor = async (req, res) => {
     });
   }
 };
+
+export const updateConsultationFee = async (req, res) => {
+    try {
+        const doctorId = req.user._id; 
+        const { consultationPrice } = req.body;
+
+        // Validate consultation price
+        if (!consultationPrice || consultationPrice < 100) {
+            return res.status(400).json({
+                success: false,
+                message: 'Consultation price must be at least 100'
+            });
+        }
+
+        // Find and update doctor profile
+        const doctorProfile = await DoctorProfile.findOne({ userId: doctorId });
+        if (!doctorProfile) {
+            return res.status(404).json({
+                success: false,
+                message: 'Doctor profile not found'
+            });
+        }
+
+        // Update consultation price
+        doctorProfile.consultationPrice = consultationPrice;
+        await doctorProfile.save();
+
+        res.json({
+            success: true,
+            message: 'Consultation fee updated successfully',
+            consultationPrice: doctorProfile.consultationPrice
+        });
+    } catch (error) {
+        console.error('Error updating consultation fee:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to update consultation fee',
+            error: error.message
+        });
+    }
+};

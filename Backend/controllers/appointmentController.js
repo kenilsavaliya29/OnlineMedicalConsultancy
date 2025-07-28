@@ -1,5 +1,6 @@
 import Appointment from '../models/appointmentModel.js';
 import User from '../models/userModel.js';
+import DoctorProfile from '../models/doctorProfileModel.js';
 
 /**
  * Get all appointments for the logged-in user
@@ -10,15 +11,153 @@ export const getUserAppointments = async (req, res) => {
     
     let appointments;
     if (req.user.role === 'doctor') {
-      appointments = await Appointment.find({ doctorId: userId })
-        .sort({ dateTime: -1 });
+      // First get all appointments
+      const appointmentsData = await Appointment.find({ doctorId: userId }).lean();
+      console.log('Found appointments:', appointmentsData.length);
+      
+      // Then get all unique patient IDs
+      const patientIds = [...new Set(appointmentsData.map(apt => apt.patientId.toString()))];
+      console.log('Patient IDs to fetch:', patientIds);
+      
+      // Fetch all patients data in one query
+      const patients = await User.find({ _id: { $in: patientIds } })
+        .select('firstName lastName profileImage')
+        .lean();
+      console.log('Found patients:', patients);
+      
+      // Create a map of patient data for quick lookup
+      const patientMap = {};
+      patients.forEach(patient => {
+        patientMap[patient._id.toString()] = {
+          _id: patient._id,
+          firstName: patient.firstName,
+          lastName: patient.lastName,
+          fullName: `${patient.firstName} ${patient.lastName}`,
+          profileImage: patient.profileImage
+        };
+      });
+      console.log('Patient map:', patientMap);
+      
+      // Get doctor's profile once
+      const doctorProfile = await DoctorProfile.findOne({ userId }).lean();
+      
+      // Map the appointments with patient data
+      appointments = appointmentsData.map(apt => {
+        const patientData = patientMap[apt.patientId.toString()];
+        console.log(`Mapping appointment ${apt._id}, patientId: ${apt.patientId}, found data:`, patientData);
+        
+        return {
+          ...apt,
+          patientId: patientData || { fullName: "Anonymous Patient" },
+          doctorProfile: doctorProfile || {}
+        };
+      });
+
     } else if (req.user.role === 'patient') {
-      appointments = await Appointment.find({ patientId: userId })
-        .sort({ dateTime: -1 });
+      // First get all appointments
+      const appointmentsData = await Appointment.find({ patientId: userId }).lean();
+      
+      // Then get all unique doctor IDs
+      const doctorIds = [...new Set(appointmentsData.map(apt => apt.doctorId.toString()))];
+      
+      // Fetch all doctors data and their profiles in parallel
+      const [doctors, doctorProfiles] = await Promise.all([
+        User.find({ _id: { $in: doctorIds } })
+          .select('firstName lastName email')
+          .lean(),
+        DoctorProfile.find({ userId: { $in: doctorIds } }).lean()
+      ]);
+      
+      // Create maps for quick lookup
+      const doctorMap = {};
+      doctors.forEach(doctor => {
+        doctorMap[doctor._id.toString()] = {
+          _id: doctor._id,
+          firstName: doctor.firstName,
+          lastName: doctor.lastName,
+          fullName: `${doctor.firstName} ${doctor.lastName}`,
+          email: doctor.email
+        };
+      });
+      
+      const profileMap = {};
+      doctorProfiles.forEach(profile => {
+        profileMap[profile.userId.toString()] = profile;
+      });
+      
+      // Map the appointments with doctor data
+      appointments = appointmentsData.map(apt => ({
+        ...apt,
+        doctorId: doctorMap[apt.doctorId.toString()] || { fullName: "Doctor Not Found" },
+        doctorProfile: profileMap[apt.doctorId.toString()] || {}
+      }));
+
     } else {
-      // Admin can see all appointments
-      appointments = await Appointment.find().sort({ dateTime: -1 });
+      // Admin view - similar approach for both patient and doctor data
+      const appointmentsData = await Appointment.find().lean();
+      
+      const patientIds = [...new Set(appointmentsData.map(apt => apt.patientId.toString()))];
+      const doctorIds = [...new Set(appointmentsData.map(apt => apt.doctorId.toString()))];
+      
+      const [patients, doctors, doctorProfiles] = await Promise.all([
+        User.find({ _id: { $in: patientIds } })
+          .select('firstName lastName profileImage')
+          .lean(),
+        User.find({ _id: { $in: doctorIds } })
+          .select('firstName lastName email')
+          .lean(),
+        DoctorProfile.find({ userId: { $in: doctorIds } }).lean()
+      ]);
+      
+      const patientMap = {};
+      patients.forEach(patient => {
+        patientMap[patient._id.toString()] = {
+          _id: patient._id,
+          firstName: patient.firstName,
+          lastName: patient.lastName,
+          fullName: `${patient.firstName} ${patient.lastName}`,
+          profileImage: patient.profileImage
+        };
+      });
+      
+      const doctorMap = {};
+      doctors.forEach(doctor => {
+        doctorMap[doctor._id.toString()] = {
+          _id: doctor._id,
+          firstName: doctor.firstName,
+          lastName: doctor.lastName,
+          fullName: `${doctor.firstName} ${doctor.lastName}`,
+          email: doctor.email
+        };
+      });
+      
+      const profileMap = {};
+      doctorProfiles.forEach(profile => {
+        profileMap[profile.userId.toString()] = profile;
+      });
+      
+      appointments = appointmentsData.map(apt => ({
+        ...apt,
+        patientId: patientMap[apt.patientId.toString()] || { fullName: "Anonymous Patient" },
+        doctorId: doctorMap[apt.doctorId.toString()] || { fullName: "Doctor Not Found" },
+        doctorProfile: profileMap[apt.doctorId.toString()] || {}
+      }));
     }
+
+    // Convert status to new format ('0' for confirmed, '1' for cancelled)
+    appointments = appointments.map(apt => {
+      if (apt.status === 'confirmed') {
+        apt.status = '0';
+      } else if (apt.status === 'cancelled') {
+        apt.status = '1';
+      }
+      return apt;
+    });
+
+    // Sort appointments by dateTime
+    appointments.sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
+    
+    console.log('Final appointments to send:', JSON.stringify(appointments, null, 2));
     
     res.json({
       success: true,
@@ -147,13 +286,6 @@ export const updateAppointmentStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
     
-    if (!['requested', 'confirmed', 'completed', 'cancelled', 'no-show'].includes(status)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid status'
-      });
-    }
-    
     const appointment = await Appointment.findById(id);
     
     if (!appointment) {
@@ -175,7 +307,7 @@ export const updateAppointmentStatus = async (req, res) => {
     }
     
     // If patient is cancelling, check if it's not too late
-    if (userIsPatient && status === 'cancelled') {
+    if (userIsPatient && status === '1') { // Changed from 'cancelled' to '1'
       const appointmentDate = new Date(appointment.dateTime);
       const now = new Date();
       const hoursDifference = (appointmentDate - now) / (1000 * 60 * 60);
@@ -197,11 +329,47 @@ export const updateAppointmentStatus = async (req, res) => {
     });
     
     await appointment.save();
+
+    // After saving, fetch the complete appointment data with populated fields
+    let updatedAppointment;
+    if (userIsDoctor) {
+      // For doctor's view - populate patient details
+      const patientData = await User.findById(appointment.patientId);
+      const doctorProfile = await DoctorProfile.findOne({ userId: appointment.doctorId });
+
+      updatedAppointment = {
+        ...appointment.toObject(),
+        patientId: patientData ? {
+          _id: patientData._id,
+          firstName: patientData.firstName,
+          lastName: patientData.lastName,
+          fullName: `${patientData.firstName} ${patientData.lastName}`,
+          profileImage: patientData.profileImage
+        } : { fullName: "Anonymous Patient" },
+        doctorProfile: doctorProfile?.toObject() || {}
+      };
+    } else if (userIsPatient) {
+      // For patient's view - populate doctor details
+      const doctorData = await User.findById(appointment.doctorId);
+      const doctorProfile = await DoctorProfile.findOne({ userId: appointment.doctorId });
+
+      updatedAppointment = {
+        ...appointment.toObject(),
+        doctorId: doctorData ? {
+          _id: doctorData._id,
+          firstName: doctorData.firstName,
+          lastName: doctorData.lastName,
+          fullName: `${doctorData.firstName} ${doctorData.lastName}`,
+          email: doctorData.email
+        } : { fullName: "Doctor Not Found" },
+        doctorProfile: doctorProfile?.toObject() || {}
+      };
+    }
     
     res.json({
       success: true,
       message: 'Appointment status updated successfully',
-      appointment
+      appointment: updatedAppointment
     });
   } catch (error) {
     console.error('Error updating appointment status:', error);
@@ -265,12 +433,66 @@ export const getAppointmentsForDoctor = async (req, res) => {
       });
     }
     
-    const appointments = await Appointment.find({ doctorId })
-      .sort({ appointmentDate: 1, appointmentTime: 1 });
+    // First get all appointments
+    const appointmentsData = await Appointment.find({ doctorId }).lean();
+    console.log('Found appointments for doctor:', appointmentsData.length);
+    
+    // Then get all unique patient IDs
+    const patientIds = [...new Set(appointmentsData.map(apt => apt.patientId.toString()))];
+    console.log('Patient IDs to fetch:', patientIds);
+    
+    // Fetch all patients data in one query
+    const patients = await User.find({ _id: { $in: patientIds } })
+      .select('firstName lastName profileImage')
+      .lean();
+    console.log('Found patients:', patients);
+    
+    // Create a map of patient data for quick lookup
+    const patientMap = {};
+    patients.forEach(patient => {
+      patientMap[patient._id.toString()] = {
+        _id: patient._id,
+        firstName: patient.firstName,
+        lastName: patient.lastName,
+        fullName: `${patient.firstName} ${patient.lastName}`,
+        profileImage: patient.profileImage
+      };
+    });
+    console.log('Patient map:', patientMap);
+    
+    // Get doctor's profile once
+    const doctorProfile = await DoctorProfile.findOne({ userId: doctorId }).lean();
+    
+    // Map the appointments with patient data
+    const appointments = appointmentsData.map(apt => {
+      const patientData = patientMap[apt.patientId.toString()];
+      console.log(`Mapping appointment ${apt._id}, patientId: ${apt.patientId}, found data:`, patientData);
+      
+      return {
+        ...apt,
+        patientId: patientData || { fullName: "Anonymous Patient" },
+        doctorProfile: doctorProfile || {}
+      };
+    });
+
+    // Convert status to new format ('0' for confirmed, '1' for cancelled)
+    const finalAppointments = appointments.map(apt => {
+      if (apt.status === 'confirmed') {
+        apt.status = '0';
+      } else if (apt.status === 'cancelled') {
+        apt.status = '1';
+      }
+      return apt;
+    });
+
+    // Sort appointments by dateTime
+    finalAppointments.sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
+    
+    console.log('Final appointments to send:', JSON.stringify(finalAppointments, null, 2));
       
     res.json({
       success: true,
-      appointments
+      appointments: finalAppointments
     });
   } catch (error) {
     console.error('Error fetching appointments for doctor:', error);

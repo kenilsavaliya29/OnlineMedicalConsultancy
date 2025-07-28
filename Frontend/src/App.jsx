@@ -27,6 +27,8 @@ import NotFoundPage from './404Page';
 import HowAppointmentsWork from './Pages/Info/HowAppointmentsWork';
 import HowConsultationWorks from './Pages/Info/HowConsultationWorks';
 import AIChatbot from './components/common/AIChatbot';
+import PaymentPage from './Pages/Doctors/AppointmentBooking/PaymentPage';
+import BookingConfirmation from './Pages/Doctors/AppointmentBooking/BookingConfirmation';
 
 function App() {
   const router = createBrowserRouter([
@@ -141,6 +143,14 @@ function App() {
     {
       path: "/doctors/:id/book",
       element: <ProtectedRoute allowedRoles={['patient']}><Layout><AppointmentBooking /></Layout></ProtectedRoute>
+    },
+    {
+      path: "/doctors/:id/payment",
+      element: <ProtectedRoute allowedRoles={['patient']}><Layout><PaymentPage /></Layout></ProtectedRoute>
+    },
+    {
+      path: "/booking-confirmation/:appointmentId",
+      element: <ProtectedRoute allowedRoles={['patient']}><Layout><BookingConfirmation /></Layout></ProtectedRoute>
     },
     {
       path: "*",

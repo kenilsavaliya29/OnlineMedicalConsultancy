@@ -1,14 +1,64 @@
 import React, { useState, useEffect, useCallback, useContext } from 'react'
 import { FaCalendarCheck, FaSyncAlt } from 'react-icons/fa';
 import MessageBox from '../../common/MessageBox.jsx';
-import { AuthContext } from '../../../contexts/authContext.jsx'; 
+import { AuthContext } from '../../../contexts/authContext.jsx';
 
-const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'; 
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+
+// Modal component for appointment details
+const AppointmentDetailsModal = ({ appointment, onClose }) => {
+    if (!appointment) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4">
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-xl font-semibold">Appointment Details</h3>
+                    <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <p className="font-semibold">Patient Information</p>
+                        <p>Name: {appointment.patientId?.fullName || "Unknown Patient"}</p>
+                        <p>Email: {appointment.patientId?.email || "N/A"}</p>
+                        <p>Phone: {appointment.patientId?.phoneNumber || "N/A"}</p>
+                    </div>
+                    <div>
+                        <p className="font-semibold">Appointment Information</p>
+                        <p>Date: {new Date(appointment.dateTime).toLocaleDateString()}</p>
+                        <p>Time: {new Date(appointment.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                        <p>Status: {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}</p>
+                    </div>
+                    <div className="col-span-2">
+                        <p className="font-semibold">Medical Information</p>
+                        <p>Reason: {appointment.reason || "N/A"}</p>
+                        <p>Symptoms: {(appointment.symptoms && appointment.symptoms.length > 0) ? appointment.symptoms.join(', ') : "None"}</p>
+                        <p>Doctor Notes: {appointment.notes?.doctor || "None"}</p>
+                        <p>Patient Notes: {appointment.notes?.patient || "None"}</p>
+                    </div>
+                </div>
+                <div className="mt-6 flex justify-end">
+                    <button
+                        onClick={onClose}
+                        className="bg-[#007E85] text-white px-4 py-2 rounded hover:bg-[#006b6f]"
+                    >
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const AppointmentsTab = () => {
-    const { user, logout } = useContext(AuthContext); 
+    const { user, logout } = useContext(AuthContext);
     const [appointments, setAppointments] = useState([]);
-    const [isLoading, setIsLoading] = useState(false); 
+    const [isLoading, setIsLoading] = useState(false);
+    const [selectedAppointment, setSelectedAppointment] = useState(null);
 
     // Fetch doctor appointments
     const fetchAppointments = useCallback(async () => {
@@ -44,7 +94,6 @@ const AppointmentsTab = () => {
             }
 
             const data = await response.json();
-
             if (data.success) {
                 setAppointments(data.appointments || []);
             } else {
@@ -55,12 +104,12 @@ const AppointmentsTab = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [user, logout]); 
+    }, [user, logout]);
 
     useEffect(() => {
         fetchAppointments();
-    }, [fetchAppointments]); 
-    
+    }, [fetchAppointments]);
+
     // Update appointment status (for doctor to cancel)
     const updateAppointmentStatus = useCallback(async (appointmentId, status) => {
         if (!appointmentId) {
@@ -71,7 +120,7 @@ const AppointmentsTab = () => {
 
         try {
             setIsLoading(true);
-            const response = await fetch(`${API_URL}/api/appointments/${appointmentId}/status`, { // Use existing status update route
+            const response = await fetch(`${API_URL}/api/appointments/${appointmentId}/status`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
@@ -90,10 +139,23 @@ const AppointmentsTab = () => {
             }
 
             const data = await response.json();
+            console.log('Status update response:', data);
 
             if (data.success) {
-                MessageBox.success(`Appointment status updated to ${status} successfully.`);
-                fetchAppointments(); 
+                const statusText = status === '0' ? 'confirmed' : status === '1' ? 'cancelled' : status;
+                MessageBox.success(`Appointment ${statusText} successfully.`);
+                
+                
+                if (data.appointment) {
+                    setAppointments(prevAppointments => 
+                        prevAppointments.map(apt => 
+                            apt._id === appointmentId ? data.appointment : apt
+                        )
+                    );
+                } else {
+                    // Fallback to fetching all appointments if single appointment update fails
+                    fetchAppointments();
+                }
             } else {
                 console.error("Failed to update appointment status:", data.message);
                 MessageBox.error(data.message || "Failed to update appointment status");
@@ -106,30 +168,38 @@ const AppointmentsTab = () => {
         }
     }, [fetchAppointments, logout]);
 
-    // View appointment details
-    const viewAppointmentDetails = useCallback((appointment) => {
-        if (!appointment) {
-            MessageBox.error("Appointment not found");
-            return;
+    const getStatusDisplay = (status) => {
+        switch(status) {
+            case '0':
+                return { text: 'Confirmed', className: 'bg-green-100 text-green-800' };
+            case '1':
+                return { text: 'Cancelled', className: 'bg-red-100 text-red-800' };
+            case 'completed':
+                return { text: 'Completed', className: 'bg-blue-100 text-blue-800' };
+            case 'no-show':
+                return { text: 'No Show', className: 'bg-yellow-100 text-yellow-800' };
+            default:
+                return { text: status, className: 'bg-gray-100 text-gray-800' };
         }
+    };
 
-        const details = [
-            `Patient: ${appointment.patientId?.fullName || appointment.patientName || "Unknown Patient"}`,
-            `Email: ${appointment.patientId?.email || appointment.patientEmail || "N/A"}`,
-            `Phone: ${appointment.patientId?.phoneNumber || appointment.patientPhone || "N/A"}`,
-            `Date: ${new Date(appointment.dateTime).toLocaleDateString()}`,
-            `Time: ${new Date(appointment.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
-            `Duration: ${appointment.duration} minutes`,
-            `Type: ${appointment.type ? appointment.type.charAt(0).toUpperCase() + appointment.type.slice(1) : "N/A"}`,
-            `Status: ${appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}`,
-            `Reason: ${appointment.reason || "N/A"}`,
-            `Symptoms: ${(appointment.symptoms && appointment.symptoms.length > 0) ? appointment.symptoms.join(', ') : "None"}`,
-            `Doctor Notes: ${appointment.notes?.doctor || "None"}`,
-            `Patient Notes: ${appointment.notes?.patient || "None"}`
-        ].join("\n"); // Use \n for multiline alert
+    const getPatientName = (appointment) => {
+        if (!appointment.patientId) return "Anonymous Patient";
+        
+        const { firstName, lastName, fullName } = appointment.patientId;
+        if (firstName && lastName) {
+            return `${firstName} ${lastName}`;
+        }
+        if (fullName) {
+            return fullName;
+        }
+        return "Anonymous Patient";
+    };
 
-        alert(`Appointment Details:\n\n${details}`);
-    }, []);
+    // Replace viewAppointmentDetails with modal handling
+    const handleViewDetails = (appointment) => {
+        setSelectedAppointment(appointment);
+    };
 
     return (
         <div className="space-y-6">
@@ -161,114 +231,89 @@ const AppointmentsTab = () => {
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {appointments.map(appointment => (
-                                <tr key={appointment._id} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="flex items-center">
-                                            {/* Patient profile image placeholder */}
-                                            <div className="flex-shrink-0 h-10 w-10">
-                                                <img
-                                                    className="h-10 w-10 rounded-full object-cover"
-                                                    src={
-                                                        appointment.patientId?.profileImage
-                                                            ? `${API_URL}${appointment.patientId.profileImage}`
-                                                            : "https://randomuser.me/api/portraits/women/85.jpg" // Placeholder for patient image
-                                                    }
-                                                    alt="Patient"
-                                                />
-                                            </div>
-                                            <div className="ml-4">
-                                                <div className="text-sm font-medium text-gray-900">{appointment.patientId?.fullName || "Unknown Patient"}</div>
-                                                <div className="text-sm text-gray-500">{appointment.patientId?.email || appointment.patientEmail}</div>
-                                                <div className="text-xs text-gray-500">{appointment.patientId?.phoneNumber || appointment.patientPhone}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-gray-900">{new Date(appointment.dateTime).toLocaleDateString()}</div>
-                                        <div className="text-sm text-gray-500">{new Date(appointment.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                            ${appointment.type === 'chat' ? 'bg-blue-100 text-blue-800' :
-                                                appointment.type === 'video' ? 'bg-purple-100 text-purple-800' :
-                                                    'bg-green-100 text-green-800'}`}>
-                                            {appointment.type ? appointment.type.charAt(0).toUpperCase() + appointment.type.slice(1) : "In Person"}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                            ${appointment.status === 'pending' || appointment.status === 'requested' ? 'bg-yellow-100 text-yellow-800' :
-                                                appointment.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                                                    appointment.status === 'completed' ? 'bg-blue-100 text-blue-800' :
-                                                        'bg-red-100 text-red-800'}`}>
-                                            {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div className="flex space-x-2">
-                                            {(appointment.status === 'requested' || appointment.status === 'confirmed') && (
-                                                <>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            if (window.confirm(`Are you sure you want to confirm the appointment with ${appointment.patientId?.fullName || "this patient"}?`)) {
-                                                                updateAppointmentStatus(appointment._id, 'confirmed');
-                                                            }
+                            {appointments.map(appointment => {
+                                const status = getStatusDisplay(appointment.status);
+                                return (
+                                    <tr key={appointment._id} className="hover:bg-gray-50">
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center">
+                                                <div className="flex-shrink-0 h-10 w-10">
+                                                    <img
+                                                        className="h-10 w-10 rounded-full object-cover"
+                                                        src={appointment.patientId?.profileImage ? `${API_URL}${appointment.patientId.profileImage}` : "/assets/images/profilephoto.svg"}
+                                                        alt={getPatientName(appointment)}
+                                                        onError={(e) => {
+                                                            e.target.src = "/assets/images/profilephoto.svg";
                                                         }}
-                                                        className="text-green-600 hover:text-green-800"
-                                                    >
-                                                        Confirm
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            if (window.confirm(`Are you sure you want to cancel the appointment with ${appointment.patientId?.fullName || "this patient"}?`)) {
-                                                                updateAppointmentStatus(appointment._id, 'cancelled');
-                                                            }
-                                                        }}
-                                                        className="text-red-600 hover:text-red-800"
-                                                    >
-                                                        Cancel
-                                                    </button>
-                                                </>
-                                            )}
-                                            {appointment.status === 'confirmed' && (
+                                                    />
+                                                </div>
+                                                <div className="ml-4">
+                                                    <div className="text-sm font-medium text-gray-900">
+                                                        {getPatientName(appointment)}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm text-gray-900">
+                                                {new Date(appointment.dateTime).toLocaleDateString()}
+                                            </div>
+                                            <div className="text-sm text-gray-500">
+                                                {new Date(appointment.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${status.className}`}>
+                                                {status.text}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center space-x-4">
+                                                {appointment.status === '0' && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => updateAppointmentStatus(appointment._id, 'completed')}
+                                                            className="text-white bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded-md text-sm"
+                                                        >
+                                                            Complete
+                                                        </button>
+                                                        <button
+                                                            onClick={() => updateAppointmentStatus(appointment._id, '1')}
+                                                            className="text-white bg-red-500 hover:bg-red-600 px-3 py-1 rounded-md text-sm"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                    </>
+                                                )}
                                                 <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        if (window.confirm(`Mark appointment with ${appointment.patientId?.fullName || "this patient"} as completed?`)) {
-                                                            updateAppointmentStatus(appointment._id, 'completed');
-                                                        }
-                                                    }}
-                                                    className="text-blue-600 hover:text-blue-800"
+                                                    onClick={() => handleViewDetails(appointment)}
+                                                    className="text-[#007E85] hover:text-[#006b6f] underline text-sm"
                                                 >
-                                                    Complete
+                                                    View Details
                                                 </button>
-                                            )}
-                                            <button
-                                                type="button"
-                                                onClick={() => viewAppointmentDetails(appointment)}
-                                                className="text-[#007E85] hover:text-[#006b6f]"
-                                            >
-                                                View
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
+            )}
+
+            {selectedAppointment && (
+                <AppointmentDetailsModal
+                    appointment={selectedAppointment}
+                    onClose={() => setSelectedAppointment(null)}
+                />
             )}
         </div>
     );
 }
 
-export default AppointmentsTab
+export default AppointmentsTab;

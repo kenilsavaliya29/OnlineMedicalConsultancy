@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaUserMd, FaClock, FaStar, FaStarHalfAlt, FaRegStar, FaArrowLeft, FaCertificate, FaRegCalendarCheck } from 'react-icons/fa';
+import { FaUserMd, FaClock, FaStar, FaStarHalfAlt, FaRegStar, FaArrowLeft, FaCertificate, FaRegCalendarCheck, FaWallet } from 'react-icons/fa';
 import { MdOutlineVerified } from 'react-icons/md';
+import { AuthContext } from '../../contexts/authContext';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
@@ -9,6 +10,7 @@ const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 const DoctorProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
 
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -132,8 +134,37 @@ const DoctorProfile = () => {
 
   // Function to handle booking appointment
   const handleBookAppointment = (timeSlot) => {
-    // Booking logic will be implemented here by the user
-  };
+    // Check if user is logged in
+    // Assuming 'user' state is managed elsewhere or passed as a prop
+    // For now, we'll just navigate to login if not logged in
+    // In a real app, you'd check if a user is logged in and get their ID
+    // const user = { _id: 'someUserId' }; // Placeholder for user object
+    // if (!user) {
+    //   navigate('/login');
+    //   return;
+    // }
+
+    // Format the appointment date based on the slot type
+    const appointmentDate = 'date' in timeSlot 
+        ? new Date(timeSlot.date).toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0]; // For recurring slots, use current date
+
+    // Prepare appointment details
+    const appointmentDetails = {
+        doctorId: doctor._id,
+        date: appointmentDate,
+        time: timeSlot.startTime,
+        fee: doctor.profile.consultationPrice,
+        type: 'in-person', // You can make this selectable if needed
+        doctorName: `${doctor.firstName} ${doctor.lastName}`,
+        specialization: doctor.profile.specialization
+    };
+
+    // Navigate to payment page with appointment details
+    navigate(`/doctors/${doctor._id}/payment`, {
+        state: { appointmentDetails }
+    });
+};
 
   if (loading) {
     return (
@@ -272,6 +303,29 @@ const DoctorProfile = () => {
           </div>
         </div>
 
+        {/* Consultation Fee Section */}
+        <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+            <div className="p-6">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                        <div className="bg-[#007E85]/10 p-4 rounded-lg">
+                            <FaWallet className="text-2xl text-[#007E85]" />
+                        </div>
+                        <div>
+                            <p className="text-sm text-gray-500">Consultation Fee</p>
+                            <h3 className="text-2xl font-bold text-gray-800">₹{doctor.profile.consultationPrice}</h3>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => document.getElementById('booking-section').scrollIntoView({ behavior: 'smooth' })}
+                        className="bg-[#007E85] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#006b6f] transition-colors w-full sm:w-auto"
+                    >
+                        Book Appointment
+                    </button>
+                </div>
+            </div>
+        </div>
+
         {/* Main Content - Two Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Doctor Details */}
@@ -309,14 +363,18 @@ const DoctorProfile = () => {
                   {selectedDay ? (
                     filteredTimeSlots.length > 0 ? (
                       <div className="grid grid-cols-2 gap-2">
-                        {filteredTimeSlots.map((slot) => (
+                        {filteredTimeSlots.map((slot, index) => (
                           <button
-                            key={slot._id}
+                            key={index}
                             onClick={() => handleBookAppointment(slot)}
-                            className="p-2 border border-[#007E85] rounded-lg text-center text-sm text-[#007E85] hover:bg-[#007E85] hover:text-white transition-colors"
+                            className="p-3 border border-[#007E85] rounded-lg text-center text-sm text-[#007E85] hover:bg-[#007E85] hover:text-white transition-colors flex flex-col items-center gap-1"
                           >
-                            {slot.startTime} - {slot.endTime}
-                            {'date' in slot && ` (${new Date(slot.date).toLocaleDateString()})`}
+                            <span className="font-medium">{slot.startTime} - {slot.endTime}</span>
+                            {'date' in slot && (
+                              <span className="text-xs opacity-75">
+                                {new Date(slot.date).toLocaleDateString()}
+                              </span>
+                            )}
                           </button>
                         ))}
                       </div>

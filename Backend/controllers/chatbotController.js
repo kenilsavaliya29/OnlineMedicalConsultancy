@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-console.log(projectContext);
+// console.log(projectContext);
 if (!GEMINI_API_KEY) {
   console.error("ERROR: GEMINI_API_KEY is not set in environment variables");
   process.exit(1);
@@ -34,7 +34,7 @@ const getRelevantContext = (query, userRole) => {
 
 export const generateChatResponse = async (req, res) => {
   const { message, user, history } = req.body;
-  console.log(message);
+  // console.log(message);
 
   if (!message) {
     return res.status(400).json({ success: false, message: "Message is required" });

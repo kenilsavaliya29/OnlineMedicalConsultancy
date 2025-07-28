@@ -9,6 +9,7 @@ import patientProfileRoutes from './routes/patientProfileRoutes.js';
 import wellnessRoutes from './routes/wellnessRoute.js';
 import cookieParser from 'cookie-parser';
 import chatbotRoutes from './routes/chatbotRoutes.js';
+import paymentRoutes from './routes/paymentRoutes.js';
 
 const app = express();
 
@@ -22,26 +23,21 @@ if (!fs.existsSync(uploadsDir)) {
 
 // Middleware
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-
-// Serve uploaded files
-app.use('/uploads', express.static('uploads'));
-
-// Enable CORS
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000'],  // Add your frontend URLs
-  credentials: true  // Allow credentials (cookies)
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true
 }));
 
 // Routes
-app.use("/api/doctors", doctorRoutes);
-app.use("/api/appointments", appointmentRoutes);
-app.use("/api/medical-records", medicalRecordRoutes);
-app.use("/api/prescriptions", prescriptionRoutes);
+app.use('/api/doctors', doctorRoutes);
+app.use('/api/appointments', appointmentRoutes);
+app.use('/api/medical-records', medicalRecordRoutes);
+app.use('/api/prescriptions', prescriptionRoutes);
 app.use('/api/timeslots', timeslotRoutes);
-app.use('/api/patient', patientProfileRoutes);
+app.use('/api/patient-profiles', patientProfileRoutes);
 app.use('/api/wellness', wellnessRoutes);
 app.use('/api/chatbot', chatbotRoutes);
+app.use('/api/payments', paymentRoutes);
 
 export default app; 

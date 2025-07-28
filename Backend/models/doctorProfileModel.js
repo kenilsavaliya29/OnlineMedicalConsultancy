@@ -19,7 +19,7 @@ const doctorProfileSchema = new mongoose.Schema({
     required: true
   },
   experience: {
-    type: Number, // Years of experience
+    type: Number, 
     required: true
   },
   registrationNumber: {
