@@ -15,7 +15,7 @@ const UpdateAvailabilityTab = () => {
     end: '14:10',
   });
   const [selectedAvailabilityType, setSelectedAvailabilityType] = useState('dateSpecific');
-  const [messageBox, setMessageBox] = useState({ type: '', message: '' });
+
 
   const { user } = useContext(AuthContext);
   const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
@@ -41,7 +41,6 @@ const UpdateAvailabilityTab = () => {
     setRecurringDaysError('');
     setDailyFreeTimeStartError('');
     setDailyFreeTimeEndError('');
-    setMessageBox({ type: '', message: '' });
 
     let hasError = false;
 
@@ -113,10 +112,10 @@ const UpdateAvailabilityTab = () => {
           throw new Error(data.message || 'Failed to add date specific availability.');
         }
 
-        setMessageBox({ type: 'success', message: data.message });
+        showMessage.success(data.message);
       } catch (error) {
         console.error('Error adding date specific availability:', error);
-        setMessageBox({ type: 'error', message: error.message || 'Failed to add date specific availability.' });
+        showMessage.error(error.message || 'Failed to add date specific availability.');
       }
     } else if (selectedAvailabilityType === 'recurringWeekly') {
       // Recurring Weekly Availability Logic
@@ -177,10 +176,10 @@ const UpdateAvailabilityTab = () => {
           throw new Error(data.message || 'Failed to add recurring weekly availability.');
         }
 
-        setMessageBox({ type: 'success', message: data.message || 'Recurring weekly availability added successfully.' });
+        showMessage.success(data.message || 'Recurring weekly availability added successfully.');
       } catch (error) {
         console.error('Error adding recurring weekly availability:', error);
-        setMessageBox({ type: 'error', message: error.message || 'Failed to add recurring weekly availability.' });
+        showMessage.error(error.message || 'Failed to add recurring weekly availability.');
       }
     }
   };
@@ -256,7 +255,8 @@ const UpdateAvailabilityTab = () => {
               ? 'bg-[#007E85] text-white shadow'
               : 'text-gray-700 hover:bg-gray-200'
             }`}
-          onClick={() => { setMessageBox({ type: '', message: '' }); setSelectedAvailabilityType('dateSpecific'); }}        >
+          onClick={() => setSelectedAvailabilityType('dateSpecific')}
+        >
           Date Specific Availability
         </button>
         <button
@@ -265,7 +265,7 @@ const UpdateAvailabilityTab = () => {
               ? 'bg-[#007E85] text-white shadow'
               : 'text-gray-700 hover:bg-gray-200'
             }`}
-          onClick={() => { setMessageBox({ type: '', message: '' }); setSelectedAvailabilityType('recurringWeekly'); }}
+          onClick={() => setSelectedAvailabilityType('recurringWeekly')}
         >
           Recurring Weekly Availability
         </button>
@@ -385,13 +385,7 @@ const UpdateAvailabilityTab = () => {
         Add Availability
       </button>
 
-      {messageBox.message && messageBox.type === 'success' && (
-        <MessageBox
-          type={messageBox.type}
-          message={messageBox.message}
-          onClose={() => setMessageBox({ type: '', message: '' })}
-        />
-      )}
+
     </div>
   );
 };
