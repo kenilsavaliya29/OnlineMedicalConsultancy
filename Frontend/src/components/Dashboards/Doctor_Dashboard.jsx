@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useCallback, useMemo, useRef } 
 import { FaCalendarCheck, FaUsers, FaWallet, FaComments, FaCog, FaChartBar, FaSignOutAlt, FaBell, FaClipboardList, FaClock, FaTimes } from 'react-icons/fa';
 import { AuthContext } from '../../contexts/authContext.jsx';
 import { useNavigate } from 'react-router-dom';
-import MessageBox from '../common/MessageBox.jsx';
+import { showMessage } from '../common/MessageBox';
 
 import OverviewTab from './DocSideBar/OverviewTab.jsx';
 import AppointmentsTab from './DocSideBar/AppointmentsTab.jsx';
@@ -28,19 +28,9 @@ const DoctorDashboard = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState()
     const [isNotificationsModalOpen, setIsNotificationsModalOpen] = useState(false);
-    const [messageBox, setMessageBox] = useState({ show: false, type: '', message: '' });
-
     const notificationsRef = useRef(null);
     const sidebarRef = useRef(null);
     const logoutModalRef = useRef(null);
-
-    const showMessage = (type, message) => {
-        setMessageBox({ show: true, type, message });
-    };
-
-    const closeMessageBox = () => {
-        setMessageBox({ show: false, type: '', message: '' });
-    };
 
 
     const sidebarLinks = useMemo(() => [
@@ -97,13 +87,13 @@ const DoctorDashboard = () => {
     useEffect(() => {
         if (!user) {
             const timer = setTimeout(() => {
-                showMessage('error', "Please log in to access the doctor dashboard");
+                showMessage.error("Please log in to access the doctor dashboard");
                 window.location.href = '/login';
             }, 500);
             return () => clearTimeout(timer);
         } else if (user.role !== 'doctor') {
             const timer = setTimeout(() => {
-                showMessage('error', "You don't have permission to access the doctor dashboard. Redirecting...");
+                showMessage.error("You don't have permission to access the doctor dashboard. Redirecting...");
                 if (user.role === 'admin') {
                     window.location.href = '/admin/dashboard';
                 } else {
@@ -118,12 +108,12 @@ const DoctorDashboard = () => {
         try {
             const result = await logout();
             if (result.success) {
-                showMessage('success', "Logged out successfully");
+                showMessage.success("Logged out successfully");
             } else {
-                showMessage('error', result.message || "Failed to logout");
+                showMessage.error(result.message || "Failed to logout");
             }
         } catch (error) {
-            showMessage('error', "An error occurred during logout");
+            showMessage.error("An error occurred during logout");
         }
     }, [logout]);
 
@@ -201,13 +191,7 @@ const DoctorDashboard = () => {
 
     return (
         <>
-            {messageBox.show && (
-                <MessageBox
-                    type={messageBox.type}
-                    message={messageBox.message}
-                    onClose={closeMessageBox}
-                />
-            )}
+
             <div className="flex bg-gray-50 relative mt-24">
                 {/* Background Overlay */}
                 {sidebarOpen && (

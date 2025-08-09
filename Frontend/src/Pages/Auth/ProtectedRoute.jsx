@@ -1,20 +1,12 @@
 import React, { useContext } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../../contexts/authContext.jsx';
-import MessageBox from '../../components/common/MessageBox.jsx';
+import { showMessage } from '../../components/common/MessageBox';
 
 const ProtectedRoute = ({ allowedRoles, children }) => {
   const { user, loading, getRedirectPath, isInitialLogin } = useContext(AuthContext);
   const location = useLocation();
-  const [messageBox, setMessageBox] = React.useState({ show: false, type: '', message: '' });
 
-  const showMessage = (type, message) => {
-    setMessageBox({ show: true, type, message });
-  };
-
-  const closeMessageBox = () => {
-    setMessageBox({ show: false, type: '', message: '' });
-  };
 
   
   if (loading) {
@@ -51,26 +43,14 @@ const ProtectedRoute = ({ allowedRoles, children }) => {
                            !isFromAuthPages;
     
     if (shouldShowToast) {
-      showMessage('error', `Access denied: You don't have permission to access this page.`);
+      showMessage.error(`Access denied: You don't have permission to access this page.`);
     }
     
     // Redirect to appropriate dashboard
     return <Navigate to={redirectPath} replace />;
   }
 
-  // User is authenticated and has the required role (if specified)
-  return (
-    <>
-      {messageBox.show && (
-        <MessageBox
-          type={messageBox.type}
-          message={messageBox.message}
-          onClose={closeMessageBox}
-        />
-      )}
-      {children}
-    </>
-  );
+  return children;
 };
 
 export default ProtectedRoute;

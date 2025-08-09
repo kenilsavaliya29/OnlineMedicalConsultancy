@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { format } from 'date-fns';
-import MessageBox from '../../common/MessageBox';
+import { showMessage } from '../../common/MessageBox';
 import { AuthContext } from '../../../contexts/authContext';
 
 const UpdateAvailabilityTab = () => {

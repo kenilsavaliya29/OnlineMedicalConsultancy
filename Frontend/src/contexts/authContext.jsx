@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import MessageBox from '../components/common/MessageBox';
+import { showMessage } from '../components/common/MessageBox';
 
 export const AuthContext = createContext();
 

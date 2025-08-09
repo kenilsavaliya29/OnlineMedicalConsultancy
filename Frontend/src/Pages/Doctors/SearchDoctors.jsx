@@ -544,12 +544,13 @@ const SearchDoctors = () => {
                                 >
                                     View Profile
                                 </button>
-                                <button
-                                    onClick={() => navigate(`/doctors/${doctor._id}/book`)}
-                                    className="flex-1 py-3 bg-[#007E85] text-white font-medium hover:bg-[#006b6f] transition-colors"
+                                <Link
+                                    // to={`/doctors/${doctor._id}/book`}
+                                    
+                                    className="text-center flex-1 py-3 bg-[#007E85] text-white font-medium hover:bg-[#006b6f] transition-colors"
                                 >
                                     Book Now
-                                </button>
+                                </Link>
                             </div>
                         </div>
                     ))}

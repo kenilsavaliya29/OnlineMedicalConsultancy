@@ -20,7 +20,7 @@ import ProtectedRoute from './Pages/Auth/ProtectedRoute';
 import Admin from './components/Dashboards/Admin_Dashboard';
 import SearchDoctors from './Pages/Doctors/SearchDoctors';
 import DoctorProfile from './Pages/Doctors/DoctorProfile';
-import AppointmentBooking from './Pages/Doctors/AppointmentBooking';
+// import AppointmentBooking from './Pages/Doctors/AppointmentBooking';
 import WellnessProgram from './pages/Patient/WellnessProgram';
 import { AuthProvider } from './contexts/authContext';
 import NotFoundPage from './404Page';
@@ -29,6 +29,7 @@ import HowConsultationWorks from './Pages/Info/HowConsultationWorks';
 import AIChatbot from './components/common/AIChatbot';
 import PaymentPage from './Pages/Doctors/AppointmentBooking/PaymentPage';
 import BookingConfirmation from './Pages/Doctors/AppointmentBooking/BookingConfirmation';
+import { MessageContainer } from './components/common/MessageBox';
 
 function App() {
   const router = createBrowserRouter([
@@ -136,14 +137,11 @@ function App() {
       path: "/doctors/:id",
       element: <Layout><DoctorProfile /></Layout>
     },
-    {
-      path: "/doctors",
-      element: <Layout ><SearchDoctors /></Layout>
-    },
-    {
-      path: "/doctors/:id/book",
-      element: <ProtectedRoute allowedRoles={['patient']}><Layout><AppointmentBooking /></Layout></ProtectedRoute>
-    },
+
+    // {
+    //   path: "/doctors/:id/book",
+    //   element: <ProtectedRoute allowedRoles={['patient']}><Layout><AppointmentBooking /></Layout></ProtectedRoute>
+    // },
     {
       path: "/doctors/:id/payment",
       element: <ProtectedRoute allowedRoles={['patient']}><Layout><PaymentPage /></Layout></ProtectedRoute>
@@ -170,6 +168,7 @@ function App() {
   return (
     <AuthProvider>
       <RouterProvider router={router} />
+      <MessageContainer />
       {/* <AIChatbot /> */}
     </AuthProvider>
   );

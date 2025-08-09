@@ -6,7 +6,7 @@ import Cropper from 'react-easy-crop';
 import { getCroppedImg } from '../../../utils/cropImage';
 import 'react-easy-crop/react-easy-crop.css'; 
 import useDebounce from '../../../hooks/useDebounce'
-import MessageBox from '../../common/MessageBox';
+import { showMessage } from '../../common/MessageBox';
 
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
@@ -18,7 +18,7 @@ const ProfileSettingsTab = () => {
     const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
     const [bio, setBio] = useState(user.profile.bio || '');
     const [isEditingBio, setIsEditingBio] = useState(false);
-    const [initialBio, setInitialBio] = useState(user.profile.bio || ''); // To track changes for bio
+    const [initialBio, setInitialBio] = useState(user.profile.bio || ''); 
 
     const [imageSrc, setImageSrc] = useState(null);
     const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -159,6 +159,7 @@ const ProfileSettingsTab = () => {
                     setMessageType('success');
                     setShowMessage(true);
                     setTimeout(() => setShowMessage(false), 3000); 
+                    window.location.reload();
 
                 } else {
                     console.error('Failed to update profile:', data.message);
