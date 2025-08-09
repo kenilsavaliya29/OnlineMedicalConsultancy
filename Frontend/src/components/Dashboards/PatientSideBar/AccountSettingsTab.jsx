@@ -6,7 +6,7 @@ import Cropper from 'react-easy-crop';
 import { getCroppedImg } from '../../../utils/cropImage';
 import 'react-easy-crop/react-easy-crop.css';
 import useDebounce from '../../../hooks/useDebounce';
-import MessageBox from '../../common/MessageBox';
+import { showMessage } from '../../common/MessageBox';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
@@ -101,6 +101,7 @@ const AccountSettingsTab = React.memo(() => {
         setMessageText(`Error cropping image: ${error.message}`);
         setMessageType('error');
         setShowMessage(true);
+        showMessage.error(`Error cropping image: ${error.message}`);
         setTimeout(() => setShowMessage(false), 5000);
         return;
       }
@@ -144,6 +145,7 @@ const AccountSettingsTab = React.memo(() => {
           setMessageText('Profile updated successfully!');
           setMessageType('success');
           setShowMessage(true);
+          showMessage.success('Profile updated successfully!');
           setTimeout(() => setShowMessage(false), 3000);
 
         } else {
@@ -152,6 +154,7 @@ const AccountSettingsTab = React.memo(() => {
           setMessageText(`Failed to update profile: ${data.message || 'Unknown error'}`);
           setMessageType('error');
           setShowMessage(true);
+          showMessage.error(`Failed to update profile: ${data.message || 'Unknown error'}`);
           setTimeout(() => setShowMessage(false), 5000);
         }
       } catch (error) {
@@ -160,6 +163,7 @@ const AccountSettingsTab = React.memo(() => {
         setMessageText(`Error saving profile: ${error.message}`);
         setMessageType('error');
         setShowMessage(true);
+        showMessage.error(`Error saving profile: ${error.message}`);
         setTimeout(() => setShowMessage(false), 5000);
       }
     } else {
@@ -169,6 +173,7 @@ const AccountSettingsTab = React.memo(() => {
       setMessageText('No changes detected.');
       setMessageType('info');
       setShowMessage(true);
+      showMessage.info('No changes detected.');
       setTimeout(() => setShowMessage(false), 3000);
     }
   };
@@ -390,10 +395,6 @@ const AccountSettingsTab = React.memo(() => {
         </button>
       </div>
 
-      {/* Message Box */}
-      {showMessage && (
-        <MessageBox type={messageType} message={messageText} onClose={() => setShowMessage(false)} />
-      )}
     </div>
   );
 })

@@ -1,13 +1,13 @@
 import React, { useState, useMemo, useContext, useEffect, useCallback } from 'react'
 import { FaUserMd, FaCalendarCheck, FaFileMedical, FaWallet, FaComments, FaCog, FaChartLine, FaSignOutAlt, FaBell, FaUser, FaHeartbeat, FaNotesMedical, FaUserCircle, FaPhone, FaEnvelope, FaMapMarkerAlt, FaKey, FaStar, FaDownload, FaSyncAlt, FaAppleAlt } from 'react-icons/fa'
 import { AuthContext } from '../../../contexts/authContext';
-import MessageBox from '../../common/MessageBox'; 
+import { showMessage } from '../../common/MessageBox'; 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 const OverViewTab = React.memo(() => {
 
     const { user, logout } = useContext(AuthContext);
-
+    console.log(user)
     const [appointments, setAppointments] = useState([]);
 
     // Fetch upcoming appointments

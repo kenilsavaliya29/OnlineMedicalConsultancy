@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FaUserMd, FaClock, FaStar, FaStarHalfAlt, FaRegStar, FaArrowLeft, FaCertificate, FaRegCalendarCheck, FaWallet } from 'react-icons/fa';
 import { MdOutlineVerified } from 'react-icons/md';
 import { AuthContext } from '../../contexts/authContext';
+import { showMessage } from '../../components/common/MessageBox';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
@@ -134,15 +135,10 @@ const DoctorProfile = () => {
 
   // Function to handle booking appointment
   const handleBookAppointment = (timeSlot) => {
-    // Check if user is logged in
-    // Assuming 'user' state is managed elsewhere or passed as a prop
-    // For now, we'll just navigate to login if not logged in
-    // In a real app, you'd check if a user is logged in and get their ID
-    // const user = { _id: 'someUserId' }; // Placeholder for user object
-    // if (!user) {
-    //   navigate('/login');
-    //   return;
-    // }
+    if (!user || user.role !== 'patient') {
+      MessageBox('error', 'Please login as a patient to book an appointment');
+      return
+    }
 
     // Format the appointment date based on the slot type
     const appointmentDate = 'date' in timeSlot 

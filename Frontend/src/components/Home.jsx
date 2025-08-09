@@ -31,7 +31,7 @@ import {
 } from 'react-icons/fa';
 import { useContext } from 'react';
 import { AuthContext } from '../contexts/authContext.jsx';
-import MessageBox from './common/MessageBox.jsx';
+import { showMessage } from './common/MessageBox';
 import faqs from '../json/faq.json';
 import testimonials from '../json/testimonials.json';
 
@@ -41,20 +41,11 @@ const Home = () => {
   const { ref, inView } = useInView({ threshold: 0.1 });
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [messageBox, setMessageBox] = useState({ show: false, type: '', message: '' });
   const [expandedFaq, setExpandedFaq] = useState(null);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [typingText, setTypingText] = useState('');
   const [isTyping, setIsTyping] = useState(true);
   const chatContainerRef = useRef(null);
-
-  const showMessage = (type, message) => {
-    setMessageBox({ show: true, type, message });
-  };
-
-  const closeMessageBox = () => {
-    setMessageBox({ show: false, type: '', message: '' });
-  };
 
   const handleWellnessClick = (e) => {
     e.preventDefault();
@@ -62,7 +53,7 @@ const Home = () => {
       navigate('/patient/wellness');
     } else {
       navigate('/login');
-      showMessage('info', 'Please login as a patient to access the Wellness Program');
+      showMessage.warn('Please login as a patient to access the Wellness Program');
     }
   };
 
@@ -148,13 +139,13 @@ const Home = () => {
 
   return (
     <main className='mt-20'>
-      {messageBox.show && (
+      {/* {messageBox.show && (
         <MessageBox
           type={messageBox.type}
           message={messageBox.message}
           onClose={closeMessageBox}
         />
-      )}
+      )} */}
 
       {/* Hero Section */}
       <section className="hero container flex flex-col gap-10 lg:flex-row items-center justify-center m-auto p-4 sm:p-6 md:p-8 lg:p-14 lg:py-20 relative overflow-hidden min-h-screen">

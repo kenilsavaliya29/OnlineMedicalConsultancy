@@ -1,21 +1,13 @@
 import React, { useState } from 'react';
 import { useForm } from "react-hook-form";
 import { NavLink } from 'react-router-dom';
-import MessageBox from '../../components/common/MessageBox.jsx';
+import { showMessage } from '../../components/common/MessageBox';
 
 const ForgotPassword = () => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [messageBox, setMessageBox] = useState({ show: false, type: '', message: '' });
 
-  const showMessage = (type, msg) => {
-    setMessageBox({ show: true, type, message: msg });
-  };
-
-  const closeMessageBox = () => {
-    setMessageBox({ show: false, type: '', message: '' });
-  };
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm();
 
@@ -37,17 +29,17 @@ const ForgotPassword = () => {
       
       if (response.ok) {
         setMessage(res.message);
-        showMessage('success', res.message);
+        showMessage.success(res.message);
         reset(); 
       } else {
         setError(res.message || 'Something went wrong');
-        showMessage('error', res.message || 'Something went wrong');
+        showMessage.error(res.message || 'Something went wrong');
         
       }
     } catch (err) {
       console.error('Error:', err);
       setError('An unexpected error occurred. Please try again.');
-      showMessage('error', 'An unexpected error occurred. Please try again.');
+      showMessage.error('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -55,13 +47,6 @@ const ForgotPassword = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#007E85] to-[#00565c]">
-      {messageBox.show && (
-        <MessageBox
-          type={messageBox.type}
-          message={messageBox.message}
-          onClose={closeMessageBox}
-        />
-      )}
       <div className="container mx-auto flex h-screen items-center justify-center px-4">
         <div className="w-full max-w-5xl rounded-2xl bg-white shadow-2xl flex overflow-hidden">
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { FaUserMd, FaPlus, FaTrash, FaEdit, FaSearch, FaFilter, FaTimes, FaCloudUploadAlt, FaUserCircle, FaBars } from 'react-icons/fa';
 import { MdDashboard } from 'react-icons/md';
-import MessageBox from '../common/MessageBox.jsx';
+import { showMessage } from '../common/MessageBox';
 import { AuthContext } from '../../contexts/authContext';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
@@ -29,7 +29,7 @@ const Admin = () => {
   const [doctorToDelete, setDoctorToDelete] = useState(null);
   const deleteModalRef = useRef(null);
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
-  const [messageBox, setMessageBox] = useState({ show: false, type: '', message: '' });
+
   const [showFilterSidebar, setShowFilterSidebar] = useState(false);
 
   // Filter states
@@ -71,13 +71,7 @@ const Admin = () => {
   // Add this to the state variables section:
   const [viewType, setViewType] = useState('table');
 
-  const showMessage = (type, message) => {
-    setMessageBox({ show: true, type, message });
-  };
 
-  const closeMessageBox = () => {
-    setMessageBox({ show: false, type: '', message: '' });
-  };
 
   // Fetch doctors on component mount
   useEffect(() => {
@@ -85,7 +79,7 @@ const Admin = () => {
       console.warn("Non-admin user trying to access admin dashboard:", user.role);
 
       const timer = setTimeout(() => {
-        showMessage('error', "You don't have permission to access the admin dashboard");
+        showMessage.error("You don't have permission to access the admin dashboard");
         window.location.href = '/';
       }, 500); // Small delay to avoid toast during normal navigation
 
@@ -103,7 +97,7 @@ const Admin = () => {
 
         if (!response.ok) {
           if (response.status === 401) {
-            showMessage('error', 'Authentication failed. Please log in again.');
+            showMessage.error('Authentication failed. Please log in again.');
             setError('Authentication failed. Please log in again.');
             return;
           }
@@ -117,12 +111,12 @@ const Admin = () => {
           setDoctors(data.doctors);
         } else {
           const errorMsg = 'Failed to fetch doctors: ' + (data.message || 'Unknown error');
-          showMessage('error', errorMsg);
+          showMessage.error(errorMsg);
           setError(errorMsg);
         }
       } catch (error) {
         const errorMsg = `Failed to fetch doctors: ${error.message}`;
-        showMessage('error', errorMsg);
+        showMessage.error(errorMsg);
         console.error('Error fetching doctors:', error);
         setError(errorMsg);
       } finally {
@@ -236,7 +230,7 @@ const Admin = () => {
 
     // Validate form
     if (!validateForm()) {
-      showMessage('error', 'Please fix the validation errors');
+      showMessage.error('Please fix the validation errors');
       return;
     }
 
@@ -309,12 +303,12 @@ const Admin = () => {
           setDoctors(doctors.map(doc =>
             doc._id === editingDoctor._id ? result.doctor : doc
           ));
-          showMessage('success', 'Doctor updated successfully!');
+          showMessage.success('Doctor updated successfully!');
           setEditingDoctor(null);
         } else {
           // Add the new doctor to the doctors array
           setDoctors([...doctors, result.doctor]);
-          showMessage('success', 'Doctor added successfully!');
+          showMessage.success('Doctor added successfully!');
           console.log("New doctor added:", result.doctor);
         }
 
@@ -336,12 +330,12 @@ const Admin = () => {
         setShowAddForm(false);
       } else {
         // Show detailed error message
-        showMessage('error', `Operation failed: ${result.message}`);
+        showMessage.error(`Operation failed: ${result.message}`);
         console.error("API returned error:", result);
       }
     } catch (error) {
       console.error("Error adding/updating doctor:", error);
-      showMessage('error', `Error: ${error.message}`);
+      showMessage.error(`Error: ${error.message}`);
 
       // Try to log more details if possible
       if (error.response) {
@@ -436,12 +430,12 @@ const Admin = () => {
       const result = await response.json();
       if (result.success) {
         setDoctors(doctors.filter(doctor => doctor._id !== id));
-        showMessage('success', 'Doctor removed successfully!');
+        showMessage.success('Doctor removed successfully!');
       } else {
-        showMessage('error', result.message || 'Failed to delete doctor');
+        showMessage.error(result.message || 'Failed to delete doctor');
       }
     } catch (error) {
-      showMessage('error', 'Failed to delete doctor');
+      showMessage.error('Failed to delete doctor');
       console.error('Error deleting doctor:', error);
     } finally {
       closeDeleteModal();
@@ -511,13 +505,7 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pt-24">
-      {messageBox.show && (
-        <MessageBox
-          type={messageBox.type}
-          message={messageBox.message}
-          onClose={closeMessageBox}
-        />
-      )}
+
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center">

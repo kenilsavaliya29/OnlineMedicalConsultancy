@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, NavLink } from 'react-router-dom';
-import MessageBox from '../../components/common/MessageBox.jsx';
+import { showMessage } from '../../components/common/MessageBox';
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -10,15 +10,7 @@ const ResetPassword = () => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [messageBox, setMessageBox] = useState({ show: false, type: '', message: '' });
 
-  const showMessage = (type, msg) => {
-    setMessageBox({ show: true, type, message: msg });
-  };
-
-  const closeMessageBox = () => {
-    setMessageBox({ show: false, type: '', message: '' });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,7 +20,7 @@ const ResetPassword = () => {
 
     if (newPassword !== confirmPassword) {
       setError('Passwords do not match.');
-      showMessage('error', 'Passwords do not match.');
+      showMessage.error('Passwords do not match.');
       setIsLoading(false);
       return;
     }
@@ -46,18 +38,18 @@ const ResetPassword = () => {
 
       if (response.ok) {
         setMessage(data.message);
-        showMessage('success', data.message);
+        showMessage.success(data.message);
         setTimeout(() => {
           navigate('/login');
         }, 3000);
       } else {
         setError(data.message || 'Something went wrong');
-        showMessage('error', data.message || 'Something went wrong');
+        showMessage.error(data.message || 'Something went wrong');
       }
     } catch (err) {
       console.error('Error:', err);
       setError('An unexpected error occurred. Please try again.');
-      showMessage('error', 'An unexpected error occurred. Please try again.');
+      showMessage.error('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -65,13 +57,6 @@ const ResetPassword = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#007E85] to-[#00565c]">
-      {messageBox.show && (
-        <MessageBox
-          type={messageBox.type}
-          message={messageBox.message}
-          onClose={closeMessageBox}
-        />
-      )}
       <div className="container mx-auto flex h-screen items-center justify-center px-4">
         <div className="w-full max-w-5xl rounded-2xl bg-white shadow-2xl flex overflow-hidden">
 

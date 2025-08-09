@@ -12,7 +12,7 @@ import MessagesTab from './PatientSideBar/MessagesTab.jsx'
 import AccountSettingsTab from './PatientSideBar/AccountSettingsTab.jsx'
 import MyDoctorTab from './PatientSideBar/MyDoctorTab.jsx'
 import MedicalProfileTab from './PatientSideBar/MedicalProfileTab.jsx'
-import MessageBox from '../common/MessageBox.jsx'
+import { showMessage } from '../common/MessageBox'
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'
 
@@ -25,15 +25,7 @@ const Patient_Dashboard = () => {
   const [patientDetails, setPatientDetails] = useState(null)
   const [isNotificationsModalOpen, setIsNotificationsModalOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-  const [messageBox, setMessageBox] = useState({ show: false, type: '', message: '' });
 
-  const showMessage = (type, message) => {
-    setMessageBox({ show: true, type, message });
-  };
-
-  const closeMessageBox = () => {
-    setMessageBox({ show: false, type: '', message: '' });
-  };
 
   const sidebarRef = useRef(null);
   const notificationsRef = useRef(null);
@@ -46,7 +38,7 @@ const Patient_Dashboard = () => {
     } else if (user && user.role !== 'patient') {
 
       const timer = setTimeout(() => {
-        showMessage('error', "You don't have permission to access the patient dashboard. Redirecting...")
+        showMessage.error("You don't have permission to access the patient dashboard. Redirecting...")
 
         if (user.role === 'doctor') {
           window.location.href = '/doctor/dashboard'
@@ -59,7 +51,7 @@ const Patient_Dashboard = () => {
     } else {
 
       const timer = setTimeout(() => {
-        showMessage('error', "Please log in to access the patient dashboard")
+        showMessage.error("Please log in to access the patient dashboard")
         window.location.href = '/login'
       }, 500)
 
@@ -105,13 +97,13 @@ const Patient_Dashboard = () => {
     try {
       const result = await logout()
       if (result.success) {
-        showMessage('success', "Logged out successfully")
+        showMessage.success("Logged out successfully")
         // Redirect will be handled by AuthContext/ProtectedRoute
       } else {
-        showMessage('error', result.message || "Failed to logout")
+        showMessage.error(result.message || "Failed to logout")
       }
     } catch (error) {
-      showMessage('error', "An error occurred during logout")
+      showMessage.error("An error occurred during logout")
     }
   }, [logout])
 
@@ -232,13 +224,7 @@ const Patient_Dashboard = () => {
 
   return (
     <>
-      {messageBox.show && (
-        <MessageBox
-          type={messageBox.type}
-          message={messageBox.message}
-          onClose={closeMessageBox}
-        />
-      )}
+
       <div className="flex bg-gray-50 relative mt-24">
         {/* Background Overlay */}
         {sidebarOpen && (

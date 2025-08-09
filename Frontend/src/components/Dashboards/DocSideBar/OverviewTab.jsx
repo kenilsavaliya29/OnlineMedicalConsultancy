@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react'
 import { FaCalendarCheck, FaUsers, FaWallet, FaPhone, FaEnvelope, FaStar, FaClock, FaCalendarAlt, FaComments, FaCog } from 'react-icons/fa';
 import { AuthContext } from '../../../contexts/authContext';
-import MessageBox from '../../common/MessageBox';
+import { showMessage } from '../../common/MessageBox';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
