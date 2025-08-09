@@ -383,7 +383,6 @@ const UpdateAvailabilityTab = () => {
       >
         Add Availability
       </button>
-
     </div>
   );
 };
