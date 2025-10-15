@@ -21,7 +21,7 @@ import Admin from './components/Dashboards/Admin_Dashboard';
 import SearchDoctors from './Pages/Doctors/SearchDoctors';
 import DoctorProfile from './Pages/Doctors/DoctorProfile';
 // import AppointmentBooking from './Pages/Doctors/AppointmentBooking';
-import WellnessProgram from './pages/Patient/WellnessProgram';
+import WellnessProgram from './Pages/Patient/WellnessProgram';
 import { AuthProvider } from './contexts/authContext';
 import NotFoundPage from './404Page';
 import HowAppointmentsWork from './Pages/Info/HowAppointmentsWork';
