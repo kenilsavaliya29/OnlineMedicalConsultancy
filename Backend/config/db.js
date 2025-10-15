@@ -1,4 +1,4 @@
-import mongoose from "mongooese";
+import mongoose from "mongoose";
 import dotenv from "dotenv";
 
 // Make sure dotenv is loaded
