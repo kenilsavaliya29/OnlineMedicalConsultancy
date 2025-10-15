@@ -10,12 +10,20 @@ const patientProfileSchema = new mongoose.Schema({
   },
 
   dateOfBirth: Date,
+  // Basic vitals captured as first-class fields for quick access and booking validation
+  bloodGroup: {
+    type: String,
+    enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Unknown'],
+  },
+  height: Number, // in cm
+  weight: Number, // in kg
   allergies: [String],
   medicalConditions: [String],
   medications: [{
     name: String,
     dosage: String,
-    frequent: Number,
+    // Align with frontend which uses `frequency` as a human-readable string
+    frequency: String,
     startDate: Date,
     endDate: Date,
     isActive: {

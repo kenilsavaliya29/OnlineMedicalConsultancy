@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
-import MessageBox from '../../common/MessageBox.jsx';
+import { showMessage } from '../../common/MessageBox.jsx';
 import { AuthContext } from '../../../contexts/authContext.jsx';
 import useDebounce from '../../../hooks/useDebounce.js';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 const MedicalProfileTab = () => {
- 
-  const { user } = useContext(AuthContext);
+
+  const { user, setUser } = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [isProfileComplete, setIsProfileComplete] = useState(true);
@@ -36,7 +36,7 @@ const MedicalProfileTab = () => {
     // Only update formData if debouncedLocalFormData is different
     // Use a deep comparison but don't include formData in the dependency array
     const isDifferent = JSON.stringify(debouncedLocalFormData) !== JSON.stringify(formData);
-    
+
     if (isDifferent) {
       setFormData(debouncedLocalFormData);
     }
@@ -57,91 +57,111 @@ const MedicalProfileTab = () => {
   const [tempMetricNotes, setTempMetricNotes] = useState('');
 
 
-  useEffect(() => {
-    const fetchProfileData = async () => {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-      try {
-        setLoading(true);
-        const response = await fetch(`${API_URL}/api/patient/medical-profile`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        });
+  const loadProfileFromUser = () => {
+    if (!user || !user.profile) {
+      setLoading(false);
+      setIsProfileComplete(false);
+      return;
+    }
 
-        const data = await response.json();
+    try {
+      setLoading(true);
+      const profile = user.profile;
+      // Prefer top-level fields; fallback to matching healthMetrics entries if missing
+      const metrics = Array.isArray(profile.healthMetrics) ? profile.healthMetrics : [];
+      const getMetric = (type) => metrics.find(m => m?.type === type);
+      const heightMetric = getMetric('height');
+      const weightMetric = getMetric('weight');
+      const bloodGroupMetric = getMetric('blood_group');
 
-        if (response.ok && data.success) {
-          const profile = data.profile;
-          setFormData({
-            dateOfBirth: profile.dateOfBirth ? new Date(profile.dateOfBirth).toISOString().split('T')[0] : '',
-            bloodGroup: profile.bloodGroup || '',
-            height: profile.height || '',
-            weight: profile.weight || '',
-            allergies: profile.allergies || [],
-            medicalConditions: profile.medicalConditions || [],
-            medications: profile.medications || [],
-            emergencyContact: profile.emergencyContact || { name: '', relationship: '', phoneNumber: '', email: '' },
-            insurance: profile.insurance || { provider: '', policyNumber: '', validUntil: '' },
-            healthMetrics: profile.healthMetrics || []
-          });
-          // Also update localFormData so that debounced state is initialized correctly
-          setLocalFormData({
-            dateOfBirth: profile.dateOfBirth ? new Date(profile.dateOfBirth).toISOString().split('T')[0] : '',
-            bloodGroup: profile.bloodGroup || '',
-            height: profile.height || '',
-            weight: profile.weight || '',
-            allergies: profile.allergies || [],
-            medicalConditions: profile.medicalConditions || [],
-            medications: profile.medications || [],
-            emergencyContact: profile.emergencyContact || { name: '', relationship: '', phoneNumber: '', email: '' },
-            insurance: profile.insurance || { provider: '', policyNumber: '', validUntil: '' },
-            healthMetrics: profile.healthMetrics || []
-          });
-          checkProfileCompletion(profile);
-        } else if (response.status === 404) {
+      const profileData = {
+        dateOfBirth: profile.dateOfBirth ? new Date(profile.dateOfBirth).toISOString().split('T')[0] : '',
+        bloodGroup: profile.bloodGroup || bloodGroupMetric?.value || '',
+        height: profile.height ?? (heightMetric ? Number(heightMetric.value) : ''),
+        weight: profile.weight ?? (weightMetric ? Number(weightMetric.value) : ''),
+        allergies: profile.allergies || [],
+        medicalConditions: profile.medicalConditions || [],
+        medications: profile.medications || [],
+        emergencyContact: profile.emergencyContact || { name: '', relationship: '', phoneNumber: '', email: '' },
+        insurance: profile.insurance || { provider: '', policyNumber: '', validUntil: '' },
+        healthMetrics: metrics
+      };
 
-          setIsProfileComplete(false);
-        } else {
-          MessageBox.error(data.message || 'Failed to fetch medical profile.');
-          setIsProfileComplete(false);
+      setFormData(profileData);
+      setLocalFormData(profileData);
+      checkProfileCompletion(profileData);
+    } catch (error) {
+      console.error('Error loading profile from user:', error);
+      setIsProfileComplete(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const refreshUserData = async () => {
+    try {
+      const response = await fetch(`${API_URL}/auth/user`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
         }
-      } catch (error) {
-        console.error('Error fetching medical profile:', error);
-        MessageBox.error('Error connecting to server.');
-        setIsProfileComplete(false);
-      } finally {
-        setLoading(false);
-      }
-    };
+      });
 
-    fetchProfileData();
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.user) {
+          setUser(data.user);
+          return data.user;
+        }
+      }
+    } catch (error) {
+      console.error('Error refreshing user data:', error);
+    }
+    return null;
+  };
+
+  useEffect(() => {
+    loadProfileFromUser();
   }, [user]);
 
-  const checkProfileCompletion = (profile) => {
+  const checkProfileCompletion = (profileData) => {
+    // Check essential basic information fields
     const essentialFields = [
-      profile.dateOfBirth,
-      profile.bloodGroup,
-      profile.height,
-      profile.weight,
-      profile.emergencyContact?.name,
-      profile.emergencyContact?.phoneNumber,
+      profileData.dateOfBirth,
+      profileData.bloodGroup,
+      profileData.height,
+      profileData.weight,
+      profileData.emergencyContact?.name,
+      profileData.emergencyContact?.phoneNumber,
     ];
 
-    const hasAllergies = profile.allergies && profile.allergies.length > 0;
-    const hasMedicalConditions = profile.medicalConditions && profile.medicalConditions.length > 0;
+    // Check if all essential fields are filled
+    const hasAllEssentialFields = essentialFields.every(field =>
+      field !== null && field !== undefined && field !== '' && field.toString().trim() !== ''
+    );
 
-    const complete = essentialFields.every(field => field !== null && field !== undefined && field !== '') &&
-      (hasAllergies || hasMedicalConditions ||
-        (profile.allergies && profile.allergies.length === 0 &&
-          profile.medicalConditions && profile.medicalConditions.length === 0));
+    // console.log('Profile completion check:', {
+    //   dateOfBirth: profileData.dateOfBirth,
+    //   bloodGroup: profileData.bloodGroup,
+    //   height: profileData.height,
+    //   weight: profileData.weight,
+    //   emergencyContactName: profileData.emergencyContact?.name,
+    //   emergencyContactPhone: profileData.emergencyContact?.phoneNumber,
+    //   hasAllEssentialFields
+    // });
 
-    setIsProfileComplete(complete);
+    setIsProfileComplete(hasAllEssentialFields);
   };
+
+  // Update the checkProfileCompletion call when formData changes
+  useEffect(() => {
+    if (formData.dateOfBirth || formData.bloodGroup || formData.height || formData.weight ||
+      formData.emergencyContact?.name || formData.emergencyContact?.phoneNumber) {
+      console.log('formData', formData)
+      checkProfileCompletion(formData);
+    }
+  }, [formData]);
 
   const handleInputChange = React.useCallback((e) => {
     const { name, value } = e.target;
@@ -203,7 +223,7 @@ const MedicalProfileTab = () => {
       setTempStartDate('');
       setTempEndDate('');
     } else {
-      MessageBox.error('Medication name, dosage, and frequency are required.');
+      showMessage.error('Medication name, dosage, and frequency are required.');
     }
   };
 
@@ -232,7 +252,7 @@ const MedicalProfileTab = () => {
       setTempMetricDate(new Date().toISOString().split('T')[0]);
       setTempMetricNotes('');
     } else {
-      MessageBox.error('Health metric type, value, and unit are required.');
+      showMessage.error('Health metric type, value, and unit are required.');
     }
   };
 
@@ -249,25 +269,26 @@ const MedicalProfileTab = () => {
 
     try {
       // Use the debounced formData for submission
-      const response = await fetch(`${API_URL}/api/patient/update-medical-profile`, {
+      const response = await fetch(`${API_URL}/api/patient-profiles/update-medical-profile`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify(formData), // Use formData here
+        body: JSON.stringify(formData),
       });
       const data = await response.json();
 
       if (response.ok && data.success) {
-        MessageBox.success(data.message);
-        checkProfileCompletion(data.profile); // Re-check completion after update
+        showMessage.success(data.message);
+        // Refresh user data to get the updated profile
+        await refreshUserData();
       } else {
-        MessageBox.error(data.message || 'Failed to save medical profile.');
+        showMessage.error(data.message || 'Failed to save medical profile.');
       }
     } catch (error) {
       console.error('Error submitting medical profile:', error);
-      MessageBox.error('Error connecting to server.');
+      showMessage.error('Error connecting to server.');
     } finally {
       setSubmitting(false);
     }
@@ -285,7 +306,15 @@ const MedicalProfileTab = () => {
     <div className="p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold text-[#007E85] mb-4">My Medical Profile</h2>
       {!isProfileComplete && (
-        <p className="text-red-500 mb-4">Your basic medical profile is incomplete. Please fill in the required details below to book consultations.</p>
+        <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+          <div className="flex">
+            <div className="ml-3">
+              <p className="text-sm text-red-700">
+                <strong>Profile Incomplete:</strong> Please fill in all required basic information (Date of Birth, Blood Group, Height, Weight, and Emergency Contact details) to enable appointment booking.
+              </p>
+            </div>
+          </div>
+        </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">

@@ -7,7 +7,6 @@ const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 const OverViewTab = React.memo(() => {
 
     const { user, logout } = useContext(AuthContext);
-    console.log(user)
     const [appointments, setAppointments] = useState([]);
 
     // Fetch upcoming appointments
