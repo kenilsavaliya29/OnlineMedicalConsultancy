@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useCallback, useMemo, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { FaUserMd, FaCalendarCheck, FaFileMedical, FaWallet, FaComments, FaCog, FaChartLine, FaSignOutAlt, FaBell, FaHeartbeat, FaNotesMedical, FaUserCircle, FaPhone, FaEnvelope, FaMapMarkerAlt, FaKey, FaStar, FaDownload, FaSyncAlt, FaAppleAlt, FaHospitalUser, FaTimes, FaBars } from 'react-icons/fa'
 import { AuthContext } from '../../contexts/authContext.jsx'
 
@@ -19,6 +19,7 @@ const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'
 const Patient_Dashboard = () => {
 
   const navigate = useNavigate()
+  const location = useLocation()
   const { user, logout } = useContext(AuthContext)
   const [activeTab, setActiveTab] = useState('overview')
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -58,6 +59,18 @@ const Patient_Dashboard = () => {
       return () => clearTimeout(timer)
     }
   }, [user, navigate]) // Removed API_URL from dependency array
+
+  // Sync active tab with query parameter (?tab=...)
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const tab = params.get('tab')
+    const validTabs = new Set([
+      'overview', 'appointments', 'doctors', 'medical-profile', 'records', 'prescriptions', 'health', 'wellness', 'payments', 'messages', 'settings'
+    ])
+    if (tab && validTabs.has(tab)) {
+      setActiveTab(tab)
+    }
+  }, [location.search])
 
 
   const handleChatRedirect = useCallback(() => {
@@ -154,8 +167,12 @@ const Patient_Dashboard = () => {
       navigate('/patient/wellness');
     } else {
       setActiveTab(tabId);
+      // reflect in URL for deep-linking
+      const params = new URLSearchParams(location.search)
+      params.set('tab', tabId)
+      navigate({ pathname: '/patient/dashboard', search: params.toString() }, { replace: true })
     }
-  }, [navigate])
+  }, [navigate, location.search])
 
   // Render content for different tabs
   const renderTabContent = useCallback(() => {

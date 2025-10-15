@@ -134,12 +134,33 @@ const DoctorProfile = () => {
   };
 
   // Function to handle booking appointment
-  const handleBookAppointment = (timeSlot) => {
+  const handleBookAppointment = async (timeSlot) => {
     if (!user || user.role !== 'patient') {
       showMessage.error('Please login as a patient to book an appointment');
       return
     }
+    if (user.role === 'patient') {
+      const response = await fetch(`${API_URL}/api/patient-profiles/profile-status`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        credentials: 'include'
+      })
+      const data = await response.json();
 
+      if (!data.isBasicProfileComplete) {
+        showMessage.warn('Your basic details are incomplete. Please complete them in My Medical Profile.');
+        navigate('/patient/dashboard?tab=medical-profile')
+      }
+      
+      else{
+        navigate(`/doctors/${doctor._id}/payment`, {
+          state: { appointmentDetails }
+        });
+      }
+    }
     // Format the appointment date based on the slot type
     const appointmentDate = 'date' in timeSlot
       ? new Date(timeSlot.date).toISOString().split('T')[0]
@@ -155,11 +176,6 @@ const DoctorProfile = () => {
       doctorName: `${doctor.firstName} ${doctor.lastName}`,
       specialization: doctor.profile.specialization
     };
-
-    // Navigate to payment page with appointment details
-    navigate(`/doctors/${doctor._id}/payment`, {
-      state: { appointmentDetails }
-    });
   };
 
   if (loading) {
