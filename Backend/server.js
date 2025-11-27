@@ -37,6 +37,11 @@ if (!fs.existsSync(uploadsPatientDir)) {
 const app = express();
 const server = http.createServer(app);
 const port = process.env.PORT || 3001;
+const renderExternalUrl = process.env.RENDER_EXTERNAL_URL;
+const publicBackendEnv = process.env.PUBLIC_BACKEND_URL || process.env.BACKEND_URL;
+const defaultPublicBackend = 'https://onlinemedicalconsultancy.onrender.com';
+const publicApiUrl = renderExternalUrl || publicBackendEnv || defaultPublicBackend;
+const localApiUrl = `http://localhost:${port}`;
 
 /**
  * Connect to MongoDB
@@ -84,10 +89,15 @@ process.on('unhandledRejection', (reason, promise) => {
 // Setup function to initialize server after DB connection attempt
 function setupServer() {
   // CORS configuration
+  const devOrigins = ['http://localhost:5173', 'http://localhost:3000'];
+  const prodOrigins = [
+    process.env.FRONTEND_URL,
+    process.env.PUBLIC_FRONTEND_URL,
+    'https://carechat.netlify.app'
+  ].filter(Boolean);
+
   const corsOptions = {
-    origin: process.env.NODE_ENV === 'production' 
-      ? [process.env.FRONTEND_URL] 
-      : ['http://localhost:5173', 'http://localhost:3000'],
+    origin: process.env.NODE_ENV === 'production' ? prodOrigins : devOrigins,
     credentials: true, 
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     optionsSuccessStatus: 204
@@ -121,6 +131,7 @@ function setupServer() {
           message: 'Healthcare API is running', 
           environment: process.env.NODE_ENV,
           version: '2.0.0', // New version with improved architecture
+          publicUrl: publicApiUrl,
           timestamp: new Date().toISOString()
         });
       });
@@ -146,7 +157,10 @@ function setupServer() {
       // Start server
       server.listen(port, () => {
         console.log(`Server running on port ${port}`);
-        console.log(`API available at http://localhost:${port}`);
+        console.log(`API available at ${publicApiUrl}`);
+        if (!renderExternalUrl) {
+          console.log(`Local access: ${localApiUrl}`);
+        }
       });
     })
     .catch(err => {
