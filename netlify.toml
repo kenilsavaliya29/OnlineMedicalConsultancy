@@ -1,0 +1,13 @@
+[build]
+  command = "npm run build"
+  publish = "Frontend/dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+  VITE_BACKEND_URL = "https://carechat-backend.onrender.com"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+

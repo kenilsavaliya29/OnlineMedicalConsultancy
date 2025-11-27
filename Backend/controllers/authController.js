@@ -364,21 +364,21 @@ export const updateProfile = async (req, res) => {
       const patientProfile = await PatientProfile.findOne({ userId: user._id });
       
       if (patientProfile) {
-        const patientProfileData = profileData.patientProfile;
+        const patientProfileData = profileData.patientProfile || {};
         
-        if (patientProfileData.dateOfBirth) {
+        if (patientProfileData.dateOfBirth !== undefined) {
           patientProfile.dateOfBirth = patientProfileData.dateOfBirth;
         }
         
-        if (patientProfileData.bloodGroup) {
+        if (patientProfileData.bloodGroup !== undefined) {
           patientProfile.bloodGroup = patientProfileData.bloodGroup;
         }
         
-        if (patientProfileData.allergies) {
+        if (patientProfileData.allergies !== undefined) {
           patientProfile.allergies = patientProfileData.allergies;
         }
         
-        if (patientProfileData.chronicConditions) {
+        if (patientProfileData.chronicConditions !== undefined) {
           patientProfile.chronicConditions = patientProfileData.chronicConditions;
         }
 

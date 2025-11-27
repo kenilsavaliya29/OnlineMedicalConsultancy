@@ -493,13 +493,7 @@ const Home = () => {
           </div>
 
           <div className="relative aspect-video max-w-4xl mx-auto rounded-2xl  overflow-hidden shadow-xl border-4 border-[#007E85]">
-            <iframe
-              src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-              title="Platform Overview"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="absolute top-0 left-0 w-full h-full p-2 rounded-2xl"
-            ></iframe>
+            <video src="/assets/videos/doctor_video.mp4" autoPlay ></video>
           </div>
         </div>
       </section>

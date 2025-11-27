@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-import { showMessage } from '../components/common/MessageBox';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { showMessage } from "../components/common/MessageBox";
 
 export const AuthContext = createContext();
 
@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const verifyUser = async () => {
-      try {
+      try { 
         setLoading(true);
         
         const response = await fetch(`${API_URL}/auth/user`, {
@@ -173,7 +173,7 @@ export const AuthProvider = ({ children }) => {
           setIsInitialLogin(false);
         }, 1000);
         
-        MessageBox.success('Registration successful!');
+        showMessage.success('Registration successful!');
         return { success: true, message: data.message, user: data.user };
       } else {
         return { success: false, message: data.message };
@@ -208,7 +208,7 @@ export const AuthProvider = ({ children }) => {
 
       if (data.success) {
         setUser(data.user);
-        MessageBox.success('Profile updated successfully!');
+        showMessage.success('Profile updated successfully!');
         return { success: true, message: data.message, user: data.user };
       } else {
         return { success: false, message: data.message };

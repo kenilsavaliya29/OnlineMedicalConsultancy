@@ -1,9 +1,6 @@
-import React, { useState } from 'react'
-import Navbar from '../components/Navbar'
-import { Checkbox } from "@material-tailwind/react";
+import React from 'react'
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import Footer from '../components/Footer';
 import { FaPhone, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa';
 
 const ContactUs = () => {
@@ -179,18 +176,18 @@ const ContactUs = () => {
                   )}
                 </div>
 
-                <div className="flex items-center">
-                  <Checkbox
+                <label className="flex items-center space-x-2 text-gray-700">
+                  <input
+                    type="checkbox"
+                    className="h-5 w-5 rounded border-gray-300 text-[#007E85] focus:ring-[#007E85]"
                     {...register("terms", {
                       required: "You must accept the terms and conditions"
                     })}
-                    color="teal"
-                    className="h-5 w-5"
                   />
-                  <label className="ml-2 text-gray-700">
+                  <span>
                     I accept the <Link to="/about/terms-and-conditions" className="text-[#007E85] hover:underline">terms & conditions</Link> and <Link to="/about/privacy-policy" className="text-[#007E85] hover:underline">privacy policy</Link>
-                  </label>
-                </div>
+                  </span>
+                </label>
                 {errors.terms && (
                   <p className="text-red-500 text-sm">{errors.terms.message}</p>
                 )}
