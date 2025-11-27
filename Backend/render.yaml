@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: carechat-backend
+    env: node
+    rootDir: Backend
+    buildCommand: npm install
+    startCommand: node server.js
+    nodeVersion: 20
+    plan: starter
+    region: oregon
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        sync: false
+      - key: NODE_ENV
+        value: production
+      - key: FRONTEND_URL
+        sync: false
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
+      - key: EMAIL_SERVICE
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: MONGO_RETRY_CONNECT
+        sync: false
+    disks:
+      - name: upload-storage
+        mountPath: /opt/render/project/src/Backend/uploads
+        sizeGB: 1
+
