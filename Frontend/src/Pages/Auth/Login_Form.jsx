@@ -1,8 +1,7 @@
 import { useForm } from "react-hook-form"
 import { Link, useNavigate, NavLink, useLocation } from "react-router-dom";
-import { React, useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../../contexts/authContext.jsx";
-import { Checkbox } from "@material-tailwind/react";
 
 const Login_Form = () => {
   let open_eye = "/assets/images/opened.svg";
@@ -311,21 +310,24 @@ const Login_Form = () => {
 
               {/* Doctor Login Checkbox */}
               <div className="mt-2">
-                <Checkbox
-                  checked={isDoctor}
-                  onChange={() => {
-                    setIsDoctor(!isDoctor);
-                    setLoginError("");
-                    setErrorType(null);
-                  }}
-                  color="teal"
-                  label={
-                    <span className="text-sm text-gray-700">
-                      I am a doctor
-                    </span>
-                  }
-                  disabled={formSubmitting}
-                />
+                <label
+                  htmlFor="doctor-login-checkbox"
+                  className="inline-flex items-center gap-2 cursor-pointer select-none"
+                >
+                  <input
+                    id="doctor-login-checkbox"
+                    type="checkbox"
+                    checked={isDoctor}
+                    onChange={() => {
+                      setIsDoctor(!isDoctor);
+                      setLoginError("");
+                      setErrorType(null);
+                    }}
+                    className="w-4 h-4 rounded border-gray-300 text-[#007E85] focus:ring-[#007E85] accent-[#007E85]"
+                    disabled={formSubmitting}
+                  />
+                  <span className="text-sm text-gray-700">I am a doctor</span>
+                </label>
               </div>
 
               <button

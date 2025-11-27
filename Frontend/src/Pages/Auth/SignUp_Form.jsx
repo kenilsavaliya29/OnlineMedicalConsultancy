@@ -2,7 +2,6 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Checkbox } from "@material-tailwind/react";
 import { useContext } from "react";
 import { AuthContext } from "../../contexts/authContext.jsx";
 
@@ -263,17 +262,28 @@ const SignUp_Form = () => {
               </div>
 
               <div className="mt-2">
-                <Checkbox
-                  {...register("terms", {
-                    required: "You must accept the terms and conditions",
-                  })}
-                  color="teal"
-                  label={
-                    <span className="text-sm text-gray-700">
-                      I accept the <Link to="/about/terms-and-conditions" className="text-[#007E85] hover:underline">terms and conditions</Link>
-                    </span>
-                  }
-                />
+                <label
+                  htmlFor="signup-terms"
+                  className="inline-flex items-center gap-2 cursor-pointer select-none"
+                >
+                  <input
+                    id="signup-terms"
+                    type="checkbox"
+                    {...register("terms", {
+                      required: "You must accept the terms and conditions",
+                    })}
+                    className="w-4 h-4 rounded border-gray-300 text-[#007E85] focus:ring-[#007E85] accent-[#007E85]"
+                  />
+                  <span className="text-sm text-gray-700">
+                    I accept the{" "}
+                    <Link
+                      to="/about/terms-and-conditions"
+                      className="text-[#007E85] hover:underline"
+                    >
+                      terms and conditions
+                    </Link>
+                  </span>
+                </label>
                 {errors.terms && (
                   <p className="mt-1 text-red-500 text-xs">{errors.terms.message}</p>
                 )}

@@ -1,3 +1,4 @@
+import React from 'react';
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import Login_Form from "./Pages/Auth/Login_Form"
 import SignUp_Form from "./Pages/Auth/SignUp_Form"
@@ -20,9 +21,7 @@ import ProtectedRoute from './Pages/Auth/ProtectedRoute';
 import Admin from './components/Dashboards/Admin_Dashboard';
 import SearchDoctors from './Pages/Doctors/SearchDoctors';
 import DoctorProfile from './Pages/Doctors/DoctorProfile';
-// import AppointmentBooking from './Pages/Doctors/AppointmentBooking';
 import WellnessProgram from './Pages/Patient/WellnessProgram';
-import { AuthProvider } from './contexts/authContext';
 import NotFoundPage from './404Page';
 import HowAppointmentsWork from './Pages/Info/HowAppointmentsWork';
 import HowConsultationWorks from './Pages/Info/HowConsultationWorks';
@@ -166,11 +165,11 @@ function App() {
   });
 
   return (
-    <AuthProvider>
+    <>
       <RouterProvider router={router} />
       <MessageContainer />
       {/* <AIChatbot /> */}
-    </AuthProvider>
+    </>
   );
 }
 

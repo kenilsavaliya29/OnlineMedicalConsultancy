@@ -3,7 +3,7 @@ import { FaCalendarCheck, FaSyncAlt } from 'react-icons/fa'
 import MessageBox from '../../common/MessageBox.jsx'
 import { AuthContext } from '../../../contexts/authContext.jsx'
 
-const API_URL = import.meta.env.BACKEND_URL || 'http://localhost:3000'
+const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000'
 
 // Modal component for appointment details
 const AppointmentDetailsModal = ({ appointment, onClose }) => {
