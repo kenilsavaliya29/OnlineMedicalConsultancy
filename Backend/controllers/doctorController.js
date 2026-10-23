@@ -342,7 +342,7 @@ const generateRandomPassword = (length = 10) => {
 
 //mail sender
 const sendWelcomeEmail = async (doctorName, email, password) => {
-  console.log("hello")
+
   const subject = 'Welcome to Medical Consultancy - Your Account Details';
 
   const body = `

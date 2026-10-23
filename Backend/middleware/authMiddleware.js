@@ -8,11 +8,20 @@ import PatientProfile from '../models/patientProfileModel.js';
  */
 const getUserWithProfile = async (userId) => {
   try {
+    console.log('Auth debug:', {
+      userId,
+      database: User.db.name,
+      collection: User.collection.name
+    });
+
     const user = await User.findById(userId);
+
+    console.log('User lookup result:', !!user);
+
     if (!user) return null;
 
     const userData = user.toObject();
-    delete userData.password; 
+    delete userData.password;
 
     // Fetch role-specific profile
     if (user.role === 'doctor') {
@@ -143,7 +152,7 @@ export const verifyPatient = async (req, res, next) => {
       });
     }
 
-    
+
     let decoded;
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET);

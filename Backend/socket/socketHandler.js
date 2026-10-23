@@ -166,6 +166,7 @@ export const setupSocket = (server) => {
 
     // Handle sending messages
     socket.on('send_message', async (data) => {
+      console.log('BACKEND RECEIVED send_message:', data);
       try {
         const { appointmentId, message, messageType = 'text' } = data;
 

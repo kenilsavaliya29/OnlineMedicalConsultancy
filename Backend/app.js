@@ -10,6 +10,7 @@ import wellnessRoutes from './routes/wellnessRoute.js';
 import cookieParser from 'cookie-parser';
 import chatbotRoutes from './routes/chatbotRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
+import chatRoutes from './routes/chatRoutes.js';
 
 const app = express();
 
@@ -39,5 +40,6 @@ app.use('/api/patient-profiles', patientProfileRoutes);
 app.use('/api/wellness', wellnessRoutes);
 app.use('/api/chatbot', chatbotRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/chat', chatRoutes);
 
 export default app; 
