@@ -134,49 +134,77 @@ const DoctorProfile = () => {
   };
 
   // Function to handle booking appointment
+
   const handleBookAppointment = async (timeSlot) => {
+
     if (!user || user.role !== 'patient') {
       showMessage.error('Please login as a patient to book an appointment');
-      return
+      return;
     }
-    if (user.role === 'patient') {
-      const response = await fetch(`${API_URL}/api/patient-profiles/profile-status`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        credentials: 'include'
-      })
+
+    if (!doctor || !timeSlot) {
+      showMessage.error('Doctor or time slot information is missing');
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${API_URL}/api/patient-profiles/profile-status`,
+        {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+          },
+          credentials: 'include',
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Profile check failed (${response.status})`);
+      }
+
       const data = await response.json();
+      console.log('Profile status:', data);
 
       if (!data.isBasicProfileComplete) {
-        showMessage.warn('Your basic details are incomplete. Please complete them in My Medical Profile.');
-        navigate('/patient/dashboard?tab=medical-profile')
+        showMessage.warn(
+          'Your basic details are incomplete. Please complete them in My Medical Profile.'
+        );
+        navigate('/patient/dashboard?tab=medical-profile');
+        return;
       }
-      
-      else{
-        navigate(`/doctors/${doctor._id}/payment`, {
-          state: { appointmentDetails }
-        });
-      }
-    }
-    // Format the appointment date based on the slot type
-    const appointmentDate = 'date' in timeSlot
-      ? new Date(timeSlot.date).toISOString().split('T')[0]
-      : new Date().toISOString().split('T')[0]; // For recurring slots, use current date
 
-    // Prepare appointment details
-    const appointmentDetails = {
-      doctorId: doctor._id,
-      date: appointmentDate,
-      time: timeSlot.startTime,
-      fee: doctor.profile.consultationPrice,
-      type: 'in-person', // You can make this selectable if needed
-      doctorName: `${doctor.firstName} ${doctor.lastName}`,
-      specialization: doctor.profile.specialization
-    };
+      // Prepare appointment details BEFORE navigating.
+      const appointmentDate = 'date' in timeSlot
+        ? new Date(timeSlot.date).toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0];
+
+      const appointmentDetails = {
+        doctorId: doctor._id,
+        date: appointmentDate,
+        time: timeSlot.startTime,
+        fee: doctor.profile.consultationPrice,
+        type: 'in-person',
+        doctorName: `${doctor.firstName} ${doctor.lastName}`,
+        specialization: doctor.profile.specialization,
+      };
+
+      console.log('Navigating to payment:', appointmentDetails);
+      console.log('Profile complete:', data.isBasicProfileComplete);
+      console.log('Doctor ID:', doctor._id);
+      console.log('Payment URL:', `/doctors/${doctor._id}/payment`);
+
+      navigate(`/doctors/${doctor._id}/payment`, {
+        state: { appointmentDetails },
+      });
+    } catch (error) {
+      console.error('Booking navigation error:', error);
+      showMessage.error(
+        error.message || 'Unable to proceed to payment. Please try again.'
+      );
+    }
   };
+
 
   if (loading) {
     return (

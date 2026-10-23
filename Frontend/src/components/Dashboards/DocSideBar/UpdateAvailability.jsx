@@ -87,7 +87,7 @@ const UpdateAvailabilityTab = () => {
 
       const newAvailability = {
         availabilityType: 'dateSpecific',
-        date: selectedDate.toISOString(),
+        date: format(selectedDate, 'yyyy-MM-dd'),
         startTime,
         endTime,
       };

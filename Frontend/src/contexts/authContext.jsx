@@ -9,16 +9,16 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [returnPath, setReturnPath] = useState(null);
   const [isInitialLogin, setIsInitialLogin] = useState(false);
-  
+
 
   const API_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 
   useEffect(() => {
     const verifyUser = async () => {
-      try { 
+      try {
         setLoading(true);
-        
+
         const response = await fetch(`${API_URL}/auth/user`, {
           method: 'POST',
           credentials: 'include',
@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
         }
 
         const data = await response.json();
-        
+
         if (data.success && data.user) {
           setUser(data.user);
         } else {
@@ -55,26 +55,26 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       // Normalize email (trim and lowercase)
       const normalizedCredentials = {
         ...credentials,
         email: credentials.email.trim().toLowerCase()
       };
-      
-      console.log("Attempting login with:", { 
+
+      console.log("Attempting login with:", {
         email: normalizedCredentials.email,
-        password: "********" 
+        password: "********"
       });
-      
+
       const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(normalizedCredentials),
         credentials: 'include'
       });
-      
+
       let data;
       try {
         data = await response.json();
@@ -82,9 +82,9 @@ export const AuthProvider = ({ children }) => {
         console.error("Failed to parse response:", e);
         throw new Error("Invalid server response");
       }
-      
+
       console.log("Login response status:", response.status);
-      
+
       if (!response.ok) {
         const errorMessage = data.message || `Login failed (${response.status})`;
         console.error("Login error:", errorMessage);
@@ -92,17 +92,17 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
         return { success: false, message: errorMessage };
       }
-      
+
       if (data.success) {
         console.log("Login successful for:", data.user?.email);
         setUser(data.user);
-        setIsInitialLogin(true); 
-        
-        
+        setIsInitialLogin(true);
+
+
         setTimeout(() => {
           setIsInitialLogin(false);
         }, 1000);
-        
+
         return { success: true, message: 'Login successful!', user: data.user };
       } else {
         setError(data.message || 'Login failed');
@@ -129,7 +129,7 @@ export const AuthProvider = ({ children }) => {
           'Content-Type': 'application/json'
         }
       });
-      
+
       setUser(null);
       setIsInitialLogin(false);
       return { success: true, message: 'Logged out successfully' };
@@ -137,7 +137,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Error during logout:', err);
 
       setUser(null);
-      setIsInitialLogin(false); 
+      setIsInitialLogin(false);
       return { success: true, message: 'Logged out locally' };
     } finally {
       setLoading(false);
@@ -166,13 +166,13 @@ export const AuthProvider = ({ children }) => {
 
       if (data.success) {
         setUser(data.user);
-        setIsInitialLogin(true); 
-        
-        
+        setIsInitialLogin(true);
+
+
         setTimeout(() => {
           setIsInitialLogin(false);
         }, 1000);
-        
+
         showMessage.success('Registration successful!');
         return { success: true, message: data.message, user: data.user };
       } else {
@@ -224,8 +224,8 @@ export const AuthProvider = ({ children }) => {
   // Helper function to determine redirect path based on user role
   const getRedirectPath = (user) => {
     if (!user) return '/login';
-    
-    switch(user.role) {
+
+    switch (user.role) {
       case 'admin':
         return '/admin/dashboard';
       case 'doctor':

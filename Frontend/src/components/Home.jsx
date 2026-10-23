@@ -161,8 +161,8 @@ const Home = () => {
         </div>
 
         <div className='hero-left z-10 text-center lg:text-left w-full lg:w-1/2 mb-8 lg:mb-0'>
-          <div className="inline-block mb-4 px-4 py-2 bg-[#007E85] bg-opacity-10 text-[#007E85] rounded-full text-sm font-medium">
-            💬 Trusted by 50,000+ Patients
+          <div className="inline-block mb-4 px-4 py-2 bg-[#007E85] bg-opacity-10 text-[#ffffff] rounded-full text-sm font-medium">
+          Trusted by 50,000+ Patients
           </div>
 
           <h1 className='text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6'>

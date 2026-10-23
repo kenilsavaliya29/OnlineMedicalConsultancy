@@ -9,6 +9,8 @@ const OverViewTab = React.memo(() => {
     const { user, logout } = useContext(AuthContext);
     const [appointments, setAppointments] = useState([]);
 
+    console.log("User details in OverViewTab:", user);
+
     // Fetch upcoming appointments
     const fetchUpcomingAppointments = useCallback(async () => {
         if (!user || !user._id) {

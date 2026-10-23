@@ -21,7 +21,7 @@ export const ChatProvider = ({ children }) => {
   const [onlineUsers, setOnlineUsers] = useState(new Set());
   const [typingUsers, setTypingUsers] = useState(new Set());
   const [chatAppointments, setChatAppointments] = useState([]);
-  
+
   // Debug: Log appointments when they change
   useEffect(() => {
     console.log('ChatContext: Appointments state updated:', chatAppointments.length, chatAppointments);
@@ -86,15 +86,15 @@ export const ChatProvider = ({ children }) => {
       });
 
       newSocket.on('message_delivered', (data) => {
-        setMessages(prev => prev.map(msg => 
-          msg._id === data.messageId 
+        setMessages(prev => prev.map(msg =>
+          msg._id === data.messageId
             ? { ...msg, status: 'delivered', deliveredAt: data.deliveredAt }
             : msg
         ));
       });
 
       newSocket.on('messages_read', (data) => {
-        setMessages(prev => prev.map(msg => 
+        setMessages(prev => prev.map(msg =>
           msg.receiverId === data.readBy
             ? { ...msg, status: 'read', readAt: data.readAt }
             : msg
@@ -138,7 +138,7 @@ export const ChatProvider = ({ children }) => {
 
       const data = await response.json();
       console.log('ChatContext: Response data:', data);
-      
+
       if (data.success) {
         console.log('ChatContext: Setting appointments:', data.appointments.length);
         setChatAppointments(data.appointments);
@@ -174,34 +174,61 @@ export const ChatProvider = ({ children }) => {
   }, [socket, currentAppointment]);
 
   // Send message
+
   const sendMessage = useCallback((message, messageType = 'text') => {
-    if (socket && currentAppointment && message.trim()) {
-      socket.emit('send_message', {
-        appointmentId: currentAppointment,
-        message: message.trim(),
-        messageType
+    const trimmedMessage = message.trim();
+
+    if (!socket?.connected || !currentAppointment || !trimmedMessage) {
+      console.error('Cannot send message:', {
+        connected: socket?.connected,
+        currentAppointment,
+        hasMessage: Boolean(trimmedMessage),
       });
+      return;
     }
+
+    socket.emit('send_message', {
+      appointmentId: currentAppointment,
+      message: trimmedMessage,
+      messageType,
+    });
+
+    console.log('send_message emitted once');
   }, [socket, currentAppointment]);
 
   // Fetch message history
+
   const fetchMessages = useCallback(async (appointmentId) => {
-    if (!user || !appointmentId) return;
+    console.log('fetchMessages called:', appointmentId);
+    console.log('Request URL:', `${API_URL}/api/chat/messages/${appointmentId}`);
+
+    if (!user || !appointmentId) {
+      console.log('Stopped: user or appointmentId is missing', {
+        user,
+        appointmentId,
+      });
+      return;
+    }
 
     try {
-      const response = await fetch(`${API_URL}/api/chat/messages/${appointmentId}`, {
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include'
-      });
+      const response = await fetch(
+        `${API_URL}/api/chat/messages/${appointmentId}`,
+        {
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+        }
+      );
+
+      console.log('Messages API status:', response.status);
 
       const data = await response.json();
+      console.log('Messages API response:', data);
+
       if (data.success) {
         setMessages(data.messages);
       }
     } catch (error) {
-      console.error('Error fetching messages:', error);
+      console.error('Messages API failed:', error);
     }
   }, [user, API_URL]);
 
@@ -254,7 +281,7 @@ export const ChatProvider = ({ children }) => {
     typingUsers,
     chatAppointments,
     isLoading,
-    
+
     // Actions
     fetchChatAppointments,
     joinAppointment,
